@@ -28,30 +28,55 @@ export function ArcadeTimer({ tasks, onSessionComplete }: ArcadeTimerProps) {
     }
   }, [tasks, selectedTaskId]);
 
-  // Load active timer state from localStorage to survive page refresh
+  // Load active timer state from server & fallback to localStorage to survive page refresh
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("liferpg_active_timer");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        const now = Date.now();
-        if (parsed.endTime && parsed.endTime > now) {
-          const remaining = Math.round((parsed.endTime - now) / 1000);
-          setSelectedDuration(parsed.durationMinutes || 25);
-          setSelectedTaskId(parsed.taskId || "");
-          setTimeLeftSeconds(remaining);
-          setIsRunning(true);
-        } else if (parsed.endTime && parsed.endTime <= now && parsed.isRunning) {
-          // Completed while away
-          setTimeLeftSeconds(0);
-          setIsRunning(false);
-          triggerCompletion(parsed.durationMinutes || 25, parsed.taskId);
-          localStorage.removeItem("liferpg_active_timer");
+    const checkActiveSession = async () => {
+      try {
+        const res = await fetch("/api/v1/timer");
+        const data = await res.json();
+        if (data.success && data.data) {
+          const session = data.data;
+          const endsAtMs = new Date(session.endsAt).getTime();
+          const now = Date.now();
+          const remaining = Math.max(0, Math.round((endsAtMs - now) / 1000));
+
+          if (remaining > 0) {
+            setSelectedDuration(session.durationMinutes || 25);
+            if (session.taskId) setSelectedTaskId(session.taskId);
+            setTimeLeftSeconds(remaining);
+            setIsRunning(true);
+            return;
+          }
         }
+      } catch {
+        // Fallback to local storage below
       }
-    } catch {
-      // ignore
-    }
+
+      try {
+        const saved = localStorage.getItem("liferpg_active_timer");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          const now = Date.now();
+          if (parsed.endTime && parsed.endTime > now) {
+            const remaining = Math.round((parsed.endTime - now) / 1000);
+            setSelectedDuration(parsed.durationMinutes || 25);
+            setSelectedTaskId(parsed.taskId || "");
+            setTimeLeftSeconds(remaining);
+            setIsRunning(true);
+          } else if (parsed.endTime && parsed.endTime <= now && parsed.isRunning) {
+            // Completed while away
+            setTimeLeftSeconds(0);
+            setIsRunning(false);
+            triggerCompletion(parsed.durationMinutes || 25, parsed.taskId);
+            localStorage.removeItem("liferpg_active_timer");
+          }
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    checkActiveSession();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -98,6 +123,21 @@ export function ArcadeTimer({ tasks, onSessionComplete }: ArcadeTimerProps) {
       });
     }
 
+    // Call server to finalize session and award XP
+    try {
+      await fetch("/api/v1/timer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "complete",
+          durationMinutes,
+          taskId: taskId || null,
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to complete timer session on server:", err);
+    }
+
     const task = tasks.find((t) => t.id === taskId);
     const taskTitle = task?.title || "Focus Chamber Sprint";
     if (onSessionComplete) {
@@ -105,7 +145,7 @@ export function ArcadeTimer({ tasks, onSessionComplete }: ArcadeTimerProps) {
     }
   };
 
-  const handleStart = () => {
+  const handleStart = async () => {
     sounds.playClick();
     const endTime = Date.now() + timeLeftSeconds * 1000;
     try {
@@ -121,10 +161,26 @@ export function ArcadeTimer({ tasks, onSessionComplete }: ArcadeTimerProps) {
     } catch {
       // ignore
     }
+
+    // Persist active session in database
+    try {
+      await fetch("/api/v1/timer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "start",
+          durationMinutes: selectedDuration,
+          taskId: selectedTaskId || null,
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to register timer session on server:", err);
+    }
+
     setIsRunning(true);
   };
 
-  const handlePause = () => {
+  const handlePause = async () => {
     sounds.playClick();
     setIsRunning(false);
     try {
@@ -132,15 +188,33 @@ export function ArcadeTimer({ tasks, onSessionComplete }: ArcadeTimerProps) {
     } catch {
       // ignore
     }
+    try {
+      await fetch("/api/v1/timer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "cancel" }),
+      });
+    } catch {
+      // ignore
+    }
   };
 
-  const handleReset = (newMinutes?: number) => {
+  const handleReset = async (newMinutes?: number) => {
     sounds.playClick();
     setIsRunning(false);
     const mins = newMinutes !== undefined ? newMinutes : selectedDuration;
     setTimeLeftSeconds(mins * 60);
     try {
       localStorage.removeItem("liferpg_active_timer");
+    } catch {
+      // ignore
+    }
+    try {
+      await fetch("/api/v1/timer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "cancel" }),
+      });
     } catch {
       // ignore
     }

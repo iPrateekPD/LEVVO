@@ -22,6 +22,7 @@ import { sounds } from "@/lib/sound";
 export default function ArcadeDashboard() {
   const [character, setCharacter] = useState<any>(null);
   const [tasks, setTasks] = useState<TaskItem[]>([]);
+  const [trackerCounts, setTrackerCounts] = useState<Record<string, number>>({});
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string; username: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -72,14 +73,16 @@ export default function ArcadeDashboard() {
 
   const loadAllData = async () => {
     try {
-      const [charRes, tasksRes] = await Promise.all([
+      const [charRes, tasksRes, trackersRes] = await Promise.all([
         fetch("/api/v1/character"),
         fetch("/api/v1/tasks"),
+        fetch("/api/v1/trackers"),
       ]);
 
-      const [charData, tasksData] = await Promise.all([
+      const [charData, tasksData, trackersData] = await Promise.all([
         charRes.json(),
         tasksRes.json(),
+        trackersRes.json(),
       ]);
 
       if (charData.success) {
@@ -89,6 +92,9 @@ export default function ArcadeDashboard() {
         }
       }
       if (tasksData.success) setTasks(tasksData.data);
+      if (trackersData.success && trackersData.data) {
+        setTrackerCounts(trackersData.data);
+      }
     } catch (err) {
       console.error("Failed to load dashboard data:", err);
     } finally {
@@ -221,44 +227,66 @@ export default function ArcadeDashboard() {
   // Focus Timer Session Complete
   const handleTimerComplete = async (taskTitle: string, minutes: number) => {
     try {
-      const res = await fetch("/api/v1/tasks/quick-milestone", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: `Focus Sprint: ${taskTitle} (${minutes}m)`,
-          difficulty: minutes >= 45 ? "Medium" : minutes >= 25 ? "Easy" : "Trivial",
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast(`⏱️ Sprint Complete! +${data.data.awardedXp} XP banked.`);
-        const refreshedChar = await fetch("/api/v1/character").then((r) => r.json());
-        if (refreshedChar.success) setCharacter(refreshedChar.data);
+      const awardedXp = Math.min(60, minutes);
+      showToast(`⏱️ Focus Sprint Complete! +${awardedXp} XP banked.`);
+      const refreshedChar = await fetch("/api/v1/character").then((r) => r.json());
+      if (refreshedChar.success) {
+        if (refreshedChar.data.currentLevel > character.currentLevel) {
+          setLevelUpData({ isOpen: true, newLevel: refreshedChar.data.currentLevel });
+        }
+        setCharacter(refreshedChar.data);
       }
     } catch (err) {
-      console.error("Failed to record timer session:", err);
+      console.error("Failed to update character after timer session:", err);
     }
   };
 
-  // Tracker Increment (+10 XP)
+  // Tracker Increment (+10 XP, +5 GP with 1-hr anti-farm throttle)
   const handleIncrementTracker = async (key: string) => {
     try {
-      const res = await fetch("/api/v1/tasks/quick-milestone", {
+      const res = await fetch("/api/v1/trackers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: `Micro Tracker: ${key.toUpperCase()}`,
-          difficulty: "Trivial",
-        }),
+        body: JSON.stringify({ trackerKey: key, delta: 1 }),
       });
       const data = await res.json();
       if (data.success) {
-        showToast(`💧 Tracker updated! +${data.data.awardedXp} XP`);
+        setTrackerCounts((prev) => ({
+          ...prev,
+          [key]: data.data.log.count,
+        }));
+
+        if (data.data.throttled) {
+          showToast(`⚡ Micro-step saved! (${key.toUpperCase()} XP capped to 1x/hr to prevent farming)`);
+        } else if (data.data.awardedXp > 0) {
+          showToast(`💧 Tracker: +${data.data.awardedXp} XP / +${data.data.awardedGold} GP for ${key.toUpperCase()}!`);
+        }
+
         const refreshedChar = await fetch("/api/v1/character").then((r) => r.json());
         if (refreshedChar.success) setCharacter(refreshedChar.data);
       }
     } catch (err) {
       console.error("Failed to increment tracker:", err);
+    }
+  };
+
+  // Tracker Decrement
+  const handleDecrementTracker = async (key: string) => {
+    try {
+      const res = await fetch("/api/v1/trackers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ trackerKey: key, delta: -1 }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTrackerCounts((prev) => ({
+          ...prev,
+          [key]: data.data.log.count,
+        }));
+      }
+    } catch (err) {
+      console.error("Failed to decrement tracker:", err);
     }
   };
 
@@ -328,7 +356,17 @@ export default function ArcadeDashboard() {
         </div>
 
         {/* 5. Predefined Trackers */}
-        <PredefinedTrackers onIncrementTracker={handleIncrementTracker} />
+        <PredefinedTrackers
+          trackers={[
+            { key: "water", label: "Water", icon: "💧", count: trackerCounts["water"] ?? 0, target: 8, unit: "glasses" },
+            { key: "gym", label: "Gym Workout", icon: "🏋️", count: trackerCounts["gym"] ?? 0, target: 1, unit: "session" },
+            { key: "cycling", label: "Cycling", icon: "🚴", count: trackerCounts["cycling"] ?? 0, target: 1, unit: "ride" },
+            { key: "reading", label: "Reading", icon: "📖", count: trackerCounts["reading"] ?? 0, target: 20, unit: "pages" },
+            { key: "meditation", label: "Meditation", icon: "🧘", count: trackerCounts["meditation"] ?? 0, target: 10, unit: "mins" },
+          ]}
+          onIncrementTracker={handleIncrementTracker}
+          onDecrementTracker={handleDecrementTracker}
+        />
 
         {/* 6. Focus Chamber Timer */}
         <ArcadeTimer tasks={tasks} onSessionComplete={handleTimerComplete} />

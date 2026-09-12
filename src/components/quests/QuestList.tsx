@@ -80,20 +80,20 @@ export function QuestList({
         <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
           {/* Filter Pills */}
           <div className="flex items-center gap-1 bg-[#161226] p-1 rounded-lg border border-cabinetBorder">
-            {(["ACTIVE", "COMPLETED", "ALL"] as const).map((mode) => (
+            {(["ACTIVE", "COMPLETED"] as const).map((mode) => (
               <button
                 key={mode}
                 onClick={() => {
                   sounds.playClick();
                   setFilter(mode);
                 }}
-                className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
+                className={`px-3 py-1 rounded text-[11px] font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
                   filter === mode
                     ? "bg-synthMagenta text-white shadow-sm font-semibold"
                     : "text-textSecondary hover:text-textPrimary"
                 }`}
               >
-                {mode}
+                {mode === "ACTIVE" ? "Active" : "Completed"}
               </button>
             ))}
           </div>
