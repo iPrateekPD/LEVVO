@@ -14,11 +14,13 @@
   --color-arcade-red: #FF3366;
 }
 
+html,
 body {
   background-color: var(--color-arcade-black);
   color: #EDEBF7;
   font-family: var(--font-outfit), sans-serif;
   overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* CRT Scanline Shader Overlay */

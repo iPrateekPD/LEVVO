@@ -77,7 +77,7 @@ export function QuestList({
           </span>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
           {/* Filter Pills */}
           <div className="flex items-center gap-1 bg-[#161226] p-1 rounded-lg border border-cabinetBorder">
             {(["ACTIVE", "COMPLETED"] as const).map((mode) => (

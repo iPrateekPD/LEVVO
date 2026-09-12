@@ -4,8 +4,11 @@ import { verifyPassword, createSessionToken, SESSION_COOKIE_NAME } from "@/lib/a
 import { z } from "zod";
 
 const LoginSchema = z.object({
-  email: z.string().trim().toLowerCase(),
+  email: z.string().trim().optional(),
+  identifier: z.string().trim().optional(),
   password: z.string().min(1, "Password is required"),
+}).refine((data) => data.email || data.identifier, {
+  message: "Email or username is required",
 });
 
 export async function POST(req: Request) {
@@ -20,17 +23,36 @@ export async function POST(req: Request) {
       );
     }
 
-    const { email, password } = parsed.data;
+    const { email, identifier, password } = parsed.data;
+    const loginId = (identifier || email || "").toLowerCase();
 
-    // Find user by email
-    const user = await prisma.user.findUnique({
-      where: { email },
+    // Find user by email or profile.username
+    let user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: loginId },
+          { profile: { username: { equals: loginId } } },
+        ],
+      },
       include: { profile: true },
     });
 
+    // Fallback case-insensitive match for sqlite if needed
+    if (!user) {
+      user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { email: { contains: loginId } },
+            { name: { contains: loginId } },
+          ],
+        },
+        include: { profile: true },
+      });
+    }
+
     if (!user) {
       return NextResponse.json(
-        { success: false, error: "Invalid email or password" },
+        { success: false, error: "Invalid email/username or password" },
         { status: 401 }
       );
     }
