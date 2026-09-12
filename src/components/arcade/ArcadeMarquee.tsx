@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Volume2, VolumeX, Tv, Sparkles, ShoppingBag, LogIn, LogOut, User } from "lucide-react";
+import Link from "next/link";
+import { Volume2, VolumeX, Tv, LogIn, LogOut, User } from "lucide-react";
 import { sounds } from "@/lib/sound";
 
 interface ArcadeMarqueeProps {
   scanlines: boolean;
   onToggleScanlines: () => void;
-  onOpenShop: () => void;
-  onOpenAiModal: () => void;
   currentUser: { username: string; email: string } | null;
   onOpenAuth: () => void;
   onLogout: () => void;
@@ -15,8 +14,6 @@ interface ArcadeMarqueeProps {
 export function ArcadeMarquee({
   scanlines,
   onToggleScanlines,
-  onOpenShop,
-  onOpenAiModal,
   currentUser,
   onOpenAuth,
   onLogout,
@@ -55,31 +52,15 @@ export function ArcadeMarquee({
 
       {/* Right Controls: Tactile Arcade Deck */}
       <div className="flex items-center gap-2">
-        {/* AI Campaign Generator */}
-        <button
-          onClick={() => {
-            sounds.playClick();
-            onOpenAiModal();
-          }}
-          className="arcade-btn flex items-center gap-1.5 px-3 py-1.5 bg-[#8A2BE2] hover:bg-[#9B42F5] text-white border border-purple-300 rounded-md font-arcade text-[10px] shadow-[0_3px_0_#4B0082]"
-          title="AI Quest Oracle"
+        {/* Profile Link */}
+        <Link
+          href="/profile"
+          className="arcade-btn flex items-center gap-1.5 px-3 py-1.5 bg-[#8A2BE2] hover:bg-[#9B42F5] text-white border border-purple-300 rounded-md font-arcade text-[10px] shadow-[0_3px_0_#4B0082] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+          title="Player Profile"
         >
-          <Sparkles className="w-3.5 h-3.5 text-arcadeGold" />
-          <span className="hidden md:inline">AI ORACLE</span>
-        </button>
-
-        {/* Rewards Shop */}
-        <button
-          onClick={() => {
-            sounds.playClick();
-            onOpenShop();
-          }}
-          className="arcade-btn flex items-center gap-1.5 px-3 py-1.5 bg-arcadeGold hover:bg-yellow-300 text-arcadeBlack border border-yellow-200 rounded-md font-arcade text-[10px] shadow-[0_3px_0_#9E8200]"
-          title="Rewards Shop"
-        >
-          <ShoppingBag className="w-3.5 h-3.5 text-arcadeBlack" />
-          <span className="hidden md:inline">SHOP</span>
-        </button>
+          <User className="w-3.5 h-3.5 text-arcadeGold" />
+          <span className="hidden sm:inline">PROFILE</span>
+        </Link>
 
         {/* Auth / Account Controls */}
         {currentUser ? (
@@ -88,11 +69,11 @@ export function ArcadeMarquee({
               sounds.playClick();
               onLogout();
             }}
-            className="arcade-btn flex items-center gap-1.5 px-2.5 py-1.5 bg-arcadeRed/20 hover:bg-arcadeRed/30 text-arcadeRed border border-arcadeRed/50 rounded-md font-arcade text-[10px]"
+            className="arcade-btn flex items-center gap-1.5 px-2.5 py-1.5 bg-arcadeRed/20 hover:bg-arcadeRed/30 text-arcadeRed border border-arcadeRed/50 rounded-md font-arcade text-[10px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             title={`Logged in as ${currentUser.username}. Click to Log Out.`}
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span className="hidden lg:inline">EXIT</span>
+            <span className="hidden md:inline">EXIT</span>
           </button>
         ) : (
           <button
@@ -100,7 +81,7 @@ export function ArcadeMarquee({
               sounds.playClick();
               onOpenAuth();
             }}
-            className="arcade-btn flex items-center gap-1.5 px-3 py-1.5 bg-neonCyan hover:bg-cyan-400 text-arcadeBlack border border-cyan-200 rounded-md font-arcade text-[10px] shadow-[0_3px_0_#008A9E]"
+            className="arcade-btn flex items-center gap-1.5 px-3 py-1.5 bg-neonCyan hover:bg-cyan-400 text-arcadeBlack border border-cyan-200 rounded-md font-arcade text-[10px] shadow-[0_3px_0_#008A9E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             title="Login or Signup"
           >
             <LogIn className="w-3.5 h-3.5" />
@@ -114,7 +95,7 @@ export function ArcadeMarquee({
             sounds.playClick();
             onToggleScanlines();
           }}
-          className={`arcade-btn p-1.5 rounded-md border text-[11px] shadow-[0_3px_0_#110B22] ${
+          className={`arcade-btn p-1.5 rounded-md border text-[11px] shadow-[0_3px_0_#110B22] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
             scanlines
               ? "bg-neonCyan/20 border-neonCyan text-neonCyan"
               : "bg-cabinetSurface border-cabinetBorder text-textSecondary"
@@ -127,7 +108,7 @@ export function ArcadeMarquee({
         {/* Audio Mute Toggle */}
         <button
           onClick={handleToggleSound}
-          className={`arcade-btn p-1.5 rounded-md border text-[11px] shadow-[0_3px_0_#110B22] ${
+          className={`arcade-btn p-1.5 rounded-md border text-[11px] shadow-[0_3px_0_#110B22] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
             !isMuted
               ? "bg-phosphorGreen/20 border-phosphorGreen text-phosphorGreen"
               : "bg-cabinetSurface border-cabinetBorder text-arcadeRed"

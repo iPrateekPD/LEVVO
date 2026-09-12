@@ -1,36 +1,28 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Sparkles } from "lucide-react";
 import { CrtContainer } from "@/components/arcade/CrtContainer";
 import { ArcadeMarquee } from "@/components/arcade/ArcadeMarquee";
-import { CharacterHUD } from "@/components/arcade/CharacterHUD";
+import { PlayerCard } from "@/components/dashboard/PlayerCard";
+import { QuickStatsRow } from "@/components/dashboard/QuickStatsRow";
 import { QuestList } from "@/components/quests/QuestList";
-import { BossBattleWidget, BossItem } from "@/components/bosses/BossBattleWidget";
+import { PredefinedTrackers } from "@/components/dashboard/PredefinedTrackers";
+import { ArcadeTimer } from "@/components/dashboard/ArcadeTimer";
+import { JourneyProgress } from "@/components/dashboard/JourneyProgress";
+import { QuickMilestone } from "@/components/dashboard/QuickMilestone";
 import { CreateQuestModal } from "@/components/modals/CreateQuestModal";
 import { EditQuestModal } from "@/components/modals/EditQuestModal";
 import { AiCampaignModal } from "@/components/modals/AiCampaignModal";
-import { RewardsShopModal } from "@/components/modals/RewardsShopModal";
 import { LevelUpCelebration } from "@/components/modals/LevelUpCelebration";
 import { ArcadeAuthModal } from "@/components/auth/ArcadeAuthModal";
 import { TaskItem } from "@/components/quests/QuestCard";
-import { ViewSwitcher, ViewMode } from "@/components/views/ViewSwitcher";
-import { KanbanBoard } from "@/components/views/KanbanBoard";
-import { TableMatrixView } from "@/components/views/TableMatrixView";
-import { HabitHeatmap } from "@/components/views/HabitHeatmap";
-import { GuildRaidWidget } from "@/components/views/GuildRaidWidget";
-import { QuestGrimoireModal } from "@/components/modals/QuestGrimoireModal";
 import { sounds } from "@/lib/sound";
 
 export default function ArcadeDashboard() {
   const [character, setCharacter] = useState<any>(null);
   const [tasks, setTasks] = useState<TaskItem[]>([]);
-  const [boss, setBoss] = useState<BossItem | null>(null);
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string; username: string } | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // View Engine State
-  const [currentView, setCurrentView] = useState<ViewMode>("list");
 
   // Display Settings
   const [scanlines, setScanlines] = useState(true);
@@ -39,13 +31,17 @@ export default function ArcadeDashboard() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskItem | null>(null);
-  const [grimoireTask, setGrimoireTask] = useState<any | null>(null);
   const [isAiOpen, setIsAiOpen] = useState(false);
-  const [isShopOpen, setIsShopOpen] = useState(false);
   const [levelUpData, setLevelUpData] = useState<{ isOpen: boolean; newLevel: number }>({
     isOpen: false,
     newLevel: 1,
   });
+
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 5000);
+  };
 
   // Initial Load from Database
   useEffect(() => {
@@ -74,25 +70,18 @@ export default function ArcadeDashboard() {
 
   const loadAllData = async () => {
     try {
-      const [charRes, tasksRes, bossRes] = await Promise.all([
+      const [charRes, tasksRes] = await Promise.all([
         fetch("/api/v1/character"),
         fetch("/api/v1/tasks"),
-        fetch("/api/v1/bosses"),
       ]);
 
-      const [charData, tasksData, bossData] = await Promise.all([
+      const [charData, tasksData] = await Promise.all([
         charRes.json(),
         tasksRes.json(),
-        bossRes.json(),
       ]);
 
       if (charData.success) setCharacter(charData.data);
       if (tasksData.success) setTasks(tasksData.data);
-      if (bossData.success && bossData.data.length > 0) {
-        setBoss(bossData.data[0]);
-      } else {
-        setBoss(null);
-      }
     } catch (err) {
       console.error("Failed to load dashboard data:", err);
     } finally {
@@ -117,12 +106,6 @@ export default function ArcadeDashboard() {
     await loadAllData();
   };
 
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 5000);
-  };
-
   // Complete a Task authoritatively
   const handleCompleteTask = async (taskId: string) => {
     try {
@@ -137,12 +120,10 @@ export default function ArcadeDashboard() {
           prev.map((t) => (t.id === taskId ? { ...t, status: "COMPLETED" } : t))
         );
 
-        // If recurring task auto-spawned next task, add to UI
         if (data.data.spawnedRecurringTask) {
           setTasks((prev) => [data.data.spawnedRecurringTask, ...prev]);
         }
 
-        // Friendly toasts for daily cap, achievement unlock, or boost
         if (data.data.dailyCapMessage) {
           showToast(data.data.dailyCapMessage);
         } else if (data.data.unlockedAchievement) {
@@ -151,16 +132,12 @@ export default function ArcadeDashboard() {
           showToast("⚡ +50% XP Boost Active for the rest of today!");
         }
 
-        // Update character stats
         if (character) {
           const newLevel = data.data.newLevel;
-
-          // Check Level Up!
           if (data.data.didLevelUp) {
             setLevelUpData({ isOpen: true, newLevel });
           }
 
-          // Reload fresh character sheet from database
           const refreshedChar = await fetch("/api/v1/character").then((r) => r.json());
           if (refreshedChar.success) {
             setCharacter(refreshedChar.data);
@@ -196,31 +173,6 @@ export default function ArcadeDashboard() {
     }
   };
 
-  // Accept Recovery Quest (+50% Boost)
-  const handleAcceptRecoveryQuest = async () => {
-    try {
-      const res = await fetch("/api/v1/tasks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: "Drink a glass of water & 2-min mobility stretch",
-          description: "Rehydrate, reset posture, and claim your +50% XP recovery boost for today!",
-          attributeCode: "STR",
-          difficulty: "Trivial",
-          tags: "recovery",
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        sounds.playLevelUp();
-        setTasks((prev) => [data.data, ...prev]);
-        showToast("⚡ Recovery Quest activated! Complete it for +50% XP Boost today.");
-      }
-    } catch (err) {
-      console.error("Failed to accept recovery quest:", err);
-    }
-  };
-
   // Delete a Task
   const handleDeleteTask = async (taskId: string) => {
     try {
@@ -236,58 +188,70 @@ export default function ArcadeDashboard() {
     }
   };
 
-  // Complete Boss Milestone
-  const handleMilestoneComplete = async (bossId: string, milestoneId: string) => {
+  // Quick Milestone: Log a quick win
+  const handleLogQuickWin = async (title: string, difficulty: "Trivial" | "Easy" | "Medium") => {
     try {
-      const res = await fetch(`/api/v1/bosses/${bossId}/milestones/${milestoneId}/complete`, {
+      const res = await fetch("/api/v1/tasks/quick-milestone", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, difficulty }),
       });
       const data = await res.json();
-
       if (data.success) {
-        setBoss(data.data.boss);
-        // If defeated, refresh character for victory loot
-        if (data.data.isDefeated) {
-          const refreshedChar = await fetch("/api/v1/character").then((r) => r.json());
-          if (refreshedChar.success) {
-            setCharacter(refreshedChar.data);
-          }
+        setTasks((prev) => [data.data.task, ...prev]);
+        showToast(`💥 Quick Win: +${data.data.awardedXp} XP / +${data.data.awardedGold} GP`);
+        if (data.data.didLevelUp) {
+          setLevelUpData({ isOpen: true, newLevel: data.data.newLevel });
         }
-        return data.data;
+        const refreshedChar = await fetch("/api/v1/character").then((r) => r.json());
+        if (refreshedChar.success) setCharacter(refreshedChar.data);
       }
     } catch (err) {
-      console.error("Milestone error:", err);
+      console.error("Failed to log quick win:", err);
     }
   };
 
-  // Shift task stage in Kanban/Table
-  const handleStageChange = async (taskId: string, newStage: string) => {
+  // Focus Timer Session Complete
+  const handleTimerComplete = async (taskTitle: string, minutes: number) => {
     try {
-      const res = await fetch(`/api/v1/tasks/${taskId}/stage`, {
-        method: "PATCH",
+      const res = await fetch("/api/v1/tasks/quick-milestone", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stage: newStage }),
+        body: JSON.stringify({
+          title: `Focus Sprint: ${taskTitle} (${minutes}m)`,
+          difficulty: minutes >= 45 ? "Medium" : minutes >= 25 ? "Easy" : "Trivial",
+        }),
       });
       const data = await res.json();
       if (data.success) {
-        setTasks((prev) =>
-          prev.map((t) =>
-            t.id === taskId
-              ? {
-                  ...t,
-                  stage: newStage,
-                  status: newStage === "DONE" ? "COMPLETED" : "ACTIVE",
-                }
-              : t
-          )
-        );
-        if (newStage === "DONE") {
-          const refreshedChar = await fetch("/api/v1/character").then((r) => r.json());
-          if (refreshedChar.success) setCharacter(refreshedChar.data);
-        }
+        showToast(`⏱️ Sprint Complete! +${data.data.awardedXp} XP banked.`);
+        const refreshedChar = await fetch("/api/v1/character").then((r) => r.json());
+        if (refreshedChar.success) setCharacter(refreshedChar.data);
       }
     } catch (err) {
-      console.error("Failed to change stage:", err);
+      console.error("Failed to record timer session:", err);
+    }
+  };
+
+  // Tracker Increment (+10 XP)
+  const handleIncrementTracker = async (key: string) => {
+    try {
+      const res = await fetch("/api/v1/tasks/quick-milestone", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `Micro Tracker: ${key.toUpperCase()}`,
+          difficulty: "Trivial",
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`💧 Tracker updated! +${data.data.awardedXp} XP`);
+        const refreshedChar = await fetch("/api/v1/character").then((r) => r.json());
+        if (refreshedChar.success) setCharacter(refreshedChar.data);
+      }
+    } catch (err) {
+      console.error("Failed to increment tracker:", err);
     }
   };
 
@@ -297,145 +261,89 @@ export default function ArcadeDashboard() {
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-synthMagenta border-t-transparent rounded-full animate-spin" />
           <span className="font-arcade text-xs text-neonCyan neon-glow-cyan animate-pulse">
-            LOADING LIFE-RPG ARCADE HUD...
+            LOADING QUESTORIA ARCADE HUD...
           </span>
         </div>
       </div>
     );
   }
 
+  const completedTasksCount = tasks.filter((t) => t.status === "COMPLETED").length;
+
   return (
     <CrtContainer scanlines={scanlines}>
-      {/* Top Illuminated Marquee Header */}
+      {/* 1. Header Marquee */}
       <ArcadeMarquee
         scanlines={scanlines}
         onToggleScanlines={() => setScanlines(!scanlines)}
-        onOpenShop={() => setIsShopOpen(true)}
-        onOpenAiModal={() => setIsAiOpen(true)}
         currentUser={currentUser}
         onOpenAuth={() => setIsAuthOpen(true)}
         onLogout={handleLogout}
       />
 
-      {/* Main Responsive Grid Layout */}
-      <main className="w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
-        {/* Left Column: Character Sheet & Attributes HUD (4 Cols on Desktop) */}
-        <section className="lg:col-span-4 flex flex-col gap-4">
-          <CharacterHUD
-            username={character.username}
-            title={character.title}
-            level={character.currentLevel}
-            currentLevelXp={character.currentLevelXp}
-            xpToNextLevel={character.xpToNextLevel}
-            progressPercent={character.progressPercent}
-            gold={character.gold}
-            currentAp={character.currentAp ?? 100}
-            maxAp={character.maxAp ?? 100}
-            streak={character.streakCurrent}
-            streakPaused={character.streakPaused}
-            momentum={character.momentumScore}
-            isBoostActive={character.isBoostActive}
-            attributes={character.attributes}
+      {/* Main Single-Page Scrollable Layout */}
+      <main className="w-full flex-1 max-w-4xl mx-auto flex flex-col gap-5 sm:gap-6">
+        {/* 2. Player Card: avatar, LVL, XP bar, Gold, Streak */}
+        <PlayerCard
+          username={character.username}
+          title={character.title}
+          level={character.currentLevel}
+          currentLevelXp={character.currentLevelXp}
+          xpToNextLevel={character.xpToNextLevel}
+          progressPercent={character.progressPercent}
+          gold={character.gold}
+          streak={character.streakCurrent}
+          streakPaused={character.streakPaused}
+          avatarId={character.avatarId}
+          ageGroup={character.ageGroup}
+        />
+
+        {/* 3. Quick Stats Row */}
+        <QuickStatsRow
+          momentum={character.momentumScore}
+          currentAp={character.currentAp ?? 100}
+          maxAp={character.maxAp ?? 100}
+          completedTasksCount={completedTasksCount}
+          totalXp={character.totalXp}
+        />
+
+        {/* 4. Today's Quests */}
+        <div className="bg-cabinetSurface/90 border-2 border-cabinetBorder rounded-xl p-4 sm:p-5 shadow-lg">
+          <QuestList
+            tasks={tasks}
+            onComplete={handleCompleteTask}
+            onDelete={handleDeleteTask}
+            onEdit={(task) => setEditingTask(task)}
+            onOpenCreateModal={() => setIsCreateOpen(true)}
+            onOpenAiModal={() => setIsAiOpen(true)}
+            onQuickAddQuest={handleQuickAddQuest}
           />
-        </section>
+        </div>
 
-        {/* Center & Right Column: Quests Stream, Multi-Views & Boss Battles (8 Cols on Desktop) */}
-        <section className="lg:col-span-8 flex flex-col gap-4 sm:gap-6">
-          {/* Recovery Quest Warm Banner (small, high-judges-love: docs/01 §5.5) */}
-          {character.isRecoveryEligible && (
-            <div className="bg-gradient-to-r from-[#201738] to-[#3B155B] border-2 border-arcadeGold/80 rounded-xl p-4 shadow-[0_0_20px_rgba(255,230,0,0.25)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fade-in">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-arcadeGold/20 border border-arcadeGold rounded-lg text-arcadeGold shrink-0">
-                  <Sparkles className="w-5 h-5 animate-pulse" />
-                </div>
-                <div>
-                  <h4 className="font-arcade text-xs text-arcadeGold tracking-wide">
-                    YOUR ADVENTURE WAS ON PAUSE. READY TO JUMP BACK IN?
-                  </h4>
-                  <p className="text-xs text-textSecondary mt-0.5">
-                    Complete a quick recovery quest to reignite your momentum and unlock a{" "}
-                    <strong className="text-phosphorGreen">+50% XP Boost</strong> for the rest of today!
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={handleAcceptRecoveryQuest}
-                className="shrink-0 arcade-btn px-4 py-2 bg-arcadeGold hover:bg-yellow-400 text-arcadeBlack font-arcade text-[10px] font-bold rounded-lg border border-yellow-200 shadow-[0_3px_0_#A38900] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
-              >
-                ⚡ ACCEPT RECOVERY QUEST (+50% BOOST)
-              </button>
-            </div>
-          )}
+        {/* 5. Predefined Trackers */}
+        <PredefinedTrackers onIncrementTracker={handleIncrementTracker} />
 
-          {/* Real-Life Boss Battle Widget */}
-          <BossBattleWidget
-            boss={boss}
-            onMilestoneComplete={handleMilestoneComplete}
-          />
+        {/* 6. Focus Chamber Timer */}
+        <ArcadeTimer tasks={tasks} onSessionComplete={handleTimerComplete} />
 
-          {/* Notion-Style View Switcher Bar */}
-          <ViewSwitcher
-            currentView={currentView}
-            onViewChange={(v) => setCurrentView(v)}
-            taskCount={tasks.length}
-          />
+        {/* 7. Hero Journey / Progress */}
+        <JourneyProgress
+          currentLevel={character.currentLevel}
+          totalXp={character.totalXp}
+          totalCompletedQuests={completedTasksCount}
+          streakCurrent={character.streakCurrent}
+          streakLongest={character.streakLongest}
+        />
 
-          {/* Dynamic View Engine */}
-          {currentView === "list" && (
-            <div className="bg-cabinetSurface/90 border-2 border-cabinetBorder rounded-xl p-4 shadow-lg">
-              <QuestList
-                tasks={tasks}
-                onComplete={handleCompleteTask}
-                onDelete={handleDeleteTask}
-                onEdit={(task) => setEditingTask(task)}
-                onOpenCreateModal={() => setIsCreateOpen(true)}
-                onOpenAiModal={() => setIsAiOpen(true)}
-                onQuickAddQuest={handleQuickAddQuest}
-              />
-            </div>
-          )}
-
-          {currentView === "kanban" && (
-            <KanbanBoard
-              tasks={tasks as any}
-              onStageChange={handleStageChange}
-              onInspectGrimoire={(task) => setGrimoireTask(task)}
-              onEdit={(task) => setEditingTask(task as any)}
-              onComplete={handleCompleteTask}
-            />
-          )}
-
-          {currentView === "table" && (
-            <TableMatrixView
-              tasks={tasks as any}
-              onStageChange={handleStageChange}
-              onInspectGrimoire={(task) => setGrimoireTask(task)}
-              onEdit={(task) => setEditingTask(task as any)}
-              onDelete={handleDeleteTask}
-              onComplete={handleCompleteTask}
-            />
-          )}
-
-          {currentView === "heatmap" && (
-            <HabitHeatmap
-              onAddHabitXp={async () => {
-                const refreshedChar = await fetch("/api/v1/character").then((r) => r.json());
-                if (refreshedChar.success) setCharacter(refreshedChar.data);
-              }}
-            />
-          )}
-
-          {currentView === "guild" && (
-            <GuildRaidWidget />
-          )}
-        </section>
+        {/* 8. Quick Milestone: Log a quick win */}
+        <QuickMilestone onLogWin={handleLogQuickWin} />
       </main>
 
       {/* Bottom Arcade Status Bar */}
-      <footer className="w-full mt-6 pt-3 border-t border-cabinetBorder/60 flex flex-col sm:flex-row items-center justify-between text-[10px] font-arcade text-textSecondary gap-2">
+      <footer className="w-full max-w-4xl mx-auto mt-8 pt-4 border-t border-cabinetBorder/60 flex flex-col sm:flex-row items-center justify-between text-[10px] font-arcade text-textSecondary gap-2">
         <div className="flex items-center gap-2">
           <span className="text-arcadeGold">★</span>
-          <span>YOUR LIFE IS THE GAME</span>
+          <span>QUESTORIA | YOUR LIFE IS THE GAME</span>
           {currentUser ? (
             <span className="text-neonCyan">| HERO: {currentUser.username}</span>
           ) : (
@@ -443,7 +351,6 @@ export default function ArcadeDashboard() {
           )}
         </div>
         <div className="flex items-center gap-4">
-          <span>SERVER AUTHORITATIVE ENGINE ACTIVE</span>
           <span className="text-phosphorGreen">DATABASE PERSISTENCE: ON</span>
         </div>
       </footer>
@@ -470,28 +377,10 @@ export default function ArcadeDashboard() {
         }}
       />
 
-      {grimoireTask && (
-        <QuestGrimoireModal
-          task={grimoireTask}
-          isOpen={!!grimoireTask}
-          onClose={() => setGrimoireTask(null)}
-          onRefresh={async () => {
-            await loadAllData();
-          }}
-        />
-      )}
-
       <AiCampaignModal
         isOpen={isAiOpen}
         onClose={() => setIsAiOpen(false)}
         onCampaignAccepted={(newQuests) => setTasks((prev) => [...newQuests, ...prev])}
-      />
-
-      <RewardsShopModal
-        isOpen={isShopOpen}
-        onClose={() => setIsShopOpen(false)}
-        gold={character.gold}
-        onGoldUpdated={(newGold) => setCharacter((prev: any) => ({ ...prev, gold: newGold }))}
       />
 
       <LevelUpCelebration
