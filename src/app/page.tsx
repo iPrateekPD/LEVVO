@@ -15,6 +15,7 @@ import { EditQuestModal } from "@/components/modals/EditQuestModal";
 import { AiCampaignModal } from "@/components/modals/AiCampaignModal";
 import { LevelUpCelebration } from "@/components/modals/LevelUpCelebration";
 import { ArcadeAuthModal } from "@/components/auth/ArcadeAuthModal";
+import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
 import { TaskItem } from "@/components/quests/QuestCard";
 import { sounds } from "@/lib/sound";
 
@@ -29,6 +30,7 @@ export default function ArcadeDashboard() {
 
   // Modals
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskItem | null>(null);
   const [isAiOpen, setIsAiOpen] = useState(false);
@@ -80,7 +82,12 @@ export default function ArcadeDashboard() {
         tasksRes.json(),
       ]);
 
-      if (charData.success) setCharacter(charData.data);
+      if (charData.success) {
+        setCharacter(charData.data);
+        if (charData.data.needsOnboarding) {
+          setIsOnboardingOpen(true);
+        }
+      }
       if (tasksData.success) setTasks(tasksData.data);
     } catch (err) {
       console.error("Failed to load dashboard data:", err);
@@ -387,6 +394,21 @@ export default function ArcadeDashboard() {
         isOpen={levelUpData.isOpen}
         newLevel={levelUpData.newLevel}
         onClose={() => setLevelUpData({ isOpen: false, newLevel: 1 })}
+      />
+
+      <OnboardingModal
+        isOpen={isOnboardingOpen}
+        onComplete={async ({ ageGroup, goals, seededTasks }) => {
+          setIsOnboardingOpen(false);
+          sounds.playLevelUp();
+          showToast(`🌟 Welcome ${ageGroup} Hero! ${seededTasks.length} daily quests forged.`);
+          if (seededTasks && seededTasks.length > 0) {
+            setTasks((prev) => [...seededTasks, ...prev]);
+          }
+          const refreshedChar = await fetch("/api/v1/character").then((r) => r.json());
+          if (refreshedChar.success) setCharacter(refreshedChar.data);
+        }}
+        onSkip={() => setIsOnboardingOpen(false)}
       />
 
       {/* Toast Notification Banner */}
