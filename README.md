@@ -176,7 +176,7 @@ The persistence layer runs on PostgreSQL managed via Prisma ORM:
 - **`items` & `inventory`:** Virtual rewards shop catalog and player-owned cosmetics.
 - **`xp_transactions`:** Immutable audit ledger of all XP and Gold adjustments.
 
-For complete SQL schema and ERD diagrams, refer to [03-database-schema.md](file:///Users/prateekpd/Projects/IIT%20BBSR/Life-RPG/docs/03-database-schema.md).
+For complete SQL schema and ERD diagrams, refer to [03-database-schema.md](./docs/03-database-schema.md).
 
 ---
 
@@ -187,7 +187,7 @@ The AI Game Master uses Google Gemini (`gemini-1.5-flash`) with **Structured Out
 3. **Recovery Quests:** Produces gentle inertia-breaking tasks for inactive users.
 4. **Safety Rule:** AI models produce proposals only; they **never** have direct write access to user stats, wallets, or levels without validated server-side logic.
 
-For complete prompt architectures and fallback logic, refer to [05-ai-integrations.md](file:///Users/prateekpd/Projects/IIT%20BBSR/Life-RPG/docs/05-ai-integrations.md).
+For complete prompt architectures and fallback logic, refer to [05-ai-integrations.md](./docs/05-ai-integrations.md).
 
 ---
 
@@ -227,7 +227,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ---
 
 ## Environment Variables
-See [.env.example](file:///Users/prateekpd/Projects/IIT%20BBSR/Life-RPG/.env.example) for exact variable keys:
+See [.env.example](./.env.example) for exact variable keys:
 - `DATABASE_URL`: Connection pooled PostgreSQL connection string.
 - `DIRECT_URL`: Direct PostgreSQL connection string for Prisma migrations.
 - `NEXTAUTH_SECRET`: Cryptographic secret for signing session cookies.
@@ -298,7 +298,7 @@ The design merges the tactile nostalgia of classic 80s/90s arcade cabinets with 
 - **CRT Bezel & Scanlines:** Hardware-accelerated CSS overlays mimicking a curved glass monitor.
 - **Handheld Adaptation:** On mobile devices, the interface transforms into a retro handheld console with touch-friendly 48px controls.
 
-For complete color tokens and component specs, refer to [06-ui-design.md](file:///Users/prateekpd/Projects/IIT%20BBSR/Life-RPG/docs/06-ui-design.md).
+For complete color tokens and component specs, refer to [06-ui-design.md](./docs/06-ui-design.md).
 
 ---
 
@@ -343,11 +343,11 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Documentation Suite
 For exhaustive architectural details, consult the canonical documentation package:
-- [01-features.md](file:///Users/prateekpd/Projects/IIT%20BBSR/Life-RPG/docs/01-features.md) — Product Feature Specification & Competitor Analysis
-- [02-tech-stack.md](file:///Users/prateekpd/Projects/IIT%20BBSR/Life-RPG/docs/02-tech-stack.md) — Technical Architecture & Stack Evaluation
-- [03-database-schema.md](file:///Users/prateekpd/Projects/IIT%20BBSR/Life-RPG/docs/03-database-schema.md) — PostgreSQL Schema, Prisma Models & ERD
-- [04-api-design.md](file:///Users/prateekpd/Projects/IIT%20BBSR/Life-RPG/docs/04-api-design.md) — RESTful API Contracts & Endpoints
-- [05-ai-integrations.md](file:///Users/prateekpd/Projects/IIT%20BBSR/Life-RPG/docs/05-ai-integrations.md) — AI Game Master & Gemini Integration
-- [06-ui-design.md](file:///Users/prateekpd/Projects/IIT%20BBSR/Life-RPG/docs/06-ui-design.md) — Retro Arcade Design System & Components
-- [07-implementation-phases.md](file:///Users/prateekpd/Projects/IIT%20BBSR/Life-RPG/docs/07-implementation-phases.md) — 14-Phase Implementation Roadmap
-- [08-testing-strategy.md](file:///Users/prateekpd/Projects/IIT%20BBSR/Life-RPG/docs/08-testing-strategy.md) — QA, Security Testing & Video Checklist
+- [01-features.md](./docs/01-features.md) — Product Feature Specification & Competitor Analysis
+- [02-tech-stack.md](./docs/02-tech-stack.md) — Technical Architecture & Stack Evaluation
+- [03-database-schema.md](./docs/03-database-schema.md) — PostgreSQL Schema, Prisma Models & ERD
+- [04-api-design.md](./docs/04-api-design.md) — RESTful API Contracts & Endpoints
+- [05-ai-integrations.md](./docs/05-ai-integrations.md) — AI Game Master & Gemini Integration
+- [06-ui-design.md](./docs/06-ui-design.md) — Retro Arcade Design System & Components
+- [07-implementation-phases.md](./docs/07-implementation-phases.md) — 14-Phase Implementation Roadmap
+- [08-testing-strategy.md](./docs/08-testing-strategy.md) — QA, Security Testing & Video Checklist

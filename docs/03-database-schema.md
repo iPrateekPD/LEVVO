@@ -26,13 +26,11 @@ erDiagram
     users ||--|| profiles : "owns"
     users ||--o{ attributes : "develops"
     users ||--o{ tasks : "creates"
-    users ||--o{ habits : "maintains"
     users ||--o{ bosses : "battles"
     users ||--o{ inventory : "owns"
     users ||--o{ user_achievements : "earns"
     users ||--o{ xp_transactions : "logs"
     users ||--o{ focus_sessions : "performs"
-    users ||--o{ ai_logs : "records"
 
     tasks ||--o{ task_completions : "records"
     bosses ||--o{ boss_milestones : "contains"
@@ -44,6 +42,7 @@ erDiagram
         uuid id PK
         string email UK
         string name
+        string password_hash
         timestamp email_verified
         string image
         timestamp created_at
@@ -156,6 +155,21 @@ erDiagram
         uuid source_id
         text description
         timestamp created_at
+    }
+
+    achievements {
+        string id PK
+        string code UK
+        string name
+        text description
+        string asset_key
+    }
+
+    user_achievements {
+        uuid id PK
+        uuid user_id FK
+        string achievement_id FK
+        timestamp unlocked_at
     }
 ```
 
@@ -331,6 +345,29 @@ Every fluctuation in character XP or Gold writes an immutable record to this led
 
 - **Indexes:**
   - `CREATE INDEX idx_xp_transactions_user ON xp_transactions(user_id, created_at DESC);`
+
+### 3.9 `achievements` (Catalog Table)
+Defines unlockable badges, milestone achievements, and honorary titles.
+
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `VARCHAR(64)` | `PK` | Unique achievement identifier (e.g. `boss_slayer`). |
+| `code` | `VARCHAR(64)` | `UNIQUE, NOT NULL` | Standardized uppercase lookup code (e.g. `TITAN_SLAYER`). |
+| `name` | `VARCHAR(100)` | `NOT NULL` | Display name (e.g. "Titan Slayer"). |
+| `description` | `TEXT` | `NOT NULL` | Unlock criteria explanation. |
+| `asset_key` | `VARCHAR(64)` | `NOT NULL` | Sprite/icon asset identifier. |
+
+### 3.10 `user_achievements`
+Join table recording unlocked player achievements.
+
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `UUID` | `PK, DEFAULT gen_random_uuid()` | Unique record ID. |
+| `user_id` | `UUID` | `NOT NULL, FK(users.id ON DELETE CASCADE)` | Unlocking player ID. |
+| `achievement_id` | `VARCHAR(64)` | `NOT NULL, FK(achievements.id ON DELETE CASCADE)` | Achievement ID. |
+| `unlocked_at` | `TIMESTAMPTZ` | `NOT NULL, DEFAULT NOW()` | Unlock timestamp. |
+
+- **Constraints:** `UNIQUE(user_id, achievement_id)`
 
 ---
 
@@ -525,13 +562,26 @@ model XpTransaction {
   @@map("xp_transactions")
 }
 
-model UserAchievement {
-  id            String   @id @default(uuid())
-  userId        String   @map("user_id")
-  achievementId String   @map("achievement_id")
-  unlockedAt    DateTime @default(now()) @map("unlocked_at")
+model Achievement {
+  id          String   @id
+  code        String   @unique
+  name        String
+  description String
+  assetKey    String   @map("asset_key")
 
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAchievements UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            String      @id @default(uuid())
+  userId        String      @map("user_id")
+  achievementId String      @map("achievement_id")
+  unlockedAt    DateTime    @default(now()) @map("unlocked_at")
+
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
 
   @@unique([userId, achievementId])
   @@map("user_achievements")
