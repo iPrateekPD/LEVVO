@@ -36,6 +36,13 @@ class SoundEngine {
     return this.isMuted;
   }
 
+  public setMuted(muted: boolean): void {
+    this.isMuted = muted;
+    if (typeof window !== "undefined") {
+      localStorage.setItem("life_rpg_sfx_muted", String(this.isMuted));
+    }
+  }
+
   public getMuted(): boolean {
     return this.isMuted;
   }

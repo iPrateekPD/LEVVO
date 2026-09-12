@@ -149,3 +149,17 @@ body {
     transform: none !important;
   }
 }
+
+/* GameBoy Monochrome Theme */
+.theme-gameboy {
+  --color-arcade-black: #081808;
+  --color-cabinet-surface: #142a14;
+  --color-cabinet-surface-light: #203e20;
+  --color-cabinet-border: #3b663b;
+  --color-neon-cyan: #9bbc0f;
+  --color-synth-magenta: #8bac0f;
+  --color-arcade-gold: #9bbc0f;
+  --color-phosphor-green: #9bbc0f;
+  --color-arcade-red: #306230;
+  filter: sepia(0.6) hue-rotate(50deg) contrast(1.1);
+}
