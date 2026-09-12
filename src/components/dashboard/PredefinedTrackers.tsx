@@ -74,52 +74,61 @@ export function PredefinedTrackers({
         </span>
       </div>
 
-      {/* Tracker Chips Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
-        {localTrackers.map((tracker) => {
-          const isComplete = tracker.count >= tracker.target;
-          return (
-            <div
-              key={tracker.key}
-              className={`p-3 rounded-xl border flex flex-col items-center justify-between gap-2 transition-all ${
-                isComplete
-                  ? "bg-phosphorGreen/15 border-phosphorGreen/50 shadow-[0_0_12px_rgba(0,255,102,0.2)]"
-                  : "bg-[#140F24] border-cabinetBorder hover:border-neonCyan/40"
-              }`}
-            >
-              <div className="text-2xl select-none">{tracker.icon}</div>
-              <div className="text-center">
-                <div className="text-xs font-semibold text-textPrimary">{tracker.label}</div>
-                <div className="font-arcade text-[10px] text-arcadeGold mt-0.5">
-                  {tracker.count} / {tracker.target}{" "}
-                  <span className="text-[8px] text-textSecondary font-sans">{tracker.unit}</span>
+      {/* Empty State or Tracker Chips Grid */}
+      {localTrackers.length === 0 ? (
+        <div className="p-6 text-center bg-[#120D24] border border-dashed border-cabinetBorder rounded-xl flex flex-col items-center justify-center gap-2">
+          <span className="font-arcade text-xs text-neonCyan">START TRACKING</span>
+          <p className="text-xs text-textSecondary font-sans max-w-sm">
+            Log water, workouts, or study counters to earn +10 XP micro-rewards throughout your day.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
+          {localTrackers.map((tracker) => {
+            const isComplete = tracker.count >= tracker.target;
+            return (
+              <div
+                key={tracker.key}
+                className={`p-3 rounded-xl border flex flex-col items-center justify-between gap-2.5 transition-all ${
+                  isComplete
+                    ? "bg-phosphorGreen/15 border-phosphorGreen/50 shadow-[0_0_12px_rgba(0,255,102,0.2)]"
+                    : "bg-[#140F24] border-cabinetBorder hover:border-neonCyan/40"
+                }`}
+              >
+                <div className="text-2xl select-none">{tracker.icon}</div>
+                <div className="text-center">
+                  <div className="text-xs font-semibold text-textPrimary">{tracker.label}</div>
+                  <div className="font-arcade text-[10px] text-arcadeGold mt-0.5">
+                    {tracker.count} / {tracker.target}{" "}
+                    <span className="text-[8px] text-textSecondary font-sans">{tracker.unit}</span>
+                  </div>
+                </div>
+
+                {/* Stepper Controls with Accessible Touch Targets */}
+                <div className="flex items-center gap-2 pt-1 w-full justify-center">
+                  <button
+                    type="button"
+                    onClick={() => handleDecrement(tracker.key)}
+                    disabled={tracker.count <= 0}
+                    className="min-w-[40px] min-h-[40px] rounded-lg bg-black/50 border border-cabinetBorder text-textSecondary hover:text-white flex items-center justify-center disabled:opacity-30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 active:scale-95"
+                    aria-label={`Decrement ${tracker.label}`}
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleIncrement(tracker.key)}
+                    className="min-w-[40px] min-h-[40px] rounded-lg bg-neonCyan/20 hover:bg-neonCyan/40 border border-neonCyan/60 text-neonCyan flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 active:scale-95 shadow-sm"
+                    aria-label={`Increment ${tracker.label}`}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-
-              {/* Stepper Controls */}
-              <div className="flex items-center gap-1.5 pt-1">
-                <button
-                  type="button"
-                  onClick={() => handleDecrement(tracker.key)}
-                  disabled={tracker.count <= 0}
-                  className="w-7 h-7 rounded-lg bg-black/50 border border-cabinetBorder text-textSecondary hover:text-white flex items-center justify-center disabled:opacity-40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
-                  aria-label={`Decrement ${tracker.label}`}
-                >
-                  <Minus className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleIncrement(tracker.key)}
-                  className="w-7 h-7 rounded-lg bg-neonCyan/20 hover:bg-neonCyan/40 border border-neonCyan/60 text-neonCyan flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 active:scale-95"
-                  aria-label={`Increment ${tracker.label}`}
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }

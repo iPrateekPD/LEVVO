@@ -133,11 +133,11 @@ export function QuestList({
             <div className="space-y-1">
               <span className="font-arcade text-xs text-arcadeGold">
                 {filter === "ACTIVE"
-                  ? "NO ACTIVE QUESTS IN QUEUE"
+                  ? "PICK YOUR FIRST QUEST"
                   : "NO QUESTS FOUND IN THIS VIEW"}
               </span>
               <p className="text-xs text-gray-400 max-w-md mx-auto font-sans">
-                Jumpstart your adventure by selecting an example quest below or consult the AI Oracle to proceduralize your real-world ambitions.
+                Jumpstart your adventure by selecting a preset quest below or consult the AI Oracle to proceduralize your real-world ambitions.
               </p>
             </div>
 

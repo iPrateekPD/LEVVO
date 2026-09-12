@@ -35,10 +35,10 @@ export function JourneyProgress({
       </div>
 
       {/* Horizontal Pixel Level Path */}
-      <div className="py-4 px-2 overflow-x-auto">
-        <div className="min-w-[420px] relative flex items-center justify-between">
+      <div className="py-4 px-1 sm:px-2 w-full overflow-hidden">
+        <div className="w-full relative flex items-center justify-between">
           {/* Connecting Track Line */}
-          <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-2 bg-[#0B0818] border border-cabinetBorder rounded-full z-0">
+          <div className="absolute left-4 right-4 sm:left-6 sm:right-6 top-1/2 -translate-y-1/2 h-2 bg-[#0B0818] border border-cabinetBorder rounded-full z-0">
             <div
               className="h-full bg-gradient-to-r from-neonCyan via-synthMagenta to-arcadeGold rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(0,240,255,0.5)]"
               style={{
@@ -61,23 +61,23 @@ export function JourneyProgress({
             return (
               <div
                 key={lvl}
-                className="relative z-10 flex flex-col items-center gap-1.5"
+                className="relative z-10 flex flex-col items-center gap-1 sm:gap-1.5"
               >
                 <div
-                  className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center font-arcade text-xs transition-all ${
+                  className={`w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl border-2 flex items-center justify-center font-arcade text-[9px] sm:text-xs transition-all ${
                     isReached
                       ? "bg-gradient-to-br from-[#2E083B] to-[#120824] border-neonCyan text-neonCyan shadow-[0_0_12px_rgba(0,240,255,0.6)]"
                       : "bg-[#0B0818] border-cabinetBorder text-textMuted"
-                  } ${isCurrent ? "ring-4 ring-synthMagenta/50 scale-110" : ""}`}
+                  } ${isCurrent ? "ring-2 sm:ring-4 ring-synthMagenta/50 scale-110" : ""}`}
                 >
                   {isReached ? `L${lvl}` : `${lvl}`}
                 </div>
                 <span
-                  className={`font-arcade text-[9px] uppercase ${
+                  className={`font-arcade text-[7px] sm:text-[9px] uppercase ${
                     isReached ? "text-neonCyan" : "text-textMuted"
                   }`}
                 >
-                  {lvl === 1 ? "Start" : lvl === 20 ? "Master" : `Stage ${lvl}`}
+                  {lvl === 1 ? "Start" : lvl === 20 ? "Master" : `Stg ${lvl}`}
                 </span>
               </div>
             );

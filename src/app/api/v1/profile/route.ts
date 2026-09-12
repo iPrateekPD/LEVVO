@@ -4,26 +4,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { z } from "zod";
-import { AGE_GROUP_CONFIGS, AgeGroup } from "@/lib/presets";
+import { AGE_GROUP_CONFIGS, AgeGroup, FREE_AVATARS, PREMIUM_AVATARS } from "@/lib/presets";
 
 export const dynamic = "force-dynamic";
-
-export const FREE_AVATARS = [
-  { id: "pixel_knight", name: "Pixel Knight", icon: "🧙‍♂️", price: 0 },
-  { id: "pixel_mage", name: "Arcane Mage", icon: "🔮", price: 0 },
-  { id: "pixel_runner", name: "Neon Runner", icon: "🏃", price: 0 },
-  { id: "pixel_scholar", name: "Grand Scholar", icon: "📜", price: 0 },
-  { id: "pixel_robot", name: "Cyborg Unit", icon: "🤖", price: 0 },
-  { id: "pixel_cat", name: "Arcade Cat", icon: "🐱", price: 0 },
-  { id: "pixel_ninja", name: "Shadow Ninja", icon: "🥷", price: 0 },
-  { id: "pixel_alchemist", name: "Alchemist", icon: "🧪", price: 0 },
-];
-
-export const PREMIUM_AVATARS = [
-  { id: "pixel_dragon", name: "Celestial Dragon", icon: "🐉", price: 500 },
-  { id: "pixel_cyber", name: "Mecha Titan", icon: "🦾", price: 500 },
-  { id: "pixel_phoenix", name: "Solar Phoenix", icon: "🦅", price: 500 },
-];
 
 const UpdateProfileSchema = z.object({
   username: z.string().trim().min(3).max(30).optional(),
@@ -143,22 +126,38 @@ export async function PATCH(req: Request) {
       });
 
       if (!existing) {
-        await prisma.$transaction([
-          prisma.inventory.create({
+        await prisma.$transaction(async (tx) => {
+          // Ensure item exists in Item table
+          await tx.item.upsert({
+            where: { id: unlockAvatar },
+            create: {
+              id: unlockAvatar,
+              name: premiumMeta.name,
+              itemType: "AVATAR",
+              description: `Legendary Avatar: ${premiumMeta.name}`,
+              priceGold: premiumMeta.price,
+              assetKey: unlockAvatar,
+            },
+            update: {},
+          });
+
+          await tx.inventory.create({
             data: {
               userId,
               itemId: unlockAvatar,
               isEquipped: true,
             },
-          }),
-          prisma.profile.update({
+          });
+
+          await tx.profile.update({
             where: { userId },
             data: {
               gold: currentProfile.gold - premiumMeta.price,
               avatarId: unlockAvatar,
             },
-          }),
-          prisma.xpTransaction.create({
+          });
+
+          await tx.xpTransaction.create({
             data: {
               userId,
               deltaXp: 0,
@@ -167,8 +166,8 @@ export async function PATCH(req: Request) {
               sourceId: unlockAvatar,
               description: `Unlocked Premium Avatar: ${premiumMeta.name}`,
             },
-          }),
-        ]);
+          });
+        });
       }
       targetAvatarId = unlockAvatar;
     }

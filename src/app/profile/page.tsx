@@ -21,8 +21,7 @@ import {
 import { CrtContainer } from "@/components/arcade/CrtContainer";
 import { sounds } from "@/lib/sound";
 import confetti from "canvas-confetti";
-import { FREE_AVATARS, PREMIUM_AVATARS } from "@/app/api/v1/profile/route";
-import { AGE_GROUP_CONFIGS, AgeGroup } from "@/lib/presets";
+import { AGE_GROUP_CONFIGS, AgeGroup, FREE_AVATARS, PREMIUM_AVATARS } from "@/lib/presets";
 
 const ALL_AVATARS = [
   ...FREE_AVATARS.map((a) => ({ ...a, isPremium: false })),

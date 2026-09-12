@@ -256,3 +256,20 @@ export function getPresetsForAgeAndGoals(
 
   return matching;
 }
+
+export const FREE_AVATARS = [
+  { id: "pixel_knight", name: "Pixel Knight", icon: "🧙‍♂️", price: 0 },
+  { id: "pixel_mage", name: "Arcane Mage", icon: "🔮", price: 0 },
+  { id: "pixel_runner", name: "Neon Runner", icon: "🏃", price: 0 },
+  { id: "pixel_scholar", name: "Grand Scholar", icon: "📜", price: 0 },
+  { id: "pixel_robot", name: "Cyborg Unit", icon: "🤖", price: 0 },
+  { id: "pixel_cat", name: "Arcade Cat", icon: "🐱", price: 0 },
+  { id: "pixel_ninja", name: "Shadow Ninja", icon: "🥷", price: 0 },
+  { id: "pixel_alchemist", name: "Alchemist", icon: "🧪", price: 0 },
+];
+
+export const PREMIUM_AVATARS = [
+  { id: "pixel_dragon", name: "Celestial Dragon", icon: "🐉", price: 500 },
+  { id: "pixel_cyber", name: "Mecha Titan", icon: "🦾", price: 500 },
+  { id: "pixel_phoenix", name: "Solar Phoenix", icon: "🦅", price: 500 },
+];
