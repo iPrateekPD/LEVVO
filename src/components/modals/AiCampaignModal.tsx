@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { X, Sparkles, Wand2, Check, ArrowRight } from "lucide-react";
 import { GeneratedCampaign } from "@/lib/gemini";
 import { sounds } from "@/lib/sound";
+import { useEscapeKey } from "@/lib/useEscapeKey";
 
 interface AiCampaignModalProps {
   isOpen: boolean;
@@ -20,6 +21,8 @@ export function AiCampaignModal({
   const [loading, setLoading] = useState(false);
   const [campaign, setCampaign] = useState<GeneratedCampaign | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null;
 

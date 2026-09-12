@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { soundEffects } from "@/lib/sound";
 import { KanbanTask } from "../views/KanbanBoard";
+import { useEscapeKey } from "@/lib/useEscapeKey";
 
 interface QuestGrimoireModalProps {
   task: KanbanTask;
@@ -22,32 +23,12 @@ export const QuestGrimoireModal: React.FC<QuestGrimoireModalProps> = ({
   const [newSubTaskTitle, setNewSubTaskTitle] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  // 25-minute Pomodoro Focus Timer
-  const FOCUS_TIME_SECONDS = 25 * 60;
-  const [timeLeft, setTimeLeft] = useState(FOCUS_TIME_SECONDS);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  useEscapeKey(onClose, isOpen);
 
   useEffect(() => {
     setNotes(task.notes || "");
     setSubTasks(task.subTasks || []);
   }, [task]);
-
-  // Pomodoro countdown effect
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (isTimerRunning && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    } else if (timeLeft === 0 && isTimerRunning) {
-      setIsTimerRunning(false);
-      soundEffects.playLevelUp();
-      alert("🏆 FOCUS TRIAL COMPLETE! +15 XP & +10 AP RESTORED TO HERO!");
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isTimerRunning, timeLeft]);
 
   if (!isOpen) return null;
 
@@ -105,12 +86,6 @@ export const QuestGrimoireModal: React.FC<QuestGrimoireModalProps> = ({
     }
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
       <div className="relative w-full max-w-3xl bg-[#090b14] border-2 border-arcade-cyan rounded-lg p-6 shadow-[0_0_40px_rgba(0,240,255,0.3)] max-h-[90vh] flex flex-col font-mono text-xs">
@@ -131,7 +106,7 @@ export const QuestGrimoireModal: React.FC<QuestGrimoireModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-white text-lg font-bold p-1 rounded hover:bg-white/10"
+            className="text-gray-500 hover:text-white text-lg font-bold p-1 rounded hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
             ✕
           </button>
@@ -139,47 +114,7 @@ export const QuestGrimoireModal: React.FC<QuestGrimoireModalProps> = ({
 
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto py-4 space-y-6 pr-1">
-          {/* 1. Pomodoro Focus Chamber Widget */}
-          <div className="p-4 bg-black/60 border border-purple-800/60 rounded-lg flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl animate-pulse">⏳</span>
-              <div>
-                <span className="text-[10px] uppercase text-purple-400 font-bold tracking-widest">
-                  DEEP WORK FOCUS CHAMBER
-                </span>
-                <p className="text-2xl font-black text-white tracking-widest">
-                  {formatTime(timeLeft)}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  soundEffects.playBlip();
-                  setIsTimerRunning(!isTimerRunning);
-                }}
-                className={`px-4 py-2 text-xs font-bold rounded uppercase transition-all ${
-                  isTimerRunning
-                    ? "bg-amber-500 text-black shadow-[0_0_12px_rgba(245,158,11,0.5)]"
-                    : "bg-arcade-cyan text-black shadow-[0_0_12px_rgba(0,240,255,0.5)]"
-                }`}
-              >
-                {isTimerRunning ? "PAUSE FOCUS" : "START SPRINT (25M)"}
-              </button>
-              <button
-                onClick={() => {
-                  soundEffects.playBlip();
-                  setIsTimerRunning(false);
-                  setTimeLeft(FOCUS_TIME_SECONDS);
-                }}
-                className="px-3 py-2 bg-gray-800 text-gray-300 hover:text-white rounded"
-              >
-                RESET
-              </button>
-            </div>
-          </div>
-
-          {/* 2. Hierarchical Sub-Quests Checklist */}
+          {/* 1. Hierarchical Sub-Quests Checklist */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-[11px] font-bold text-arcade-cyan uppercase tracking-wider">
@@ -204,7 +139,7 @@ export const QuestGrimoireModal: React.FC<QuestGrimoireModalProps> = ({
                     <div
                       key={st.id}
                       onClick={() => toggleSubTask(st.id, st.status)}
-                      className={`flex items-center justify-between p-2.5 rounded border transition-colors cursor-pointer ${
+                      className={`flex items-center justify-between p-2.5 rounded border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
                         isDone
                           ? "bg-emerald-950/20 border-emerald-900/40 text-gray-500"
                           : "bg-black/50 border-gray-800 hover:border-arcade-cyan text-gray-200"
@@ -215,7 +150,7 @@ export const QuestGrimoireModal: React.FC<QuestGrimoireModalProps> = ({
                           type="checkbox"
                           checked={isDone}
                           onChange={() => toggleSubTask(st.id, st.status)}
-                          className="h-4 w-4 accent-emerald-400 cursor-pointer"
+                          className="h-4 w-4 accent-emerald-400 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
                         />
                         <span className={isDone ? "line-through" : "font-semibold"}>
                           {st.title}
@@ -237,11 +172,11 @@ export const QuestGrimoireModal: React.FC<QuestGrimoireModalProps> = ({
                 placeholder="Enter sub-quest step..."
                 value={newSubTaskTitle}
                 onChange={(e) => setNewSubTaskTitle(e.target.value)}
-                className="flex-1 bg-black/60 border border-gray-800 focus:border-arcade-cyan text-gray-200 px-3 py-2 rounded outline-none text-xs"
+                className="flex-1 bg-black/60 border border-gray-800 focus:border-arcade-cyan text-gray-200 px-3 py-2 rounded outline-none text-xs focus-visible:ring-2 focus-visible:ring-cyan-400"
               />
               <button
                 type="submit"
-                className="px-4 py-2 bg-arcade-cyan/15 text-arcade-cyan border border-arcade-cyan/40 hover:bg-arcade-cyan/30 rounded font-bold uppercase transition-all"
+                className="px-4 py-2 bg-arcade-cyan/15 text-arcade-cyan border border-arcade-cyan/40 hover:bg-arcade-cyan/30 rounded font-bold uppercase transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
               >
                 + ADD STEP
               </button>
@@ -261,7 +196,7 @@ export const QuestGrimoireModal: React.FC<QuestGrimoireModalProps> = ({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Record architectural specs, code snippets, research findings, or reflection..."
-              className="w-full bg-black/70 border border-gray-800 focus:border-arcade-gold text-gray-200 p-3 rounded outline-none font-mono text-xs leading-relaxed"
+              className="w-full bg-black/70 border border-gray-800 focus:border-arcade-gold text-gray-200 p-3 rounded outline-none font-mono text-xs leading-relaxed focus-visible:ring-2 focus-visible:ring-cyan-400"
             />
           </div>
         </div>
@@ -274,14 +209,14 @@ export const QuestGrimoireModal: React.FC<QuestGrimoireModalProps> = ({
           <div className="flex gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-gray-800 text-gray-300 hover:text-white rounded font-bold uppercase"
+              className="px-4 py-2 bg-gray-800 text-gray-300 hover:text-white rounded font-bold uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             >
               CLOSE
             </button>
             <button
               onClick={handleSaveNotes}
               disabled={isSaving}
-              className="px-5 py-2 bg-arcade-gold text-black rounded font-bold uppercase hover:bg-yellow-400 transition-all shadow-[0_0_12px_rgba(255,230,0,0.4)] disabled:opacity-50"
+              className="px-5 py-2 bg-arcade-gold text-black rounded font-bold uppercase hover:bg-yellow-400 transition-all shadow-[0_0_12px_rgba(255,230,0,0.4)] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             >
               {isSaving ? "SAVING..." : "SAVE GRIMOIRE"}
             </button>

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { X, Sparkles, Plus } from "lucide-react";
 import { CANONICAL_ATTRIBUTES, DIFFICULTY_TIERS, DifficultyTier } from "@/lib/progression";
 import { sounds } from "@/lib/sound";
+import { useEscapeKey } from "@/lib/useEscapeKey";
 
 interface CreateQuestModalProps {
   isOpen: boolean;
@@ -16,8 +17,11 @@ export function CreateQuestModal({ isOpen, onClose, onTaskCreated }: CreateQuest
   const [description, setDescription] = useState("");
   const [attributeCode, setAttributeCode] = useState("INT");
   const [difficulty, setDifficulty] = useState<DifficultyTier>("Medium");
+  const [recurrence, setRecurrence] = useState<"NONE" | "DAILY" | "WEEKLY">("NONE");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null;
 
@@ -40,6 +44,7 @@ export function CreateQuestModal({ isOpen, onClose, onTaskCreated }: CreateQuest
           description: description || undefined,
           attributeCode,
           difficulty,
+          recurrence,
         }),
       });
 
@@ -160,6 +165,29 @@ export function CreateQuestModal({ isOpen, onClose, onTaskCreated }: CreateQuest
                   </button>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Recurrence Selection */}
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-textSecondary">
+              Quest Recurrence (Auto-Spawn on Completion)
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {(["NONE", "DAILY", "WEEKLY"] as const).map((rec) => (
+                <button
+                  type="button"
+                  key={rec}
+                  onClick={() => setRecurrence(rec)}
+                  className={`p-2 rounded-lg border text-center font-arcade text-[10px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
+                    recurrence === rec
+                      ? "bg-arcade-cyan/20 border-arcade-cyan text-arcade-cyan shadow-[0_0_10px_rgba(0,240,255,0.4)]"
+                      : "bg-[#150F26] border-cabinetBorder text-textSecondary hover:text-textPrimary"
+                  }`}
+                >
+                  {rec === "NONE" ? "ONE-OFF" : rec}
+                </button>
+              ))}
             </div>
           </div>
 

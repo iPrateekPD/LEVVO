@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { X, ShoppingBag, Coins, Check, Sparkles } from "lucide-react";
 import confetti from "canvas-confetti";
 import { sounds } from "@/lib/sound";
+import { useEscapeKey } from "@/lib/useEscapeKey";
 
 interface ShopItem {
   id: string;
@@ -29,8 +30,10 @@ export function RewardsShopModal({
   onGoldUpdated,
 }: RewardsShopModalProps) {
   const [items, setItems] = useState<ShopItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
+
+  useEscapeKey(onClose, isOpen);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

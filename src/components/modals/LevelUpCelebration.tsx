@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import confetti from "canvas-confetti";
 import { Trophy, Star, ArrowRight } from "lucide-react";
 import { sounds } from "@/lib/sound";
+import { useEscapeKey } from "@/lib/useEscapeKey";
 
 interface LevelUpCelebrationProps {
   isOpen: boolean;
@@ -12,6 +13,8 @@ interface LevelUpCelebrationProps {
 }
 
 export function LevelUpCelebration({ isOpen, newLevel, onClose }: LevelUpCelebrationProps) {
+  useEscapeKey(onClose, isOpen);
+
   useEffect(() => {
     if (isOpen) {
       sounds.playLevelUp();

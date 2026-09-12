@@ -68,6 +68,7 @@ export async function GET(req: Request) {
         streakLongest: profile.streakLongest,
         streakPaused,
         momentumScore: profile.momentumScore,
+        isRecoveryEligible: hoursSinceActive >= 72,
         isBoostActive,
         boostExpiresAt: profile.boostExpiresAt,
         activeTheme: profile.activeTheme,

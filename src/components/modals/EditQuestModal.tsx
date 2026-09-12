@@ -5,6 +5,7 @@ import { X, Edit3, Check } from "lucide-react";
 import { CANONICAL_ATTRIBUTES, DIFFICULTY_TIERS, DifficultyTier } from "@/lib/progression";
 import { TaskItem } from "@/components/quests/QuestCard";
 import { sounds } from "@/lib/sound";
+import { useEscapeKey } from "@/lib/useEscapeKey";
 
 interface EditQuestModalProps {
   isOpen: boolean;
@@ -20,6 +21,8 @@ export function EditQuestModal({ isOpen, task, onClose, onTaskUpdated }: EditQue
   const [difficulty, setDifficulty] = useState<DifficultyTier>("Medium");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEscapeKey(onClose, isOpen);
 
   useEffect(() => {
     if (task) {

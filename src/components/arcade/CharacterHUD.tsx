@@ -20,7 +20,9 @@ interface CharacterHUDProps {
   progressPercent: number;
   gold: number;
   streak: number;
+  streakPaused?: boolean;
   momentum: number;
+  isBoostActive?: boolean;
   currentAp?: number;
   maxAp?: number;
   attributes: AttributeData[];
@@ -44,7 +46,9 @@ export function CharacterHUD({
   progressPercent,
   gold,
   streak,
+  streakPaused = false,
   momentum,
+  isBoostActive = false,
   currentAp = 100,
   maxAp = 100,
   attributes,
@@ -64,49 +68,53 @@ export function CharacterHUD({
           </span>
         </div>
 
-        {/* Character Title & Handle */}
-        <div className="flex-1 min-w-0">
+        {/* Name & Rank */}
+        <div className="flex flex-col min-w-0">
           <div className="flex items-center gap-2">
-            <h2 className="font-arcade text-xs sm:text-sm text-textPrimary truncate">
+            <h2 className="font-arcade text-xs text-neonCyan truncate tracking-wider">
               {username}
             </h2>
-            <span className="text-[10px] bg-synthMagenta/20 text-synthMagenta border border-synthMagenta/40 px-1.5 py-0.5 rounded font-arcade">
-              LVL {level}
-            </span>
+            {isBoostActive && (
+              <span className="font-arcade text-[8px] bg-arcadeGold/20 text-arcadeGold border border-arcadeGold/40 px-1 py-0.5 rounded animate-pulse">
+                ⚡ +50% BOOST
+              </span>
+            )}
           </div>
-          <p className="text-xs text-neonCyan font-medium mt-0.5">{title}</p>
+          <span className="text-xs text-textSecondary truncate">{title}</span>
         </div>
       </div>
 
-      {/* Main XP Progress Gauge */}
+      {/* Main Level Progress Bar */}
       <div className="flex flex-col gap-1.5">
-        <div className="flex justify-between items-center text-[11px]">
-          <span className="font-arcade text-[10px] text-[#00F0FF]">XP PROGRESS</span>
-          <span className="text-textSecondary font-mono text-xs">
+        <div className="flex justify-between text-xs">
+          <span className="font-arcade text-[10px] text-textSecondary">
+            LVL {level}
+          </span>
+          <span className="font-mono text-textSecondary text-[11px]">
             {currentLevelXp} / {totalLevelBand} XP ({progressPercent}%)
           </span>
         </div>
-        <div className="w-full h-3.5 bg-arcadeBlack rounded-full p-0.5 border border-cabinetBorder relative overflow-hidden">
+        <div className="w-full h-3 bg-arcadeBlack rounded-full p-0.5 border border-cabinetBorder overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-neonCyan via-synthMagenta to-arcadeGold rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(0,240,255,0.6)]"
+            className="h-full bg-gradient-to-r from-neonCyan to-synthMagenta rounded-full transition-all duration-300 shadow-[0_0_8px_rgba(0,240,255,0.5)]"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
       </div>
 
-      {/* Action Points (AP / Energy Gauge) */}
-      <div className="flex flex-col gap-1.5">
-        <div className="flex justify-between items-center text-[11px]">
-          <span className="font-arcade text-[10px] text-purple-400 flex items-center gap-1">
-            <span>⚡</span> ACTION ENERGY (AP)
+      {/* Action Points (AP) Energy Bar */}
+      <div className="flex flex-col gap-1">
+        <div className="flex justify-between text-[11px] font-mono">
+          <span className="font-arcade text-[9px] text-arcade-cyan flex items-center gap-1">
+            ⚡ ACTION POINTS (AP)
           </span>
-          <span className="text-purple-300 font-mono text-xs">
+          <span className="text-textSecondary">
             {currentAp} / {maxAp} AP
           </span>
         </div>
-        <div className="w-full h-2.5 bg-arcadeBlack rounded-full p-0.5 border border-purple-900/60 relative overflow-hidden">
+        <div className="w-full h-2 bg-arcadeBlack rounded-full p-0.5 border border-arcade-cyan/30 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-purple-600 via-indigo-500 to-purple-400 rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]"
+            className="h-full bg-gradient-to-r from-arcade-cyan to-phosphorGreen rounded-full transition-all duration-300 shadow-[0_0_6px_rgba(0,240,255,0.6)]"
             style={{ width: `${apPercent}%` }}
           />
         </div>
@@ -132,7 +140,7 @@ export function CharacterHUD({
             <span className="font-arcade text-[11px]">{streak}</span>
           </div>
           <span className="text-[9px] text-textSecondary uppercase font-medium mt-0.5">
-            Day Streak
+            {streakPaused ? "Streak (Frozen)" : "Day Streak"}
           </span>
         </div>
 

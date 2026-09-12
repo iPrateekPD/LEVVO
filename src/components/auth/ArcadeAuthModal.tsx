@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { UserPlus, LogIn, Sparkles, ShieldCheck, X } from "lucide-react";
 import { sounds } from "@/lib/sound";
+import { useEscapeKey } from "@/lib/useEscapeKey";
 
 interface ArcadeAuthModalProps {
   isOpen: boolean;
@@ -17,6 +18,8 @@ export function ArcadeAuthModal({ isOpen, onClose, onAuthenticated }: ArcadeAuth
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null;
 
@@ -95,7 +98,7 @@ export function ArcadeAuthModal({ isOpen, onClose, onAuthenticated }: ArcadeAuth
             sounds.playClick();
             onClose();
           }}
-          className="absolute top-4 right-4 text-textSecondary hover:text-white p-1"
+          className="absolute top-4 right-4 text-textSecondary hover:text-white p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded"
         >
           <X className="w-5 h-5" />
         </button>
@@ -122,7 +125,7 @@ export function ArcadeAuthModal({ isOpen, onClose, onAuthenticated }: ArcadeAuth
               setMode("LOGIN");
               setError(null);
             }}
-            className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+            className={`py-2 text-xs font-semibold rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
               mode === "LOGIN"
                 ? "bg-synthMagenta text-white shadow-sm font-arcade text-[11px]"
                 : "text-textSecondary hover:text-textPrimary"
@@ -137,7 +140,7 @@ export function ArcadeAuthModal({ isOpen, onClose, onAuthenticated }: ArcadeAuth
               setMode("SIGNUP");
               setError(null);
             }}
-            className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+            className={`py-2 text-xs font-semibold rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
               mode === "SIGNUP"
                 ? "bg-synthMagenta text-white shadow-sm font-arcade text-[11px]"
                 : "text-textSecondary hover:text-textPrimary"
@@ -164,7 +167,7 @@ export function ArcadeAuthModal({ isOpen, onClose, onAuthenticated }: ArcadeAuth
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="e.g., PixelKnight"
                 required
-                className="w-full bg-[#120D24] border border-cabinetBorder rounded-lg px-3 py-2 text-sm text-textPrimary placeholder:text-textMuted focus:outline-none focus:border-neonCyan"
+                className="w-full bg-[#120D24] border border-cabinetBorder rounded-lg px-3 py-2 text-sm text-textPrimary placeholder:text-textMuted focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus:border-neonCyan"
               />
             </div>
           )}
@@ -177,7 +180,7 @@ export function ArcadeAuthModal({ isOpen, onClose, onAuthenticated }: ArcadeAuth
               onChange={(e) => setEmail(e.target.value)}
               placeholder="player@liferpg.dev"
               required
-              className="w-full bg-[#120D24] border border-cabinetBorder rounded-lg px-3 py-2 text-sm text-textPrimary placeholder:text-textMuted focus:outline-none focus:border-neonCyan"
+              className="w-full bg-[#120D24] border border-cabinetBorder rounded-lg px-3 py-2 text-sm text-textPrimary placeholder:text-textMuted focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus:border-neonCyan"
             />
           </div>
 
@@ -189,14 +192,14 @@ export function ArcadeAuthModal({ isOpen, onClose, onAuthenticated }: ArcadeAuth
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="w-full bg-[#120D24] border border-cabinetBorder rounded-lg px-3 py-2 text-sm text-textPrimary placeholder:text-textMuted focus:outline-none focus:border-neonCyan"
+              className="w-full bg-[#120D24] border border-cabinetBorder rounded-lg px-3 py-2 text-sm text-textPrimary placeholder:text-textMuted focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus:border-neonCyan"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="arcade-btn w-full mt-2 py-2.5 bg-gradient-to-r from-synthMagenta to-pink-600 hover:brightness-110 text-white font-arcade text-xs rounded-xl border border-pink-300 shadow-[0_3px_0_#9E0045] flex items-center justify-center gap-2"
+            className="arcade-btn w-full mt-2 py-2.5 bg-gradient-to-r from-synthMagenta to-pink-600 hover:brightness-110 text-white font-arcade text-xs rounded-xl border border-pink-300 shadow-[0_3px_0_#9E0045] flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
             {mode === "LOGIN" ? <LogIn className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
             <span>
@@ -215,7 +218,7 @@ export function ArcadeAuthModal({ isOpen, onClose, onAuthenticated }: ArcadeAuth
             type="button"
             onClick={handleQuickDemoLogin}
             disabled={loading}
-            className="text-xs text-neonCyan hover:text-cyan-300 font-medium flex items-center gap-1.5 underline"
+            className="text-xs text-neonCyan hover:text-cyan-300 font-medium flex items-center gap-1.5 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded"
           >
             <ShieldCheck className="w-3.5 h-3.5" />
             <span>Quick Login with Seed Demo Account (Explorer)</span>

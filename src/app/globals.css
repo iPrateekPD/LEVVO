@@ -97,14 +97,55 @@ body {
   background: #FF2A85;
 }
 
-/* Accessibility: Reduced Motion Override */
+/* Screen Shake & Floating Damage FX */
+@keyframes screen-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px) rotate(-0.5deg); }
+  40%, 80% { transform: translateX(6px) rotate(0.5deg); }
+}
+
+.animate-screen-shake {
+  animation: screen-shake 0.35s ease-in-out;
+}
+
+@keyframes float-damage {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0px) scale(1.15);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-25px) scale(1.0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px) scale(0.9);
+  }
+}
+
+.animate-float-damage {
+  animation: float-damage 1.2s ease-out forwards;
+}
+
+/* Accessibility: Reduced Motion Override (docs/06 §5.3) */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-  .crt-scanlines::before {
+  .crt-scanlines::before,
+  .crt-overlay::before {
     display: none !important;
+  }
+  .animate-screen-shake,
+  .animate-float-damage {
+    animation: none !important;
+    transform: none !important;
   }
 }
