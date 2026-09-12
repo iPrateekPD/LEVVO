@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 
-const DEFAULT_USER_ID = "default-user-hero";
+import { getSessionUser } from "@/lib/auth";
 
 const PurchaseSchema = z.object({
   itemId: z.string().min(1),
@@ -10,6 +10,8 @@ const PurchaseSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    const session = await getSessionUser(req);
+    const userId = session?.userId ?? "default-user-hero";
     const body = await req.json();
     const parsed = PurchaseSchema.safeParse(body);
 
@@ -30,7 +32,7 @@ export async function POST(req: Request) {
     const result = await prisma.$transaction(async (tx) => {
       // 1. Check profile gold
       const profile = await tx.profile.findUniqueOrThrow({
-        where: { userId: DEFAULT_USER_ID },
+        where: { userId: userId },
       });
 
       if (profile.gold < item.priceGold) {
@@ -41,7 +43,7 @@ export async function POST(req: Request) {
       const existing = await tx.inventory.findUnique({
         where: {
           userId_itemId: {
-            userId: DEFAULT_USER_ID,
+            userId: userId,
             itemId,
           },
         },
@@ -53,7 +55,7 @@ export async function POST(req: Request) {
 
       // 3. Deduct Gold
       const updatedProfile = await tx.profile.update({
-        where: { userId: DEFAULT_USER_ID },
+        where: { userId: userId },
         data: {
           gold: profile.gold - item.priceGold,
           ...(item.itemType === "THEME" ? { activeTheme: item.id } : {}),
@@ -64,7 +66,7 @@ export async function POST(req: Request) {
       if (!existing) {
         await tx.inventory.create({
           data: {
-            userId: DEFAULT_USER_ID,
+            userId: userId,
             itemId,
             isEquipped: item.itemType === "THEME",
           },
@@ -74,7 +76,7 @@ export async function POST(req: Request) {
       // 5. Log audit transaction
       await tx.xpTransaction.create({
         data: {
-          userId: DEFAULT_USER_ID,
+          userId: userId,
           deltaXp: 0,
           deltaGold: -item.priceGold,
           sourceType: "SHOP_PURCHASE",

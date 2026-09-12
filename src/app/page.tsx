@@ -7,22 +7,28 @@ import { CharacterHUD } from "@/components/arcade/CharacterHUD";
 import { QuestList } from "@/components/quests/QuestList";
 import { BossBattleWidget, BossItem } from "@/components/bosses/BossBattleWidget";
 import { CreateQuestModal } from "@/components/modals/CreateQuestModal";
+import { EditQuestModal } from "@/components/modals/EditQuestModal";
 import { AiCampaignModal } from "@/components/modals/AiCampaignModal";
 import { RewardsShopModal } from "@/components/modals/RewardsShopModal";
 import { LevelUpCelebration } from "@/components/modals/LevelUpCelebration";
+import { ArcadeAuthModal } from "@/components/auth/ArcadeAuthModal";
 import { TaskItem } from "@/components/quests/QuestCard";
+import { sounds } from "@/lib/sound";
 
 export default function ArcadeDashboard() {
   const [character, setCharacter] = useState<any>(null);
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [boss, setBoss] = useState<BossItem | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ id: string; email: string; username: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Display Settings
   const [scanlines, setScanlines] = useState(true);
 
   // Modals
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<TaskItem | null>(null);
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [isShopOpen, setIsShopOpen] = useState(false);
   const [levelUpData, setLevelUpData] = useState<{ isOpen: boolean; newLevel: number }>({
@@ -32,8 +38,27 @@ export default function ArcadeDashboard() {
 
   // Initial Load from Database
   useEffect(() => {
-    loadAllData();
+    initApp();
   }, []);
+
+  const initApp = async () => {
+    await checkAuth();
+    await loadAllData();
+  };
+
+  const checkAuth = async () => {
+    try {
+      const res = await fetch("/api/v1/auth/me");
+      const data = await res.json();
+      if (data.success && data.user) {
+        setCurrentUser(data.user);
+      } else {
+        setCurrentUser(null);
+      }
+    } catch {
+      setCurrentUser(null);
+    }
+  };
 
   const loadAllData = async () => {
     try {
@@ -53,12 +78,31 @@ export default function ArcadeDashboard() {
       if (tasksData.success) setTasks(tasksData.data);
       if (bossData.success && bossData.data.length > 0) {
         setBoss(bossData.data[0]);
+      } else {
+        setBoss(null);
       }
     } catch (err) {
       console.error("Failed to load dashboard data:", err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLogout = async () => {
+    sounds.playClick();
+    try {
+      await fetch("/api/v1/auth/logout", { method: "POST" });
+      setCurrentUser(null);
+      await loadAllData();
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
+
+  const handleAuthenticated = async (user: { id: string; email: string; username: string }) => {
+    setCurrentUser(user);
+    setLoading(true);
+    await loadAllData();
   };
 
   // Complete a Task authoritatively
@@ -77,7 +121,6 @@ export default function ArcadeDashboard() {
 
         // Update character stats
         if (character) {
-          const newTotalXp = data.data.totalXp;
           const newLevel = data.data.newLevel;
 
           // Check Level Up!
@@ -156,6 +199,9 @@ export default function ArcadeDashboard() {
         onToggleScanlines={() => setScanlines(!scanlines)}
         onOpenShop={() => setIsShopOpen(true)}
         onOpenAiModal={() => setIsAiOpen(true)}
+        currentUser={currentUser}
+        onOpenAuth={() => setIsAuthOpen(true)}
+        onLogout={handleLogout}
       />
 
       {/* Main Responsive Grid Layout */}
@@ -184,12 +230,13 @@ export default function ArcadeDashboard() {
             onMilestoneComplete={handleMilestoneComplete}
           />
 
-          {/* Daily Quests Queue */}
+          {/* Daily Quests Queue with CRUD */}
           <div className="bg-cabinetSurface/90 border-2 border-cabinetBorder rounded-xl p-4 shadow-lg">
             <QuestList
               tasks={tasks}
               onComplete={handleCompleteTask}
               onDelete={handleDeleteTask}
+              onEdit={(task) => setEditingTask(task)}
               onOpenCreateModal={() => setIsCreateOpen(true)}
             />
           </div>
@@ -201,6 +248,11 @@ export default function ArcadeDashboard() {
         <div className="flex items-center gap-2">
           <span className="text-arcadeGold">★</span>
           <span>YOUR LIFE IS THE GAME</span>
+          {currentUser ? (
+            <span className="text-neonCyan">| HERO: {currentUser.username}</span>
+          ) : (
+            <span className="text-textMuted">| GUEST SESSION</span>
+          )}
         </div>
         <div className="flex items-center gap-4">
           <span>SERVER AUTHORITATIVE ENGINE ACTIVE</span>
@@ -209,10 +261,25 @@ export default function ArcadeDashboard() {
       </footer>
 
       {/* Modals */}
+      <ArcadeAuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onAuthenticated={handleAuthenticated}
+      />
+
       <CreateQuestModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
         onTaskCreated={(newTask) => setTasks((prev) => [newTask, ...prev])}
+      />
+
+      <EditQuestModal
+        isOpen={!!editingTask}
+        task={editingTask}
+        onClose={() => setEditingTask(null)}
+        onTaskUpdated={(updatedTask) => {
+          setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)));
+        }}
       />
 
       <AiCampaignModal

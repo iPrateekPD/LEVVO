@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 
-const DEFAULT_USER_ID = "default-user-hero";
+import { getSessionUser } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 const CreateBossSchema = z.object({
   title: z.string().trim().min(3).max(120),
@@ -17,10 +19,13 @@ const CreateBossSchema = z.object({
     .min(1),
 });
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const session = await getSessionUser(req);
+    const userId = session?.userId ?? "default-user-hero";
+
     const bosses = await prisma.boss.findMany({
-      where: { userId: DEFAULT_USER_ID },
+      where: { userId },
       include: {
         milestones: {
           orderBy: { damageHp: "asc" },
@@ -38,6 +43,9 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const session = await getSessionUser(req);
+    const userId = session?.userId ?? "default-user-hero";
+
     const body = await req.json();
     const parsed = CreateBossSchema.safeParse(body);
 
@@ -53,7 +61,7 @@ export async function POST(req: Request) {
 
     const boss = await prisma.boss.create({
       data: {
-        userId: DEFAULT_USER_ID,
+        userId,
         title,
         description: description || null,
         totalHp,

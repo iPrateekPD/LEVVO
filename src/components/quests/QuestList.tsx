@@ -9,6 +9,7 @@ interface QuestListProps {
   tasks: TaskItem[];
   onComplete: (taskId: string) => Promise<{ didLevelUp?: boolean; newLevel?: number } | void>;
   onDelete: (taskId: string) => void;
+  onEdit?: (task: TaskItem) => void;
   onOpenCreateModal: () => void;
 }
 
@@ -16,6 +17,7 @@ export function QuestList({
   tasks,
   onComplete,
   onDelete,
+  onEdit,
   onOpenCreateModal,
 }: QuestListProps) {
   const [filter, setFilter] = useState<"ALL" | "ACTIVE" | "COMPLETED">("ACTIVE");
@@ -101,6 +103,7 @@ export function QuestList({
               task={task}
               onComplete={onComplete}
               onDelete={onDelete}
+              onEdit={onEdit}
             />
           ))
         )}

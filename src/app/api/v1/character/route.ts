@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { calculateLevelFromTotalXp, calculateAttributeLevel, CANONICAL_ATTRIBUTES } from "@/lib/progression";
+import { getSessionUser } from "@/lib/auth";
 
-// Single active user ID for zero-auth frictionless local hackathon demonstration
-const DEFAULT_USER_ID = "default-user-hero";
+export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const session = await getSessionUser(req);
+    const userId = session?.userId ?? "default-user-hero";
+
     const profile = await prisma.profile.findUnique({
-      where: { userId: DEFAULT_USER_ID },
+      where: { userId },
     });
 
     if (!profile) {
@@ -16,7 +19,7 @@ export async function GET() {
     }
 
     const attributes = await prisma.attribute.findMany({
-      where: { userId: DEFAULT_USER_ID },
+      where: { userId },
     });
 
     const levelStats = calculateLevelFromTotalXp(profile.totalXp);

@@ -3,7 +3,9 @@ import { prisma } from "@/lib/db";
 import { DIFFICULTY_TIERS, DifficultyTier } from "@/lib/progression";
 import { z } from "zod";
 
-const DEFAULT_USER_ID = "default-user-hero";
+import { getSessionUser } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 const CreateTaskSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(160),
@@ -15,12 +17,15 @@ const CreateTaskSchema = z.object({
 
 export async function GET(req: Request) {
   try {
+    const session = await getSessionUser(req);
+    const userId = session?.userId ?? "default-user-hero";
+
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status");
 
     const tasks = await prisma.task.findMany({
       where: {
-        userId: DEFAULT_USER_ID,
+        userId,
         ...(status ? { status } : {}),
       },
       orderBy: [
@@ -38,6 +43,9 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    const session = await getSessionUser(req);
+    const userId = session?.userId ?? "default-user-hero";
+
     const body = await req.json();
     const parsed = CreateTaskSchema.safeParse(body);
 
@@ -53,7 +61,7 @@ export async function POST(req: Request) {
 
     const task = await prisma.task.create({
       data: {
-        userId: DEFAULT_USER_ID,
+        userId,
         title,
         description: description || null,
         attributeCode,

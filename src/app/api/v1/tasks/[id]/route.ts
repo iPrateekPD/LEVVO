@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { DIFFICULTY_TIERS, DifficultyTier } from "@/lib/progression";
 import { z } from "zod";
 
-const DEFAULT_USER_ID = "default-user-hero";
+import { getSessionUser } from "@/lib/auth";
 
 const UpdateTaskSchema = z.object({
   title: z.string().trim().min(1).max(160).optional(),
@@ -15,6 +15,9 @@ const UpdateTaskSchema = z.object({
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
+    const session = await getSessionUser(req);
+    const userId = session?.userId ?? "default-user-hero";
+
     const { id } = params;
     const body = await req.json();
     const parsed = UpdateTaskSchema.safeParse(body);
@@ -30,7 +33,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       where: { id },
     });
 
-    if (!task || task.userId !== DEFAULT_USER_ID) {
+    if (!task || task.userId !== userId) {
       return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
     }
 
@@ -55,13 +58,16 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
+    const session = await getSessionUser(req);
+    const userId = session?.userId ?? "default-user-hero";
+
     const { id } = params;
 
     const task = await prisma.task.findUnique({
       where: { id },
     });
 
-    if (!task || task.userId !== DEFAULT_USER_ID) {
+    if (!task || task.userId !== userId) {
       return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
     }
 

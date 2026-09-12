@@ -2,17 +2,20 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { calculateLevelFromTotalXp, calculateAttributeLevel } from "@/lib/progression";
 
-const DEFAULT_USER_ID = "default-user-hero";
+import { getSessionUser } from "@/lib/auth";
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
+    const session = await getSessionUser(req);
+    const userId = session?.userId ?? "default-user-hero";
+
     const { id } = params;
 
     const task = await prisma.task.findUnique({
       where: { id },
     });
 
-    if (!task || task.userId !== DEFAULT_USER_ID) {
+    if (!task || task.userId !== userId) {
       return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
     }
 
@@ -38,7 +41,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       await tx.taskCompletion.create({
         data: {
           taskId: task.id,
-          userId: DEFAULT_USER_ID,
+          userId: userId,
           completionDate: new Date(),
           awardedXp: task.xpReward,
           awardedGold: task.goldReward,
@@ -47,7 +50,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
       // 3. Fetch profile
       const profile = await tx.profile.findUniqueOrThrow({
-        where: { userId: DEFAULT_USER_ID },
+        where: { userId: userId },
       });
 
       const oldLevelStats = calculateLevelFromTotalXp(profile.totalXp);
@@ -68,7 +71,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
       // 5. Update Profile
       const updatedProfile = await tx.profile.update({
-        where: { userId: DEFAULT_USER_ID },
+        where: { userId: userId },
         data: {
           totalXp: newTotalXp,
           currentLevel: newLevelStats.level,
@@ -83,7 +86,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       const attribute = await tx.attribute.findUnique({
         where: {
           userId_attributeCode: {
-            userId: DEFAULT_USER_ID,
+            userId: userId,
             attributeCode: task.attributeCode,
           },
         },
@@ -105,7 +108,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       // 7. Audit log in XpTransaction
       await tx.xpTransaction.create({
         data: {
-          userId: DEFAULT_USER_ID,
+          userId: userId,
           deltaXp: task.xpReward,
           deltaGold: task.goldReward,
           sourceType: "TASK_COMPLETE",

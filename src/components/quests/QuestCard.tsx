@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Check, Clock, Brain, Shield, Sparkles, Target, Palette, Users, Trash2 } from "lucide-react";
+import { Check, Clock, Brain, Shield, Sparkles, Target, Palette, Users, Trash2, Edit3 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { sounds } from "@/lib/sound";
 
@@ -21,6 +21,7 @@ interface QuestCardProps {
   task: TaskItem;
   onComplete: (taskId: string) => Promise<{ didLevelUp?: boolean; newLevel?: number } | void>;
   onDelete: (taskId: string) => void;
+  onEdit?: (task: TaskItem) => void;
 }
 
 const ATTRIBUTE_STYLES: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
@@ -32,7 +33,7 @@ const ATTRIBUTE_STYLES: Record<string, { bg: string; text: string; icon: React.R
   CHA: { bg: "bg-emerald-950/60", text: "text-phosphorGreen", icon: <Users className="w-3.5 h-3.5" /> },
 };
 
-export function QuestCard({ task, onComplete, onDelete }: QuestCardProps) {
+export function QuestCard({ task, onComplete, onDelete, onEdit }: QuestCardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isCompleted = task.status === "COMPLETED";
 
@@ -121,6 +122,20 @@ export function QuestCard({ task, onComplete, onDelete }: QuestCardProps) {
 
       {/* Right Action Buttons */}
       <div className="flex items-center gap-2 shrink-0">
+        {/* Edit Task Button */}
+        {onEdit && !isCompleted && (
+          <button
+            onClick={() => {
+              sounds.playClick();
+              onEdit(task);
+            }}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 text-textSecondary hover:text-neonCyan rounded hover:bg-neonCyan/10"
+            title="Edit quest"
+          >
+            <Edit3 className="w-4 h-4" />
+          </button>
+        )}
+
         {/* Delete Task Button */}
         <button
           onClick={() => {

@@ -2,13 +2,16 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { calculateLevelFromTotalXp } from "@/lib/progression";
 
-const DEFAULT_USER_ID = "default-user-hero";
+import { getSessionUser } from "@/lib/auth";
 
 export async function POST(
   req: Request,
   { params }: { params: { id: string; milestoneId: string } }
 ) {
   try {
+    const session = await getSessionUser(req);
+    const userId = session?.userId ?? "default-user-hero";
+
     const { id: bossId, milestoneId } = params;
 
     const boss = await prisma.boss.findUnique({
@@ -16,7 +19,7 @@ export async function POST(
       include: { milestones: true },
     });
 
-    if (!boss || boss.userId !== DEFAULT_USER_ID) {
+    if (!boss || boss.userId !== userId) {
       return NextResponse.json({ success: false, error: "Boss not found" }, { status: 404 });
     }
 
@@ -61,7 +64,7 @@ export async function POST(
       // 3. If defeated, award victory loot!
       if (isDefeated && boss.status !== "DEFEATED") {
         const profile = await tx.profile.findUniqueOrThrow({
-          where: { userId: DEFAULT_USER_ID },
+          where: { userId: userId },
         });
 
         const newTotalXp = profile.totalXp + boss.rewardXp;
@@ -69,7 +72,7 @@ export async function POST(
         const newLevelStats = calculateLevelFromTotalXp(newTotalXp);
 
         await tx.profile.update({
-          where: { userId: DEFAULT_USER_ID },
+          where: { userId: userId },
           data: {
             totalXp: newTotalXp,
             currentLevel: newLevelStats.level,
@@ -79,7 +82,7 @@ export async function POST(
 
         await tx.xpTransaction.create({
           data: {
-            userId: DEFAULT_USER_ID,
+            userId: userId,
             deltaXp: boss.rewardXp,
             deltaGold: boss.rewardGold,
             sourceType: "BOSS_VICTORY",

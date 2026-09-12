@@ -1,7 +1,5 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
-import { Volume2, VolumeX, Tv, Sparkles, ShoppingBag } from "lucide-react";
+import { Volume2, VolumeX, Tv, Sparkles, ShoppingBag, LogIn, LogOut, User } from "lucide-react";
 import { sounds } from "@/lib/sound";
 
 interface ArcadeMarqueeProps {
@@ -9,6 +7,9 @@ interface ArcadeMarqueeProps {
   onToggleScanlines: () => void;
   onOpenShop: () => void;
   onOpenAiModal: () => void;
+  currentUser: { username: string; email: string } | null;
+  onOpenAuth: () => void;
+  onLogout: () => void;
 }
 
 export function ArcadeMarquee({
@@ -16,6 +17,9 @@ export function ArcadeMarquee({
   onToggleScanlines,
   onOpenShop,
   onOpenAiModal,
+  currentUser,
+  onOpenAuth,
+  onLogout,
 }: ArcadeMarqueeProps) {
   const [isMuted, setIsMuted] = useState(false);
 
@@ -76,6 +80,33 @@ export function ArcadeMarquee({
           <ShoppingBag className="w-3.5 h-3.5 text-arcadeBlack" />
           <span className="hidden md:inline">SHOP</span>
         </button>
+
+        {/* Auth / Account Controls */}
+        {currentUser ? (
+          <button
+            onClick={() => {
+              sounds.playClick();
+              onLogout();
+            }}
+            className="arcade-btn flex items-center gap-1.5 px-2.5 py-1.5 bg-arcadeRed/20 hover:bg-arcadeRed/30 text-arcadeRed border border-arcadeRed/50 rounded-md font-arcade text-[10px]"
+            title={`Logged in as ${currentUser.username}. Click to Log Out.`}
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden lg:inline">EXIT</span>
+          </button>
+        ) : (
+          <button
+            onClick={() => {
+              sounds.playClick();
+              onOpenAuth();
+            }}
+            className="arcade-btn flex items-center gap-1.5 px-3 py-1.5 bg-neonCyan hover:bg-cyan-400 text-arcadeBlack border border-cyan-200 rounded-md font-arcade text-[10px] shadow-[0_3px_0_#008A9E]"
+            title="Login or Signup"
+          >
+            <LogIn className="w-3.5 h-3.5" />
+            <span>LOGIN</span>
+          </button>
+        )}
 
         {/* CRT Scanline Toggle */}
         <button

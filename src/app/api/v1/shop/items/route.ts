@@ -1,17 +1,21 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { getSessionUser } from "@/lib/auth";
 
-const DEFAULT_USER_ID = "default-user-hero";
+export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const session = await getSessionUser(req);
+    const userId = session?.userId ?? "default-user-hero";
+
     const items = await prisma.item.findMany({
       where: { isActive: true },
       orderBy: { priceGold: "asc" },
     });
 
     const userInventory = await prisma.inventory.findMany({
-      where: { userId: DEFAULT_USER_ID },
+      where: { userId },
     });
 
     const ownedItemIds = new Set(userInventory.map((inv) => inv.itemId));
