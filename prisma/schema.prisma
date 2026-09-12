@@ -19,6 +19,7 @@ model User {
   attributes     Attribute[]
   tasks          Task[]
   taskCompletions TaskCompletion[]
+  achievements   UserAchievement[]
   bosses         Boss[]
   inventory      Inventory[]
   xpTransactions XpTransaction[]
@@ -39,7 +40,9 @@ model Profile {
   streakCurrent   Int       @default(0)
   streakLongest   Int       @default(0)
   lastActiveDate  DateTime?
-  momentumScore   Int       @default(50)
+  momentumScore   Int       @default(0)
+  timezone        String    @default("UTC")
+  boostExpiresAt  DateTime?
   activeTheme     String    @default("synthwave")
   avatarId        String    @default("pixel_knight")
   sfxEnabled      Boolean   @default(true)
@@ -77,6 +80,7 @@ model Task {
   status         String          @default("ACTIVE")
   stage          String          @default("TODO")
   isRecurring    Boolean         @default(false)
+  recurrence     String          @default("NONE") // NONE | DAILY | WEEKLY
   recurrenceRule String?
   tags           String?
   dueDate        DateTime?
@@ -87,13 +91,13 @@ model Task {
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   parentTask     Task?           @relation("SubTasks", fields: [parentTaskId], references: [id], onDelete: Cascade)
   subTasks       Task[]          @relation("SubTasks")
-  completions    TaskCompletion?
+  completions    TaskCompletion[]
   bossMilestone  BossMilestone?
 }
 
 model TaskCompletion {
   id             String   @id @default(uuid())
-  taskId         String   @unique
+  taskId         String
   userId         String
   completionDate DateTime
   awardedXp      Int
@@ -102,6 +106,31 @@ model TaskCompletion {
 
   task           Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, completionDate])
+}
+
+model Achievement {
+  id               String            @id @default(uuid())
+  code             String            @unique
+  name             String
+  description      String
+  assetKey         String
+  createdAt        DateTime          @default(now())
+
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id            String      @id @default(uuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime    @default(now())
+
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
 }
 
 model Boss {

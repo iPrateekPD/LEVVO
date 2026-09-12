@@ -1,7 +1,8 @@
+// AUDIT: Tenant-isolation enforced. boss.userId is strictly verified against authenticated session.userId.
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { calculateLevelFromTotalXp } from "@/lib/progression";
-
 import { getSessionUser } from "@/lib/auth";
 
 export async function POST(
@@ -91,9 +92,35 @@ export async function POST(
           },
         });
 
+        // Unlock boss_slayer achievement if not already owned
+        let unlockedAchievement = null;
+        const bossSlayerAch = await tx.achievement.findUnique({
+          where: { code: "boss_slayer" },
+        });
+        if (bossSlayerAch) {
+          const alreadyUnlocked = await tx.userAchievement.findUnique({
+            where: {
+              userId_achievementId: {
+                userId,
+                achievementId: bossSlayerAch.id,
+              },
+            },
+          });
+          if (!alreadyUnlocked) {
+            await tx.userAchievement.create({
+              data: {
+                userId,
+                achievementId: bossSlayerAch.id,
+              },
+            });
+            unlockedAchievement = bossSlayerAch.name;
+          }
+        }
+
         lootAwarded = {
           xp: boss.rewardXp,
           gold: boss.rewardGold,
+          unlockedAchievement: unlockedAchievement ?? "Titan Slayer",
         };
       }
 

@@ -208,7 +208,7 @@ The primary player character sheet containing authoritative progression snapshot
 | `streak_current`| `INTEGER` | `NOT NULL, DEFAULT 0` | Current active streak in consecutive days. |
 | `streak_longest`| `INTEGER` | `NOT NULL, DEFAULT 0` | All-time highest streak achieved. |
 | `last_active_date`| `DATE` | `NULLABLE` | Most recent date with verified quest activity. |
-| `momentum_score`| `INTEGER` | `NOT NULL, DEFAULT 50, CHECK(momentum_score BETWEEN 0 AND 100)` | Rolling 7-day weighted momentum rating. |
+| `momentum_score`| `INTEGER` | `NOT NULL, DEFAULT 0, CHECK(momentum_score BETWEEN 0 AND 100)` | Rolling 7-day weighted momentum rating. |
 | `active_theme` | `VARCHAR(32)` | `NOT NULL, DEFAULT 'synthwave'` | Active CRT colorway token. |
 | `avatar_id` | `VARCHAR(32)` | `NOT NULL, DEFAULT 'pixel_knight'` | Equipped pixel avatar identifier. |
 | `sfx_enabled` | `BOOLEAN` | `NOT NULL, DEFAULT true` | Retro 8-bit sound effects toggle. |
@@ -418,7 +418,7 @@ model Profile {
   streakCurrent   Int       @default(0) @map("streak_current")
   streakLongest   Int       @default(0) @map("streak_longest")
   lastActiveDate  DateTime? @map("last_active_date") @db.Date
-  momentumScore   Int       @default(50) @map("momentum_score")
+  momentumScore   Int       @default(0) @map("momentum_score")
   activeTheme     String    @default("synthwave") @map("active_theme")
   avatarId        String    @default("pixel_knight") @map("avatar_id")
   sfxEnabled      Boolean   @default(true) @map("sfx_enabled")

@@ -68,7 +68,7 @@ export async function POST(req: Request) {
               gold: 50, // Starter bonus
               streakCurrent: 1,
               streakLongest: 1,
-              momentumScore: 50,
+              momentumScore: 0,
               activeTheme: "synthwave",
               avatarId: "pixel_knight",
               sfxEnabled: true,

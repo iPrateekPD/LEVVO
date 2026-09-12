@@ -82,8 +82,25 @@ export function calculateAttributeLevel(attributeXp: number): number {
 }
 
 /**
- * Momentum Score: 0 to 100 rating based on recent activity
+ * Momentum Score: 0 to 100 rating based on rolling 7-day weighted activity
+ * Formula: Momentum = min(100, sum_{d=0..6} (CompletedXP_d / 200) * w_d * (100 / sum(w)))
+ * where w_0 = 1.0 (today) down to w_6 = 0.4 (6 days ago)
  */
+export function calculateWeightedMomentum(dailyXpLast7Days: number[]): number {
+  const weights = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4];
+  const weightSum = weights.reduce((a, b) => a + b, 0); // 4.9
+  let weightedScore = 0;
+
+  for (let d = 0; d < 7; d++) {
+    const xp = dailyXpLast7Days[d] || 0;
+    const wd = weights[d];
+    weightedScore += (Math.min(xp, 600) / 200) * wd;
+  }
+
+  const normalized = (weightedScore / weightSum) * 100;
+  return Math.min(100, Math.max(0, Math.round(normalized)));
+}
+
 export function calculateMomentum(completionsCount7Days: number): number {
-  return Math.min(100, Math.max(10, Math.round(completionsCount7Days * 12.5)));
+  return Math.min(100, Math.max(0, Math.round(completionsCount7Days * 12.5)));
 }

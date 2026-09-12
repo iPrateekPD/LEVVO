@@ -134,7 +134,10 @@ For financial, progression, and task completion endpoints, clients may supply an
     }
   }
   ```
-- **SECURITY NOTES:** Evaluates whether `lastActiveDate` requires a streak pause or triggers an eligible Recovery Quest.
+- **SECURITY & STREAK NOTES:** Evaluates whether `lastActiveDate` requires a streak pause or triggers an eligible Recovery Quest. Streak calculation is non-punitive:
+  - If `lastActiveDate` is missing or equals today: streak continues (set to 1 if missing).
+  - If `lastActiveDate` is yesterday in user's profile timezone: `streakCurrent += 1`.
+  - If `lastActiveDate` is 2+ days ago: `streakCurrent` is frozen (never reset to 0); `streakPaused` is derived as `true` when `lastActiveDate >= 36h` ago, and the next completion resumes from the frozen value. No punitive reset, ever.
 
 ---
 

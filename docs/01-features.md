@@ -192,7 +192,10 @@ To ensure razor-sharp execution, features are strictly triaged into engineering 
 - **Priority:** `P0 (Streaks)` & `P1 (Momentum & Recovery)`
 - **Description:** Dual-layer consistency tracking that celebrates daily habits without inducing shame or catastrophic disengagement when life interrupts routine.
 - **Mechanics:**
-  1. **Daily Streak (`P0`):** Increments when at least one active quest is completed within the user's local timezone day (midnight to 23:59:59). If 36 hours elapse with zero completions, the streak counter pauses.
+  1. **Daily Streak (`P0`):** Non-punitive streak tracking. On each verified completion, the user's local date is computed from their profile timezone:
+     - If `lastActiveDate` is missing or equals today: streak continues (set to 1 if missing).
+     - If `lastActiveDate` was yesterday: `streakCurrent += 1`.
+     - If `lastActiveDate` was 2+ days ago: the streak does NOT hard-reset. The `streakCurrent` remains frozen, a `streakPaused` flag is derived (`lastActiveDate >= 36h` ago), and the next completion resumes directly from the frozen value. There is NO punitive reset, ever.
   2. **Momentum Score (`P1`):** A dynamic rating from 0 to 100 representing rolling 7-day consistency and effort weight:
      $$\text{Momentum} = \min\left(100, \sum_{d=0}^{6} \frac{\text{Completed XP}_{d}}{200} \times w_d\right)$$
      where $w_d$ weights recent days higher ($w_0 = 1.0, w_6 = 0.4$).

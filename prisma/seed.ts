@@ -6,6 +6,8 @@ async function main() {
   console.log("🌱 Seeding Life-RPG database...");
 
   // 1. Clean existing records
+  await prisma.userAchievement.deleteMany({});
+  await prisma.achievement.deleteMany({});
   await prisma.activityLog.deleteMany({});
   await prisma.guildBoss.deleteMany({});
   await prisma.guildMember.deleteMany({});
@@ -332,6 +334,44 @@ async function main() {
 
   for (const item of items) {
     await prisma.item.create({ data: item });
+  }
+
+  // 9. Seed Achievement Catalog
+  const achievements = [
+    {
+      code: "first_quest",
+      name: "First Quest",
+      description: "Completed your first quest (+10 XP total)",
+      assetKey: "badge_first_quest",
+    },
+    {
+      code: "streak_7",
+      name: "Week-Long Dedication",
+      description: "Maintained a 7-day consistency streak",
+      assetKey: "badge_streak_7",
+    },
+    {
+      code: "boss_slayer",
+      name: "Titan Slayer",
+      description: "Defeated an epic boss battle",
+      assetKey: "badge_boss_slayer",
+    },
+    {
+      code: "level_5",
+      name: "Level 5 Ascendant",
+      description: "Reached Character Level 5",
+      assetKey: "badge_level_5",
+    },
+    {
+      code: "gold_1000",
+      name: "Gold Hoarder",
+      description: "Accumulated over 1,000 gold pieces",
+      assetKey: "badge_gold_1000",
+    },
+  ];
+
+  for (const ach of achievements) {
+    await prisma.achievement.create({ data: ach });
   }
 
   // Equip default theme

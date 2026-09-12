@@ -17,6 +17,7 @@ const CreateTaskSchema = z.object({
   stage: z.enum(["TODO", "IN_PROGRESS", "REVIEW", "DONE"]).default("TODO"),
   apCost: z.number().int().min(0).max(100).default(10),
   tags: z.string().optional(),
+  recurrence: z.enum(["NONE", "DAILY", "WEEKLY"]).default("NONE"),
   dueDate: z.string().optional(),
 });
 
@@ -80,6 +81,7 @@ export async function POST(req: Request) {
       stage,
       apCost,
       tags,
+      recurrence,
       dueDate,
     } = parsed.data;
 
@@ -99,6 +101,8 @@ export async function POST(req: Request) {
         apCost: apCost ?? 10,
         status: stage === "DONE" ? "COMPLETED" : "ACTIVE",
         stage: stage ?? "TODO",
+        isRecurring: recurrence !== "NONE",
+        recurrence: recurrence ?? "NONE",
         tags: tags || null,
         dueDate: dueDate ? new Date(dueDate) : null,
       },
