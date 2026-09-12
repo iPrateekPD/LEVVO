@@ -281,6 +281,7 @@ Life-RPG is architected for zero-downtime deployment on **Vercel** connected to 
 - **Tenant Isolation:** Every query enforces strict user ownership checks.
 - **Idempotency Locks:** Composite keys prevent duplicate task completion or double-rewards.
 - **Secure Sessions:** Encrypted HTTP-only cookies protect against XSS token extraction.
+- **Difficulty-Spam & XP Farming Mitigation:** In self-directed gamification, self-assessed difficulty creates an inherent trust boundary where users might artificially tier trivial chores as "Epic" to farm XP. LIFE-RPG mitigates this vector server-side through a two-tiered defense: strict sliding-window rate limiting (maximum 20 new task creations per user per 24 hours) and a hard daily earnable ceiling of 600 XP per calendar day. Once reached, tasks still record completion for personal accountability, but rewards are capped with a friendly notice ("Daily XP cap reached — the work still counts!") to preserve economic and character progression integrity.
 
 ---
 

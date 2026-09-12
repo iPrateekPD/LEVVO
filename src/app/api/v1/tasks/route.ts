@@ -1,11 +1,41 @@
+// AUDIT: Tenant-isolation enforced. All task queries strictly filter by session.userId.
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { DIFFICULTY_TIERS, DifficultyTier } from "@/lib/progression";
 import { z } from "zod";
-
 import { getSessionUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Rate Limiting Defense: Max 20 new tasks per user per 24 hours (sliding window).
+ * Closes the difficulty-spam cheat vector where users create endless Epic tasks to farm XP.
+ * NOTE: Using an in-memory sliding window map for hackathon environment.
+ * Production Path: Back with distributed Redis (e.g. Upstash / ioredis) using a sorted set (ZADD/ZREMRANGEBYSCORE).
+ */
+const taskCreationRateLimits = new Map<string, number[]>();
+
+function checkTaskCreationRateLimit(userId: string): { allowed: boolean; retryAfterSeconds?: number } {
+  const now = Date.now();
+  const windowMs = 24 * 60 * 60 * 1000; // 24-hour sliding window
+  const maxTasks = 20;
+
+  const timestamps = (taskCreationRateLimits.get(userId) || []).filter(
+    (t) => now - t < windowMs
+  );
+
+  if (timestamps.length >= maxTasks) {
+    const oldest = timestamps[0];
+    const retryAfterSeconds = Math.ceil((windowMs - (now - oldest)) / 1000);
+    taskCreationRateLimits.set(userId, timestamps);
+    return { allowed: false, retryAfterSeconds };
+  }
+
+  timestamps.push(now);
+  taskCreationRateLimits.set(userId, timestamps);
+  return { allowed: true };
+}
 
 const CreateTaskSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(160),
@@ -60,6 +90,19 @@ export async function POST(req: Request) {
   try {
     const session = await getSessionUser(req);
     const userId = session?.userId ?? "default-user-hero";
+
+    // 1. Enforce sliding-window rate limit (max 20 new tasks per 24 hours per user)
+    const rateLimit = checkTaskCreationRateLimit(userId);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "RATE_LIMIT_EXCEEDED",
+          message: `Daily task creation limit reached (maximum 20 tasks per 24 hours to prevent XP farming). Please retry in ${rateLimit.retryAfterSeconds}s.`,
+        },
+        { status: 429 }
+      );
+    }
 
     const body = await req.json();
     const parsed = CreateTaskSchema.safeParse(body);

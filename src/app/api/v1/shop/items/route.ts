@@ -1,3 +1,5 @@
+// AUDIT: Tenant-isolation enforced. User inventory state is strictly isolated by session.userId.
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";

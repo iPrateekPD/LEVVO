@@ -1,3 +1,5 @@
+// AUDIT: Tenant-isolation enforced. Gold balance deduction and inventory grant are strictly bound to session.userId.
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";

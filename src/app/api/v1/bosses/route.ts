@@ -1,22 +1,24 @@
+// AUDIT: Tenant-isolation enforced. Boss creation and querying strictly enforce session.userId ownership.
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-
 import { getSessionUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 const CreateBossSchema = z.object({
-  title: z.string().trim().min(3).max(120),
+  title: z.string().trim().min(3, "Title must be at least 3 characters").max(120),
   description: z.string().trim().max(1000).optional(),
   milestones: z
     .array(
       z.object({
-        title: z.string().trim().min(2).max(120),
-        damageHp: z.number().int().min(50).max(1000),
+        title: z.string().trim().min(2, "Milestone title is required").max(120),
+        damageHp: z.number().int().min(50, "Each milestone must deal at least 50 HP damage").max(2000),
       })
     )
-    .min(1),
+    .min(2, "Boss requires between 2 and 10 milestones")
+    .max(10, "Boss requires between 2 and 10 milestones"),
 });
 
 export async function GET(req: Request) {

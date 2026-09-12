@@ -1,3 +1,5 @@
+// AUDIT: Tenant-isolation enforced. Heatmap activity is strictly filtered by session.userId.
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";

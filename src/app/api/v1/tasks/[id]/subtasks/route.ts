@@ -1,3 +1,5 @@
+// AUDIT: Tenant-isolation enforced. Subtask creation strictly verifies parentTask.userId === session.userId.
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { DIFFICULTY_TIERS, DifficultyTier } from "@/lib/progression";
