@@ -109,7 +109,7 @@ export default function LoginPage() {
         }
 
         sounds.playLevelUp();
-        setSuccessMsg("🎉 Welcome back, Explorer! Entering Questoria...");
+        setSuccessMsg("🎉 Welcome back, Explorer! Entering LEVVO...");
         setTimeout(() => {
           router.push("/");
           router.refresh();
@@ -139,14 +139,14 @@ export default function LoginPage() {
         }
 
         sounds.playLevelUp();
-        setSuccessMsg("✨ Adventurer profile registered! Entering Questoria...");
+        setSuccessMsg("✨ Adventurer profile registered! Entering LEVVO...");
         setTimeout(() => {
           router.push("/");
           router.refresh();
         }, 800);
       }
     } catch {
-      setError("Network error while connecting to Questoria auth realm.");
+      setError("Network error while connecting to LEVVO arcade auth realm.");
     } finally {
       setLoading(false);
     }
@@ -207,12 +207,13 @@ export default function LoginPage() {
         </Link>
 
         {/* Brand Header Matching Screenshot */}
+        {/* Brand Header */}
         <div className="flex flex-col items-center text-center">
-          <span className="font-arcade text-lg sm:text-2xl text-[#FFE600] neon-glow-gold tracking-widest font-black leading-none">
-            QUESTORIA
+          <span className="font-arcade text-xl sm:text-3xl text-[#FFE600] neon-glow-gold tracking-widest font-black leading-none">
+            LEVVO
           </span>
           <span className="font-arcade text-[8px] sm:text-[10px] text-synthMagenta tracking-widest mt-1">
-            SMALL STEPS. EPIC YOU.
+            90&apos;S ARCADE LIFE RPG • レボ
           </span>
         </div>
 
@@ -228,12 +229,12 @@ export default function LoginPage() {
           {/* Card Title & Subtitle */}
           <div className="flex flex-col items-center text-center gap-1">
             <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-              {mode === "LOGIN" ? "Welcome Back, Explorer!" : "Join the Questoria Guild!"}
+              {mode === "LOGIN" ? "Welcome Back, Player 1!" : "Join the LEVVO Guild!"}
             </h1>
             <p className="text-xs text-gray-300">
               {mode === "LOGIN"
-                ? "Continue your journey to a better you."
-                : "Start your quest for real-life progress."}
+                ? "Insert coin to resume your real-life adventure."
+                : "Level up habits, study, and fitness like a 90's champion."}
             </p>
           </div>
 
@@ -507,7 +508,7 @@ export default function LoginPage() {
 
       {/* Footer Minimal Indicator */}
       <footer className="w-full text-center text-[9px] sm:text-[10px] text-gray-500 font-mono z-10 pb-2 px-4">
-        QUESTORIA V2.4 • ENCRYPTED SESSION STORAGE
+        LEVVO STUDIOS™ // 90&apos;S ARCADE HARDWARE SYSTEM 1994 • ENCRYPTED SESSION STORAGE
       </footer>
 
       {/* Floating Toast Notification */}

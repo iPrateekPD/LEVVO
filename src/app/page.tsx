@@ -47,9 +47,10 @@ import { AiCampaignModal } from "@/components/modals/AiCampaignModal";
 import { LevelUpCelebration } from "@/components/modals/LevelUpCelebration";
 import { ArcadeAuthModal } from "@/components/auth/ArcadeAuthModal";
 import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
+import { RetroArcadeZone } from "@/components/dashboard/RetroArcadeZone";
 import { TaskItem } from "@/components/quests/QuestCard";
 
-export default function QuestoriaMainPage() {
+export default function LevvoMainPage() {
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string; username: string } | null>(null);
   const [character, setCharacter] = useState<any>(null);
   const [tasks, setTasks] = useState<TaskItem[]>([]);
@@ -360,117 +361,61 @@ export default function QuestoriaMainPage() {
       {/* 1. TOP NAVBAR (WITH SEAMLESS HUD / OVERVIEW SWITCHER)                     */}
       {/* ========================================================================= */}
       <header className="w-full bg-[#09071A]/95 backdrop-blur-md border-b border-[#281A4C] sticky top-0 z-50 px-3 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between shadow-lg">
-        {/* Left Brand */}
+        {/* Left Brand - Professional Video Game Company Studio Logo */}
         <Link
           href="/"
           onClick={() => {
             sounds.playClick();
-            if (!currentUser) setViewMode("OVERVIEW");
           }}
           className="flex items-center gap-2.5 sm:gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-lg p-1"
         >
-          <span className="text-synthMagenta text-lg sm:text-xl select-none animate-pulse">✦</span>
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-synthMagenta to-[#8A2BE2] flex items-center justify-center border border-synthMagenta/60 shadow-[0_0_12px_rgba(255,42,133,0.5)] group-hover:scale-105 transition-transform">
+            <Gamepad2 className="w-5 h-5 text-arcadeGold animate-pulse" />
+          </div>
           <div className="flex flex-col">
-            <span className="font-arcade text-base sm:text-xl text-[#FFE600] neon-glow-gold tracking-widest font-black leading-none group-hover:scale-105 transition-transform">
-              QUESTORIA
-            </span>
-            <span className="font-arcade text-[8px] sm:text-[10px] text-synthMagenta tracking-wider mt-0.5 leading-none">
-              SMALL STEPS. EPIC YOU.
+            <div className="flex items-center gap-1.5">
+              <span className="font-arcade text-base sm:text-xl text-[#FFE600] neon-glow-gold tracking-widest font-black leading-none group-hover:scale-105 transition-transform">
+                LEVVO
+              </span>
+              <span className="font-arcade text-[9px] px-1.5 py-0.5 rounded bg-synthMagenta/30 border border-synthMagenta/50 text-synthMagenta uppercase tracking-wider hidden sm:inline-block">
+                STUDIOS™
+              </span>
+            </div>
+            <span className="font-arcade text-[8px] sm:text-[9px] text-neonCyan tracking-wider mt-0.5 leading-none">
+              90&apos;S RETRO ARCADE LIFE RPG • レボ
             </span>
           </div>
         </Link>
 
-        {/* Mobile Mode Switcher (If authenticated) */}
-        {currentUser && (
-          <button
-            type="button"
-            onClick={() => {
-              sounds.playClick();
-              setViewMode(viewMode === "DASHBOARD" ? "OVERVIEW" : "DASHBOARD");
-            }}
-            className="md:hidden arcade-btn px-2 py-1 bg-[#230F3B] border border-synthMagenta text-white font-arcade text-[8px] rounded-lg flex items-center gap-1 shadow-sm"
-            title="Toggle between RPG Dashboard HUD and App Overview"
-          >
-            {viewMode === "DASHBOARD" ? (
-              <>
-                <Globe className="w-3 h-3 text-neonCyan" />
-                <span>OVERVIEW</span>
-              </>
-            ) : (
-              <>
-                <LayoutDashboard className="w-3 h-3 text-synthMagenta" />
-                <span>HUD</span>
-              </>
-            )}
-          </button>
-        )}
+        {/* Center: Video Game Studio Hardware Console Status HUD (No generic web links) */}
+        <div className="hidden md:flex items-center gap-3 bg-[#110B24]/90 border border-[#3A1E68] rounded-xl px-4 py-1.5 shadow-[inset_0_0_12px_rgba(0,0,0,0.6)]">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-phosphorGreen animate-ping" />
+            <span className="font-arcade text-[10px] text-phosphorGreen tracking-widest uppercase">
+              1P READY
+            </span>
+          </div>
+          <div className="h-3 w-px bg-[#3A1E68]" />
+          <div className="flex items-center gap-1.5 text-[10px] font-mono text-gray-300">
+            <span className="text-synthMagenta font-bold">HI-SCORE:</span>
+            <span className="text-[#FFE600] font-arcade">999,990</span>
+          </div>
+          <div className="h-3 w-px bg-[#3A1E68]" />
+          <div className="flex items-center gap-1.5 font-arcade text-[10px] text-neonCyan">
+            <span>CREDITS:</span>
+            <span className="text-arcadeGold animate-pulse">02</span>
+          </div>
+          <div className="h-3 w-px bg-[#3A1E68]" />
+          <div className="text-[9px] font-mono text-purple-300 uppercase tracking-wider">
+            LEVVO HARDWARE // SYSTEM-94
+          </div>
+        </div>
 
-        {/* Center Mode Switcher Pills (If authenticated, toggle HUD vs Overview) */}
-        <nav className="hidden md:flex items-center gap-1.5 bg-[#120D2A] border border-[#2B1D54] rounded-xl px-2 py-1">
-          {currentUser ? (
-            <>
-              <button
-                type="button"
-                onClick={() => {
-                  sounds.playClick();
-                  setViewMode("DASHBOARD");
-                }}
-                className={`px-3 py-1.5 rounded-lg font-arcade text-xs flex items-center gap-1.5 transition-all ${
-                  viewMode === "DASHBOARD"
-                    ? "bg-[#2E1045] border border-synthMagenta text-white shadow-[0_0_10px_rgba(255,42,133,0.3)] font-bold"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                <LayoutDashboard className="w-3.5 h-3.5" />
-                <span>MY DASHBOARD</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  sounds.playClick();
-                  setViewMode("OVERVIEW");
-                }}
-                className={`px-3 py-1.5 rounded-lg font-arcade text-xs flex items-center gap-1.5 transition-all ${
-                  viewMode === "OVERVIEW"
-                    ? "bg-[#2E1045] border border-synthMagenta text-white shadow-[0_0_10px_rgba(255,42,133,0.3)] font-bold"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                <Globe className="w-3.5 h-3.5" />
-                <span>APP OVERVIEW</span>
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={() => {
-                  sounds.playClick();
-                  setViewMode("OVERVIEW");
-                }}
-                className={`px-3 py-1.5 rounded-lg font-arcade text-xs transition-all ${
-                  viewMode === "OVERVIEW"
-                    ? "bg-[#2E1045] border border-synthMagenta text-white shadow-[0_0_10px_rgba(255,42,133,0.3)] font-bold"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                Home
-              </button>
-              <a href="#features" className="px-3 py-1.5 rounded-lg text-gray-300 hover:text-white text-xs">
-                Features
-              </a>
-              <a href="#how-it-works" className="px-3 py-1.5 rounded-lg text-gray-300 hover:text-white text-xs">
-                How It Works
-              </a>
-              <a href="#worlds" className="px-3 py-1.5 rounded-lg text-gray-300 hover:text-white text-xs">
-                Worlds
-              </a>
-              <a href="#about" className="px-3 py-1.5 rounded-lg text-gray-300 hover:text-white text-xs">
-                About
-              </a>
-            </>
-          )}
-        </nav>
+        {/* Mobile Mini Arcade Badge */}
+        <div className="flex md:hidden items-center gap-1.5 bg-[#170E30] border border-[#3A1E68] rounded-lg px-2 py-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-phosphorGreen animate-pulse" />
+          <span className="font-arcade text-[8px] text-arcadeGold">1P ACTIVE • CR 02</span>
+        </div>
 
         {/* Right Action Buttons */}
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
@@ -532,100 +477,126 @@ export default function QuestoriaMainPage() {
       </header>
 
       {/* ========================================================================= */}
-      {/* 2. MODE SWITCH: DASHBOARD VIEW (WHEN LOGGED IN / ACTIVE)                  */}
+      {/* 2. AUTHENTICATED USER: EXCLUSIVELY SHOW RPG DASHBOARD HUD                 */}
       {/* ========================================================================= */}
-      {viewMode === "DASHBOARD" && character ? (
-        <div ref={dashboardRef} className="w-full flex-1 flex flex-col items-center p-1 sm:p-6 max-w-full overflow-hidden box-border">
-          <CrtContainer scanlines={scanlines}>
-            {/* Dashboard Marquee Bar */}
-            <ArcadeMarquee
-              scanlines={scanlines}
-              onToggleScanlines={() => setScanlines(!scanlines)}
-              currentUser={currentUser}
-              onOpenAuth={() => setIsAuthOpen(true)}
-              onLogout={handleLogout}
-            />
-
-            {/* Main Single-Page Stack (8 Ordered Sections) */}
-            <main className="w-full flex-1 max-w-4xl mx-auto flex flex-col gap-5 sm:gap-6 mt-4">
-              {/* 2. Player Card */}
-              <PlayerCard
-                username={character.username}
-                title={character.title}
-                level={character.currentLevel}
-                currentLevelXp={character.currentLevelXp}
-                xpToNextLevel={character.xpToNextLevel}
-                progressPercent={character.progressPercent}
-                gold={character.gold}
-                streak={character.streakCurrent}
-                streakPaused={character.streakPaused}
-                avatarId={character.avatarId}
-                ageGroup={character.ageGroup}
+      {currentUser ? (
+        character ? (
+          <div ref={dashboardRef} className="w-full flex-1 flex flex-col items-center p-1 sm:p-6 max-w-full overflow-hidden box-border">
+            <CrtContainer scanlines={scanlines}>
+              {/* Dashboard Marquee Bar */}
+              <ArcadeMarquee
+                scanlines={scanlines}
+                onToggleScanlines={() => setScanlines(!scanlines)}
+                currentUser={currentUser}
+                onOpenAuth={() => setIsAuthOpen(true)}
+                onLogout={handleLogout}
               />
 
-              {/* 3. Quick Stats Row */}
-              <QuickStatsRow
-                momentum={character.momentumScore}
-                currentAp={character.currentAp ?? 100}
-                maxAp={character.maxAp ?? 100}
-                completedTasksCount={completedTasksCount}
-                totalXp={character.totalXp}
-              />
+              {/* Main Single-Page Stack (8 Ordered Sections + Retro Arcade Zone) */}
+              <main className="w-full flex-1 max-w-4xl mx-auto flex flex-col gap-5 sm:gap-6 mt-4">
+                {/* 2. Player Card */}
+                <PlayerCard
+                  username={character.username}
+                  title={character.title}
+                  level={character.currentLevel}
+                  currentLevelXp={character.currentLevelXp}
+                  xpToNextLevel={character.xpToNextLevel}
+                  progressPercent={character.progressPercent}
+                  gold={character.gold}
+                  streak={character.streakCurrent}
+                  streakPaused={character.streakPaused}
+                  avatarId={character.avatarId}
+                  ageGroup={character.ageGroup}
+                />
 
-              {/* 4. Today's Quests */}
-              <div className="bg-cabinetSurface/90 border-2 border-cabinetBorder rounded-xl p-4 sm:p-5 shadow-lg">
-                <QuestList
-                  tasks={tasks}
-                  onComplete={handleCompleteTask}
-                  onDelete={async (id) => {
-                    await fetch(`/api/v1/tasks/${id}`, { method: "DELETE" });
-                    setTasks((prev) => prev.filter((t) => t.id !== id));
-                  }}
-                  onEdit={(t) => setEditingTask(t)}
-                  onOpenCreateModal={() => setIsCreateOpen(true)}
-                  onOpenAiModal={() => setIsAiOpen(true)}
-                  onQuickAddQuest={async (q) => {
-                    const res = await fetch("/api/v1/tasks", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(q),
-                    });
-                    const d = await res.json();
-                    if (d.success) setTasks((prev) => [d.data, ...prev]);
+                {/* 3. Quick Stats Row */}
+                <QuickStatsRow
+                  momentum={character.momentumScore}
+                  currentAp={character.currentAp ?? 100}
+                  maxAp={character.maxAp ?? 100}
+                  completedTasksCount={completedTasksCount}
+                  totalXp={character.totalXp}
+                />
+
+                {/* 4. Today's Quests */}
+                <div className="bg-cabinetSurface/90 border-2 border-cabinetBorder rounded-xl p-4 sm:p-5 shadow-lg">
+                  <QuestList
+                    tasks={tasks}
+                    onComplete={handleCompleteTask}
+                    onDelete={async (id) => {
+                      await fetch(`/api/v1/tasks/${id}`, { method: "DELETE" });
+                      setTasks((prev) => prev.filter((t) => t.id !== id));
+                    }}
+                    onEdit={(t) => setEditingTask(t)}
+                    onOpenCreateModal={() => setIsCreateOpen(true)}
+                    onOpenAiModal={() => setIsAiOpen(true)}
+                    onQuickAddQuest={async (q) => {
+                      const res = await fetch("/api/v1/tasks", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(q),
+                      });
+                      const d = await res.json();
+                      if (d.success) setTasks((prev) => [d.data, ...prev]);
+                    }}
+                  />
+                </div>
+
+                {/* 5. Predefined Trackers */}
+                <PredefinedTrackers
+                  trackers={[
+                    { key: "water", label: "Water", icon: "💧", count: trackerCounts["water"] ?? 0, target: 8, unit: "glasses" },
+                    { key: "gym", label: "Gym Workout", icon: "🏋️", count: trackerCounts["gym"] ?? 0, target: 1, unit: "session" },
+                    { key: "cycling", label: "Cycling", icon: "🚴", count: trackerCounts["cycling"] ?? 0, target: 1, unit: "ride" },
+                    { key: "reading", label: "Reading", icon: "📖", count: trackerCounts["reading"] ?? 0, target: 20, unit: "pages" },
+                    { key: "meditation", label: "Meditation", icon: "🧘", count: trackerCounts["meditation"] ?? 0, target: 10, unit: "mins" },
+                  ]}
+                  onIncrementTracker={handleIncrementTracker}
+                  onDecrementTracker={handleDecrementTracker}
+                />
+
+                {/* 6. Focus Chamber Timer (With 90's Pac-Man Sprint Corridor) */}
+                <ArcadeTimer tasks={tasks} onSessionComplete={handleTimerComplete} />
+
+                {/* 7. OG 90's Video Game Zone (Pac-Man Maze, Snakes & Ladders, Ludo Quadrant) */}
+                <RetroArcadeZone
+                  currentLevel={character.currentLevel}
+                  streak={character.streakCurrent}
+                  completedTasksCount={completedTasksCount}
+                  totalXp={character.totalXp}
+                  onAwardBonusXp={(amount: number, reason: string) => {
+                    showToast(`🎮 90's Arcade Win: +${amount} XP awarded for ${reason}!`);
+                    loadAllData();
                   }}
                 />
-              </div>
 
-              {/* 5. Predefined Trackers */}
-              <PredefinedTrackers
-                trackers={[
-                  { key: "water", label: "Water", icon: "💧", count: trackerCounts["water"] ?? 0, target: 8, unit: "glasses" },
-                  { key: "gym", label: "Gym Workout", icon: "🏋️", count: trackerCounts["gym"] ?? 0, target: 1, unit: "session" },
-                  { key: "cycling", label: "Cycling", icon: "🚴", count: trackerCounts["cycling"] ?? 0, target: 1, unit: "ride" },
-                  { key: "reading", label: "Reading", icon: "📖", count: trackerCounts["reading"] ?? 0, target: 20, unit: "pages" },
-                  { key: "meditation", label: "Meditation", icon: "🧘", count: trackerCounts["meditation"] ?? 0, target: 10, unit: "mins" },
-                ]}
-                onIncrementTracker={handleIncrementTracker}
-                onDecrementTracker={handleDecrementTracker}
-              />
+                {/* 8. Hero Journey / Progress */}
+                <JourneyProgress
+                  currentLevel={character.currentLevel}
+                  totalXp={character.totalXp}
+                  totalCompletedQuests={completedTasksCount}
+                  streakCurrent={character.streakCurrent}
+                  streakLongest={character.streakLongest}
+                />
 
-              {/* 6. Focus Chamber Timer */}
-              <ArcadeTimer tasks={tasks} onSessionComplete={handleTimerComplete} />
-
-              {/* 7. Hero Journey / Progress */}
-              <JourneyProgress
-                currentLevel={character.currentLevel}
-                totalXp={character.totalXp}
-                totalCompletedQuests={completedTasksCount}
-                streakCurrent={character.streakCurrent}
-                streakLongest={character.streakLongest}
-              />
-
-              {/* 8. Quick Milestone: Log a quick win */}
-              <QuickMilestone onLogWin={handleLogQuickWin} />
-            </main>
-          </CrtContainer>
-        </div>
+                {/* 9. Quick Milestone: Log a quick win */}
+                <QuickMilestone onLogWin={handleLogQuickWin} />
+              </main>
+            </CrtContainer>
+          </div>
+        ) : (
+          <div className="w-full flex-1 flex flex-col items-center justify-center p-8 text-center min-h-[60vh]">
+            <div className="w-16 h-16 rounded-2xl bg-synthMagenta/20 border-2 border-synthMagenta flex items-center justify-center mb-4 shadow-[0_0_25px_rgba(255,42,133,0.5)] animate-pulse">
+              <Gamepad2 className="w-8 h-8 text-arcadeGold" />
+            </div>
+            <h2 className="font-arcade text-lg sm:text-xl text-arcadeGold neon-glow-gold tracking-widest">
+              INSERT COIN // LOADING HERO HUD...
+            </h2>
+            <p className="font-mono text-xs text-neonCyan mt-2 tracking-wider">
+              SYNCHRONIZING 90&apos;S HARDWARE SYSTEM
+            </p>
+          </div>
+        )
       ) : (
         /* ========================================================================= */
         /* 3. MODE SWITCH: EXACT HOME / LANDING OVERVIEW PAGE                        */
@@ -679,7 +650,7 @@ export default function QuestoriaMainPage() {
               </span>
 
               <h1 className="hero-anim-item font-arcade text-4xl sm:text-6xl md:text-7xl text-[#FFE600] neon-glow-gold tracking-widest font-black leading-none select-none drop-shadow-[0_5px_15px_rgba(255,230,0,0.4)]">
-                QUESTORIA
+                LEVVO
               </h1>
 
               <h2 className="hero-anim-item font-arcade text-sm sm:text-lg md:text-xl text-synthMagenta neon-glow-magenta tracking-widest mt-1 uppercase font-bold">
@@ -809,7 +780,7 @@ export default function QuestoriaMainPage() {
                 </div>
 
                 <p className="text-sm text-gray-300 leading-relaxed mt-1">
-                  Whether you want to learn a new skill, build better habits, stay healthy or complete a big project — Questoria turns it into a game.
+                  Whether you want to learn a new skill, build better habits, stay healthy or complete a big project — Levvo turns it into a game.
                 </p>
 
                 <div className="flex items-center gap-3 pt-2">
@@ -825,7 +796,7 @@ export default function QuestoriaMainPage() {
                     }}
                     className="arcade-btn px-5 py-2.5 bg-neonCyan hover:bg-cyan-300 text-arcadeBlack font-arcade text-xs font-bold rounded-xl shadow-[0_0_15px_rgba(0,240,255,0.4)] flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
                   >
-                    <span>JOIN QUESTORIA</span>
+                    <span>JOIN LEVVO</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
 
@@ -833,7 +804,7 @@ export default function QuestoriaMainPage() {
                     type="button"
                     onClick={() => {
                       sounds.playClick();
-                      showToast("🎬 Launching Questoria Arcade Demo Video!");
+                      showToast("🎬 Launching Levvo Arcade Demo Video!");
                     }}
                     className="px-4 py-2.5 bg-[#140E2A] hover:bg-[#201445] border border-cabinetBorder text-white font-arcade text-xs rounded-xl flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
                   >
@@ -1026,7 +997,7 @@ export default function QuestoriaMainPage() {
           {/* Left Brand */}
           <div className="flex items-center gap-2">
             <span className="text-synthMagenta">✦</span>
-            <span className="text-synthMagenta tracking-widest font-bold">QUESTORIA</span>
+            <span className="text-synthMagenta tracking-widest font-bold">LEVVO</span>
           </div>
 
           {/* Center Pillars */}
@@ -1042,7 +1013,7 @@ export default function QuestoriaMainPage() {
 
           {/* Right Slogan */}
           <div className="text-[10px] text-gray-400 tracking-widest">
-            SMALL STEPS. EPIC YOU.
+            90&apos;S RETRO ARCADE LIFE RPG • LEVVO STUDIOS™
           </div>
         </div>
       </footer>

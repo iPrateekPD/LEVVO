@@ -14,8 +14,8 @@ const outfitFont = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Life-RPG | Your Life Is The Game",
-  description: "Transform daily tasks, fitness habits, and projects into an authentic retro arcade role-playing game.",
+  title: "LEVVO | Retro Arcade 90s Life RPG",
+  description: "Level up your real life with authentic 90s retro video game mechanics: Pac-Man focus chamber, Snakes & Ladders, Ludo tokens, and daily quests.",
 };
 
 export default function RootLayout({

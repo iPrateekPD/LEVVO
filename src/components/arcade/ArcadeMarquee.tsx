@@ -42,11 +42,22 @@ export function ArcadeMarquee({
 
       {/* Center: Backlit Neon Brand Title */}
       <div className="text-center">
-        <h1 className="font-arcade text-xl sm:text-2xl md:text-3xl text-[#FFE600] tracking-wider neon-glow-gold">
-          QUESTORIA
+        <div className="flex items-center justify-center gap-2">
+          <span className="font-arcade text-[8px] text-arcadeGold bg-black/60 px-1.5 py-0.5 rounded border border-yellow-400/40">
+            90&apos;S ARCADE
+          </span>
+          <span className="font-arcade text-[8px] text-neonCyan bg-black/60 px-1.5 py-0.5 rounded border border-cyan-400/40">
+            STAGE 1-1
+          </span>
+          <span className="font-arcade text-[8px] text-phosphorGreen bg-black/60 px-1.5 py-0.5 rounded border border-green-400/40 hidden sm:inline">
+            CREDITS: 02
+          </span>
+        </div>
+        <h1 className="font-arcade text-2xl sm:text-3xl md:text-4xl text-[#FFE600] tracking-wider neon-glow-gold mt-1">
+          LEVVO
         </h1>
-        <p className="font-arcade text-[9px] sm:text-[11px] text-synthMagenta tracking-widest uppercase mt-1 neon-glow-magenta">
-          Small steps. Epic you.
+        <p className="font-arcade text-[8px] sm:text-[10px] text-synthMagenta tracking-widest uppercase mt-0.5 neon-glow-magenta">
+          レボ • LEVEL UP YOUR LIFE
         </p>
       </div>
 

@@ -306,6 +306,20 @@ export function ArcadeTimer({ tasks, onSessionComplete }: ArcadeTimerProps) {
             {formatTime(timeLeftSeconds)}
           </div>
 
+          {/* 90's Pac-Man Focus Progress Corridor */}
+          <div className="w-full max-w-xs bg-[#070512] border border-blue-900/60 rounded-lg py-1.5 px-3 flex items-center justify-between overflow-hidden select-none">
+            <span className="font-arcade text-[8px] text-yellow-400">PAC-SPRINT</span>
+            <div className="flex items-center gap-1.5">
+              <span className={`text-base select-none ${isRunning ? "animate-pulse text-yellow-300" : "text-yellow-400"}`}>ᗧ</span>
+              <span className="text-yellow-200/60 text-[10px] tracking-widest font-mono">••••••••</span>
+              <span className="text-sm select-none">👾</span>
+              <span className="text-sm select-none">👻</span>
+            </div>
+            <span className="font-arcade text-[8px] text-synthMagenta">
+              {isRunning ? "WAKA!" : "STANDBY"}
+            </span>
+          </div>
+
           <div className="flex items-center gap-3">
             {!isRunning ? (
               <button
