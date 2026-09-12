@@ -6,6 +6,10 @@ async function main() {
   console.log("🌱 Seeding Life-RPG database...");
 
   // 1. Clean existing records
+  await prisma.activityLog.deleteMany({});
+  await prisma.guildBoss.deleteMany({});
+  await prisma.guildMember.deleteMany({});
+  await prisma.guild.deleteMany({});
   await prisma.xpTransaction.deleteMany({});
   await prisma.taskCompletion.deleteMany({});
   await prisma.bossMilestone.deleteMany({});
@@ -27,9 +31,11 @@ async function main() {
         create: {
           username: "EXPLORER",
           title: "Novice Explorer",
-          totalXp: 720,
-          currentLevel: 3,
-          gold: 85,
+          totalXp: 1450,
+          currentLevel: 4,
+          gold: 445,
+          currentAp: 85,
+          maxAp: 100,
           streakCurrent: 5,
           streakLongest: 8,
           momentumScore: 72,
@@ -44,10 +50,10 @@ async function main() {
 
   // 3. Initialize 6 Canonical Attributes
   const initialAttributes = [
-    { code: "INT", xp: 320, level: 3 },
-    { code: "STR", xp: 140, level: 2 },
-    { code: "WIS", xp: 80, level: 1 },
-    { code: "DEX", xp: 110, level: 2 },
+    { code: "INT", xp: 470, level: 3 },
+    { code: "STR", xp: 175, level: 2 },
+    { code: "WIS", xp: 100, level: 2 },
+    { code: "DEX", xp: 135, level: 2 },
     { code: "CRE", xp: 50, level: 1 },
     { code: "CHA", xp: 20, level: 1 },
   ];
@@ -63,43 +69,109 @@ async function main() {
     });
   }
 
-  // 4. Create Initial Starter Quests
+  // 4. Create Initial Starter Quests with Kanban Stages & Notes
+  const parentEpic = await prisma.task.create({
+    data: {
+      userId: user.id,
+      title: "Build High-Performance Search Engine",
+      description: "Design and implement an in-memory inverted index with rank scoring.",
+      notes: "### Search Architecture Blueprint\n- **Inverted Index**: Tokenize lowercase text, eliminate stopwords.\n- **BM25 Scoring**: $IDF \\times \\frac{TF \\times (k_1 + 1)}{TF + k_1 \\times (1 - b + b \\times \\frac{|D|}{avgdl})}$\n- **Benchmark Goal**: Sub-5ms query response time.",
+      attributeCode: "INT",
+      difficulty: "Epic",
+      xpReward: 200,
+      goldReward: 100,
+      apCost: 35,
+      status: "ACTIVE",
+      stage: "IN_PROGRESS",
+      tags: "Coding, Rust, Algorithms",
+    },
+  });
+
+  // Subtasks for parentEpic
+  await prisma.task.createMany({
+    data: [
+      {
+        userId: user.id,
+        parentTaskId: parentEpic.id,
+        title: "Write inverted index tokenizer",
+        description: "Tokenize inputs into sanitized terms.",
+        attributeCode: "INT",
+        difficulty: "Easy",
+        xpReward: 30,
+        goldReward: 15,
+        apCost: 10,
+        status: "COMPLETED",
+        stage: "DONE",
+      },
+      {
+        userId: user.id,
+        parentTaskId: parentEpic.id,
+        title: "Implement BM25 scoring algorithm",
+        description: "Calculate term frequency and inverse document frequency.",
+        attributeCode: "INT",
+        difficulty: "Medium",
+        xpReward: 60,
+        goldReward: 30,
+        apCost: 15,
+        status: "ACTIVE",
+        stage: "IN_PROGRESS",
+      },
+      {
+        userId: user.id,
+        parentTaskId: parentEpic.id,
+        title: "Benchmark latency under 10k QPS",
+        description: "Stress test system with mock query load.",
+        attributeCode: "INT",
+        difficulty: "Hard",
+        xpReward: 110,
+        goldReward: 55,
+        apCost: 20,
+        status: "ACTIVE",
+        stage: "TODO",
+      },
+    ],
+  });
+
+  // Other standard quests across Kanban stages
   const starterQuests = [
     {
       title: "Read for 20 minutes",
       description: "Build your knowledge by reading a chapter of technical or non-fiction book.",
+      notes: "Reading *Designing Data-Intensive Applications* Chapter 3 (Storage and Retrieval).",
       attributeCode: "INT",
       difficulty: "Medium",
       xpReward: 50,
       goldReward: 25,
+      apCost: 15,
       status: "ACTIVE",
+      stage: "TODO",
+      tags: "Reading, Learning",
     },
     {
       title: "Exercise or take a brisk walk",
       description: "Physical activity to increase vitality and clear the mind.",
+      notes: "30 min outdoor jog + 10 min core stretching.",
       attributeCode: "STR",
       difficulty: "Easy",
       xpReward: 25,
       goldReward: 10,
+      apCost: 10,
       status: "ACTIVE",
+      stage: "IN_PROGRESS",
+      tags: "Health, Cardio",
     },
     {
-      title: "Practice a coding problem",
-      description: "Sharpen algorithmic thinking on LeetCode or a project bug.",
-      attributeCode: "INT",
-      difficulty: "Medium",
-      xpReward: 50,
-      goldReward: 25,
-      status: "ACTIVE",
-    },
-    {
-      title: "Write a journal entry",
+      title: "Review Daily Progress & Organize Workspace",
       description: "Reflect on today's challenges and outline tomorrow's focus.",
+      notes: "Inbox zero + review calendar for tomorrow.",
       attributeCode: "WIS",
       difficulty: "Trivial",
       xpReward: 10,
       goldReward: 5,
+      apCost: 5,
       status: "ACTIVE",
+      stage: "REVIEW",
+      tags: "Mindfulness, Routine",
     },
   ];
 
@@ -112,14 +184,38 @@ async function main() {
     });
   }
 
-  // 5. Create Default Boss Battle
-  const boss = await prisma.boss.create({
+  // 5. Seed Activity Logs for the 365-Day Consistency Heatmap
+  const today = new Date();
+  for (let i = 60; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split("T")[0];
+
+    // Seed activity pattern (alternating intensity, weekends lighter)
+    const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+    const tasks = isWeekend ? (i % 3 === 0 ? 1 : 0) : (i % 5 === 0 ? 4 : 2);
+    const xp = tasks * 35 + (i % 4 === 0 ? 25 : 0);
+
+    if (tasks > 0) {
+      await prisma.activityLog.create({
+        data: {
+          userId: user.id,
+          date: dateStr,
+          tasksCompleted: tasks,
+          xpEarned: xp,
+        },
+      });
+    }
+  }
+
+  // 6. Create Default Boss Battle
+  await prisma.boss.create({
     data: {
       userId: user.id,
       title: "Final Year Capstone Project",
       description: "Complete and successfully deploy the complete software architecture.",
       totalHp: 1000,
-      currentHp: 750,
+      currentHp: 500,
       status: "ACTIVE",
       rewardXp: 500,
       rewardGold: 250,
@@ -134,7 +230,8 @@ async function main() {
           {
             title: "System Architecture & Relational Schema",
             damageHp: 250,
-            status: "PENDING",
+            status: "COMPLETED",
+            completedAt: new Date(),
           },
           {
             title: "Core Backend CRUD & Auth APIs",
@@ -151,7 +248,37 @@ async function main() {
     },
   });
 
-  // 6. Seed Shop Items
+  // 7. Seed Guild & Shared World Boss
+  const guild = await prisma.guild.create({
+    data: {
+      name: "The Pixel Vanguard",
+      tag: "VNGD",
+      description: "Elite cohort of full-stack engineers and digital craftspeople.",
+      level: 3,
+      members: {
+        create: [
+          {
+            userId: user.id,
+            role: "LEADER",
+          },
+        ],
+      },
+      bosses: {
+        create: [
+          {
+            title: "The Hydra of Procrastination",
+            totalHp: 5000,
+            currentHp: 3850,
+            status: "ACTIVE",
+            rewardXp: 1500,
+            rewardGold: 750,
+          },
+        ],
+      },
+    },
+  });
+
+  // 8. Seed Shop Items
   const items = [
     {
       id: "theme_synthwave",
@@ -216,7 +343,7 @@ async function main() {
     },
   });
 
-  console.log("✅ Seed completed successfully!");
+  console.log("✅ Rich seed completed successfully!");
 }
 
 main()

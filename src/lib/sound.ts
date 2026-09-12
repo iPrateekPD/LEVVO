@@ -162,6 +162,28 @@ class SoundEngine {
       osc.stop(ctx.currentTime + 0.15);
     } catch {}
   }
+
+  public playBlip() {
+    this.playClick();
+  }
+
+  public playVictory() {
+    this.playComplete();
+  }
+
+  public playPowerUp() {
+    this.playLevelUp();
+  }
 }
 
 export const sounds = new SoundEngine();
+
+export const soundEffects = {
+  playBlip: () => sounds.playClick(),
+  playClick: () => sounds.playClick(),
+  playVictory: () => sounds.playComplete(),
+  playComplete: () => sounds.playComplete(),
+  playLevelUp: () => sounds.playLevelUp(),
+  playPowerUp: () => sounds.playLevelUp(),
+  playBossHit: () => sounds.playBossHit(),
+};

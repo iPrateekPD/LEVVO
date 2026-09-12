@@ -45,6 +45,8 @@ export async function GET(req: Request) {
         xpToNextLevel: levelStats.xpToNextLevel,
         progressPercent: levelStats.progressPercent,
         gold: profile.gold,
+        currentAp: profile.currentAp ?? 100,
+        maxAp: profile.maxAp ?? 100,
         streakCurrent: profile.streakCurrent,
         streakLongest: profile.streakLongest,
         momentumScore: profile.momentumScore,

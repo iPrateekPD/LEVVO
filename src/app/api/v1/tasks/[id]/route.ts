@@ -8,9 +8,13 @@ import { getSessionUser } from "@/lib/auth";
 const UpdateTaskSchema = z.object({
   title: z.string().trim().min(1).max(160).optional(),
   description: z.string().trim().max(2000).optional().nullable(),
+  notes: z.string().trim().max(5000).optional().nullable(),
   attributeCode: z.enum(["STR", "INT", "WIS", "DEX", "CRE", "CHA"]).optional(),
   difficulty: z.enum(["Trivial", "Easy", "Medium", "Hard", "Epic"]).optional(),
   status: z.enum(["ACTIVE", "COMPLETED", "ARCHIVED"]).optional(),
+  stage: z.enum(["TODO", "IN_PROGRESS", "REVIEW", "DONE"]).optional(),
+  tags: z.string().optional().nullable(),
+  apCost: z.number().int().min(0).max(100).optional(),
 });
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
@@ -42,6 +46,16 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       const rewards = DIFFICULTY_TIERS[parsed.data.difficulty as DifficultyTier];
       updateData.xpReward = rewards.xp;
       updateData.goldReward = rewards.gold;
+    }
+
+    if (parsed.data.stage) {
+      if (parsed.data.stage === "DONE") {
+        updateData.status = "COMPLETED";
+        updateData.completedAt = task.completedAt || new Date();
+      } else {
+        updateData.status = "ACTIVE";
+        updateData.completedAt = null;
+      }
     }
 
     const updated = await prisma.task.update({

@@ -10,8 +10,13 @@ export const dynamic = "force-dynamic";
 const CreateTaskSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(160),
   description: z.string().trim().max(2000).optional(),
+  notes: z.string().trim().max(5000).optional(),
+  parentTaskId: z.string().optional(),
   attributeCode: z.enum(["STR", "INT", "WIS", "DEX", "CRE", "CHA"]).default("INT"),
   difficulty: z.enum(["Trivial", "Easy", "Medium", "Hard", "Epic"]).default("Medium"),
+  stage: z.enum(["TODO", "IN_PROGRESS", "REVIEW", "DONE"]).default("TODO"),
+  apCost: z.number().int().min(0).max(100).default(10),
+  tags: z.string().optional(),
   dueDate: z.string().optional(),
 });
 
@@ -22,11 +27,20 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status");
+    const stage = searchParams.get("stage");
+    const parentOnly = searchParams.get("parentOnly") !== "false"; // default true unless requested
 
     const tasks = await prisma.task.findMany({
       where: {
         userId,
         ...(status ? { status } : {}),
+        ...(stage ? { stage } : {}),
+        ...(parentOnly ? { parentTaskId: null } : {}),
+      },
+      include: {
+        subTasks: {
+          orderBy: { createdAt: "asc" },
+        },
       },
       orderBy: [
         { status: "asc" }, // ACTIVE before COMPLETED
@@ -56,7 +70,19 @@ export async function POST(req: Request) {
       );
     }
 
-    const { title, description, attributeCode, difficulty, dueDate } = parsed.data;
+    const {
+      title,
+      description,
+      notes,
+      parentTaskId,
+      attributeCode,
+      difficulty,
+      stage,
+      apCost,
+      tags,
+      dueDate,
+    } = parsed.data;
+
     const rewards = DIFFICULTY_TIERS[difficulty as DifficultyTier];
 
     const task = await prisma.task.create({
@@ -64,12 +90,20 @@ export async function POST(req: Request) {
         userId,
         title,
         description: description || null,
+        notes: notes || null,
+        parentTaskId: parentTaskId || null,
         attributeCode,
         difficulty,
         xpReward: rewards.xp,
         goldReward: rewards.gold,
-        status: "ACTIVE",
+        apCost: apCost ?? 10,
+        status: stage === "DONE" ? "COMPLETED" : "ACTIVE",
+        stage: stage ?? "TODO",
+        tags: tags || null,
         dueDate: dueDate ? new Date(dueDate) : null,
+      },
+      include: {
+        subTasks: true,
       },
     });
 

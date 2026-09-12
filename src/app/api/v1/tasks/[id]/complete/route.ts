@@ -28,11 +28,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
     // Atomic server-authoritative transaction
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Mark task completed
+      // 1. Mark task completed and stage DONE
       const updatedTask = await tx.task.update({
         where: { id },
         data: {
           status: "COMPLETED",
+          stage: "DONE",
           completedAt: new Date(),
         },
       });
@@ -69,6 +70,9 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       }
       const streakLongest = Math.max(profile.streakLongest, streakCurrent);
 
+      // AP deduction (cannot drop below 0)
+      const newAp = Math.max(0, (profile.currentAp ?? 100) - (task.apCost ?? 10));
+
       // 5. Update Profile
       const updatedProfile = await tx.profile.update({
         where: { userId: userId },
@@ -76,9 +80,31 @@ export async function POST(req: Request, { params }: { params: { id: string } })
           totalXp: newTotalXp,
           currentLevel: newLevelStats.level,
           gold: profile.gold + task.goldReward,
+          currentAp: newAp,
           streakCurrent,
           streakLongest,
           lastActiveDate: now,
+        },
+      });
+
+      // 5b. Upsert today's ActivityLog for 365-day consistency heatmap
+      const todayStr = now.toISOString().split("T")[0];
+      await tx.activityLog.upsert({
+        where: {
+          userId_date: {
+            userId,
+            date: todayStr,
+          },
+        },
+        create: {
+          userId,
+          date: todayStr,
+          tasksCompleted: 1,
+          xpEarned: task.xpReward,
+        },
+        update: {
+          tasksCompleted: { increment: 1 },
+          xpEarned: { increment: task.xpReward },
         },
       });
 

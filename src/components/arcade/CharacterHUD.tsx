@@ -21,6 +21,8 @@ interface CharacterHUDProps {
   gold: number;
   streak: number;
   momentum: number;
+  currentAp?: number;
+  maxAp?: number;
   attributes: AttributeData[];
 }
 
@@ -43,9 +45,12 @@ export function CharacterHUD({
   gold,
   streak,
   momentum,
+  currentAp = 100,
+  maxAp = 100,
   attributes,
 }: CharacterHUDProps) {
   const totalLevelBand = currentLevelXp + xpToNextLevel;
+  const apPercent = Math.min(100, Math.max(0, Math.round((currentAp / maxAp) * 100)));
 
   return (
     <div className="bg-cabinetSurface/90 border-2 border-cabinetBorder rounded-xl p-4 shadow-lg flex flex-col gap-4">
@@ -85,6 +90,24 @@ export function CharacterHUD({
           <div
             className="h-full bg-gradient-to-r from-neonCyan via-synthMagenta to-arcadeGold rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(0,240,255,0.6)]"
             style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Action Points (AP / Energy Gauge) */}
+      <div className="flex flex-col gap-1.5">
+        <div className="flex justify-between items-center text-[11px]">
+          <span className="font-arcade text-[10px] text-purple-400 flex items-center gap-1">
+            <span>⚡</span> ACTION ENERGY (AP)
+          </span>
+          <span className="text-purple-300 font-mono text-xs">
+            {currentAp} / {maxAp} AP
+          </span>
+        </div>
+        <div className="w-full h-2.5 bg-arcadeBlack rounded-full p-0.5 border border-purple-900/60 relative overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-purple-600 via-indigo-500 to-purple-400 rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]"
+            style={{ width: `${apPercent}%` }}
           />
         </div>
       </div>
