@@ -736,16 +736,16 @@ export default function LevvoMainPage() {
 
                 <ChevronRight className="w-5 h-5 text-gray-600 hidden lg:block shrink-0" />
 
-                {/* Step 4: BECOME A BETTER YOU */}
+                {/* Step 4: BETTER YOU */}
                 <div className="feature-card-anim flex flex-col items-center text-center gap-1.5 sm:gap-2 flex-1 p-3 rounded-xl bg-[#0F0B20]/60 sm:bg-transparent border border-white/[0.04] sm:border-transparent">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-1 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
                     <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                   <h3 className="font-arcade text-[11px] sm:text-xs text-white tracking-widest uppercase font-bold">
-                    BECOME A BETTER YOU
+                    BETTER YOU
                   </h3>
                   <p className="text-[10px] sm:text-xs text-gray-400 leading-tight font-sans">
-                    Real progress. A brighter tomorrow.
+                    Real progress.
                   </p>
                 </div>
               </div>
@@ -993,32 +993,21 @@ export default function LevvoMainPage() {
       )}
 
       {/* ========================================================================= */}
-      {/* 4. FOOTER (EXACT MATCH TO SCREENSHOT)                                    */}
+      {/* 4. FOOTER (CLEAN WITH 1 TAGLINE)                                          */}
       {/* ========================================================================= */}
       {!currentUser && (
         <footer className="w-full bg-[#05030E] border-t border-[#1C1236] py-5 px-4 sm:px-8 mt-auto">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 font-arcade text-xs">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
             {/* Left Brand */}
             <div className="flex items-center gap-2">
               <Image src="/logo.png" alt="LEVVO" width={20} height={20} className="w-5 h-5 object-contain" />
-              <span className="text-synthMagenta tracking-widest font-bold">LEVVO</span>
+              <span className="font-arcade text-xs text-synthMagenta tracking-widest font-bold">LEVVO</span>
             </div>
 
-            {/* Center Pillars */}
-            <div className="text-[10px] sm:text-xs text-gray-400 tracking-widest flex items-center gap-2 select-none">
-              <span>LEARN</span>
-              <span>•</span>
-              <span>IMPROVE</span>
-              <span>•</span>
-              <span>EXPLORE</span>
-              <span>•</span>
-              <span>LEVEL UP</span>
-            </div>
-
-            {/* Right Slogan */}
-            <div className="text-[10px] text-gray-400 tracking-widest">
-              90&apos;S RETRO ARCADE LIFE RPG • LEVVO STUDIOS™
-            </div>
+            {/* Single Clean Tagline */}
+            <p className="text-xs text-gray-400 font-sans tracking-wide">
+              Level up your life, one quest at a time.
+            </p>
           </div>
         </footer>
       )}
@@ -1083,11 +1072,11 @@ export default function LevvoMainPage() {
         onClose={() => setLevelUpData({ isOpen: false, newLevel: 1 })}
       />
 
-      {/* Floating Toast Notification */}
+      {/* Floating Toast Notification - Centered on screen */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#120D24] border-2 border-neonCyan rounded-xl px-4 py-2.5 shadow-[0_0_20px_rgba(0,240,255,0.4)] flex items-center gap-2 animate-bounce">
-          <Sparkles className="w-4 h-4 text-neonCyan" />
-          <span className="text-xs font-semibold text-textPrimary">{toastMessage}</span>
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-[92vw] sm:max-w-md bg-[#120D24]/95 backdrop-blur-md border-2 border-neonCyan rounded-xl px-4 py-3 shadow-[0_0_25px_rgba(0,240,255,0.4)] flex items-center justify-center gap-2.5 text-center">
+          <Sparkles className="w-4 h-4 text-neonCyan shrink-0" />
+          <span className="text-xs font-semibold text-textPrimary text-center">{toastMessage}</span>
         </div>
       )}
     </div>

@@ -595,26 +595,32 @@ export function ModernAppDashboard({
               </button>
 
               {notificationsOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-[#0E1326] border border-white/[0.1] rounded-2xl shadow-2xl p-4 z-50 text-xs animate-in fade-in zoom-in-95 backdrop-blur-xl">
-                  <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
-                    <span className="font-semibold text-white">Daily Briefing</span>
-                    <span className="font-mono text-[10px] text-cyan-400">ACTIVE</span>
-                  </div>
-                  <div className="py-3 flex flex-col gap-2.5 text-slate-300">
-                    <div className="flex items-start gap-2">
-                      <span className="text-sm">⚔️</span>
-                      <p>
-                        <strong className="text-white">{activeTasks.length} quests</strong> awaiting completion today.
-                      </p>
+                <>
+                  <div
+                    className="fixed inset-0 z-40 bg-black/40 sm:bg-transparent backdrop-blur-[2px] sm:backdrop-blur-none"
+                    onClick={() => setNotificationsOpen(false)}
+                  />
+                  <div className="fixed top-16 left-1/2 -translate-x-1/2 sm:absolute sm:top-full sm:left-auto sm:right-0 sm:translate-x-0 mt-2 w-[calc(100vw-2rem)] max-w-sm sm:w-72 bg-[#0E1326] border border-white/[0.1] rounded-2xl shadow-2xl p-4 z-50 text-xs animate-in fade-in zoom-in-95 backdrop-blur-xl">
+                    <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
+                      <span className="font-semibold text-white">Daily Briefing</span>
+                      <span className="font-mono text-[10px] text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">ACTIVE</span>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-sm">🔥</span>
-                      <p>
-                        Streak record: <strong className="text-amber-400">{character?.streakCurrent || 1} days strong</strong>. Keep the chain going!
-                      </p>
+                    <div className="py-3 flex flex-col gap-2.5 text-slate-300">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-base shrink-0">⚔️</span>
+                        <p>
+                          <strong className="text-white">{activeTasks.length} quests</strong> awaiting completion today.
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-base shrink-0">🔥</span>
+                        <p>
+                          Streak record: <strong className="text-amber-400">{character?.streakCurrent || 1} days strong</strong>. Keep the chain going!
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </>
               )}
             </div>
 
@@ -1374,7 +1380,7 @@ export function ModernAppDashboard({
               {/* Task list with Active & Completed */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-[#0C1022]/85 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 flex flex-col gap-3 shadow-lg">
-                  <h3 className="text-xs font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
+                  <h3 className="text-xs font-bold text-cyan-400 flex items-center justify-between uppercase tracking-wider">
                     <span>Active Quests</span>
                     <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 text-[10px] text-cyan-300 font-mono">
                       {activeTasks.length}
@@ -1404,7 +1410,7 @@ export function ModernAppDashboard({
                 </div>
 
                 <div className="bg-[#0C1022]/85 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 flex flex-col gap-3 shadow-lg">
-                  <h3 className="text-xs font-bold text-emerald-400 flex items-center gap-2 uppercase tracking-wider">
+                  <h3 className="text-xs font-bold text-emerald-400 flex items-center justify-between uppercase tracking-wider">
                     <span>Completed Today</span>
                     <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-[10px] text-emerald-300 font-mono">
                       {completedTasks.length}

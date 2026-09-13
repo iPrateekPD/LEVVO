@@ -583,16 +583,16 @@ function LoginForm() {
         </div>
       </main>
 
-      {/* Footer Minimal Indicator */}
-      <footer className="w-full text-center text-[9px] sm:text-[10px] text-gray-500 font-mono z-10 pb-2 px-4">
-        LEVVO STUDIOS™ // 90&apos;S ARCADE HARDWARE SYSTEM 1994 • ENCRYPTED SESSION STORAGE
+      {/* Footer Minimal Clean Indicator */}
+      <footer className="w-full text-center text-xs text-gray-500 font-sans z-10 pb-4 px-4">
+        LEVVO • Level up your life, one quest at a time.
       </footer>
 
-      {/* Floating Toast Notification */}
+      {/* Floating Toast Notification - Centered on screen */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#120D24] border-2 border-neonCyan rounded-xl px-4 py-2.5 shadow-[0_0_20px_rgba(0,240,255,0.4)] flex items-center gap-2 animate-bounce">
-          <Sparkles className="w-4 h-4 text-neonCyan" />
-          <span className="text-xs font-semibold text-textPrimary">{toastMessage}</span>
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-[92vw] sm:max-w-md bg-[#120D24]/95 backdrop-blur-md border-2 border-neonCyan rounded-xl px-4 py-3 shadow-[0_0_25px_rgba(0,240,255,0.4)] flex items-center justify-center gap-2.5 text-center">
+          <Sparkles className="w-4 h-4 text-neonCyan shrink-0" />
+          <span className="text-xs font-semibold text-textPrimary text-center">{toastMessage}</span>
         </div>
       )}
     </div>

@@ -661,11 +661,11 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Toast */}
+        {/* Toast - Centered on screen */}
         {toastMessage && (
-          <div className="fixed bottom-6 right-6 z-50 bg-[#120D24] border-2 border-neonCyan rounded-xl px-4 py-2.5 shadow-[0_0_20px_rgba(0,240,255,0.4)] flex items-center gap-2 animate-bounce">
-            <span className="font-arcade text-xs text-neonCyan">⚡</span>
-            <span className="text-xs font-semibold text-textPrimary">{toastMessage}</span>
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-[92vw] sm:max-w-md bg-[#120D24]/95 backdrop-blur-md border-2 border-neonCyan rounded-xl px-4 py-3 shadow-[0_0_25px_rgba(0,240,255,0.4)] flex items-center justify-center gap-2.5 text-center">
+            <span className="font-arcade text-xs text-neonCyan shrink-0">⚡</span>
+            <span className="text-xs font-semibold text-textPrimary text-center">{toastMessage}</span>
           </div>
         )}
       </CrtContainer>
