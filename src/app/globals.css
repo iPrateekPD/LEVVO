@@ -79,24 +79,25 @@ body {
   box-shadow: 0 1px 0 rgba(0,0,0,0.5) !important;
 }
 
-/* Custom Pixelated Scrollbar */
+/* Custom Refined Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B0C16;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2B254A;
-  border-radius: 4px;
-  border: 1px solid #FF2A85;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  border: none;
+  transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #FF2A85;
+  background: rgba(0, 240, 255, 0.4);
 }
 
 /* Screen Shake & Floating Damage FX */
