@@ -912,12 +912,12 @@ export function ModernAppDashboard({
         onTouchStart={() => {
           if (mobileMenuOpen) setMobileMenuOpen(false);
         }}
-        className="flex-1 flex flex-col min-w-0 z-10 md:h-full md:overflow-y-auto"
+        className="flex-1 pt-16 md:pt-0 flex flex-col min-w-0 z-10 md:h-full md:overflow-y-auto"
       >
-        {/* Top App Bar (Search + Lo-Fi Music + Notifications + User Menu) */}
-        <header className="h-16 bg-[#080B17]/80 border-b border-white/[0.07] px-3 sm:px-6 md:px-8 flex items-center justify-between sticky top-0 z-30 backdrop-blur-xl shrink-0">
+        {/* Top App Bar (Search + Lo-Fi Music + Notifications + User Menu) - Fixed on mobile, sticky on desktop */}
+        <header className="fixed top-0 left-0 right-0 md:static md:sticky md:top-0 h-16 bg-[#080B17]/95 md:bg-[#080B17]/80 border-b border-white/[0.07] px-3 sm:px-6 md:px-8 flex items-center justify-between z-30 backdrop-blur-xl shrink-0">
           {/* Mobile Menu Toggle + Compact Search Input + OG Gaming Life & Hi-Score Badges */}
-          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 sm:flex-none">
             <button
               type="button"
               onClick={() => {
@@ -937,7 +937,7 @@ export function ModernAppDashboard({
             {/* Compact Global Search Bar with Live Command Dropdown */}
             <div
               ref={searchContainerRef}
-              className="relative w-28 xs:w-32 sm:w-44 md:w-56 transition-all duration-200 focus-within:w-40 sm:focus-within:w-60 shrink-0"
+              className="relative flex-1 sm:w-44 md:w-56 sm:flex-none transition-all duration-200 focus-within:flex-1 sm:focus-within:w-60 min-w-[90px] max-w-[170px] sm:max-w-none shrink-0"
             >
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
@@ -1170,7 +1170,7 @@ export function ModernAppDashboard({
           </div>
 
           {/* Right Action Icons & User Badge */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 ml-1 sm:ml-2">
             {/* FEATURE 5: Lo-Fi Ambient Synthesizer Music Player */}
             <button
               type="button"
@@ -1180,7 +1180,7 @@ export function ModernAppDashboard({
                   lofiMusic.toggle();
                 }
               }}
-              className={`h-9 w-[50px] sm:w-[114px] inline-flex items-center justify-center gap-1.5 rounded-xl border text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
+              className={`h-9 w-9 sm:w-[114px] inline-flex items-center justify-center gap-1.5 rounded-xl border text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
                 isMusicPlaying
                   ? "bg-cyan-500/20 text-cyan-300 border-cyan-400/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
                   : "bg-white/[0.04] text-slate-400 border-white/[0.08] hover:text-slate-200 hover:bg-white/[0.08]"
@@ -1191,7 +1191,6 @@ export function ModernAppDashboard({
               <span className="hidden sm:inline truncate max-w-[65px]">
                 {isMusicPlaying ? musicTrackName : "Lo-Fi BGM"}
               </span>
-              <span className="sm:hidden text-[10px] font-mono">BGM</span>
             </button>
 
             {/* Ask AI Companion Button */}
@@ -1201,28 +1200,26 @@ export function ModernAppDashboard({
                 sounds.playClick();
                 onOpenAiOracle();
               }}
-              className="h-9 w-[50px] sm:w-[114px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-200 text-xs font-semibold whitespace-nowrap hover:bg-purple-500/30 hover:border-purple-400/50 transition-all hover:scale-[1.02] shadow-[0_0_15px_rgba(168,85,247,0.15)] shrink-0"
+              className="h-9 w-9 sm:w-[114px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-200 text-xs font-semibold whitespace-nowrap hover:bg-purple-500/30 hover:border-purple-400/50 transition-all hover:scale-[1.02] shadow-[0_0_15px_rgba(168,85,247,0.15)] shrink-0"
               title="Ask AI Companion Oracle"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin-slow shrink-0" />
               <span className="hidden sm:inline">Ask AI</span>
-              <span className="sm:hidden text-[10px]">AI</span>
             </button>
 
             {/* Share Victory Card Trigger with Magnetic Hover */}
-            <MagneticWrapper strength={0.25} className="inline-block shrink-0">
+            <MagneticWrapper strength={0.25} className="hidden sm:inline-block shrink-0">
               <button
                 type="button"
                 onClick={() => {
                   sounds.playClick();
                   setIsShareVictoryOpen(true);
                 }}
-                className="h-9 w-[50px] sm:w-[114px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold whitespace-nowrap shadow-sm transition-all hover:scale-105 active:scale-95 shrink-0"
+                className="h-9 sm:w-[114px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold whitespace-nowrap shadow-sm transition-all hover:scale-105 active:scale-95 shrink-0"
                 title="Share your daily hero achievements"
               >
                 <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <span className="hidden sm:inline">Share Card</span>
-                <span className="sm:hidden text-[10px]">Card</span>
+                <span>Share Card</span>
               </button>
             </MagneticWrapper>
 
@@ -1276,7 +1273,7 @@ export function ModernAppDashboard({
               <Link
                 href="/profile"
                 onClick={() => sounds.playClick()}
-                className="h-9 flex items-center gap-2 p-1 pr-1.5 sm:pr-2.5 rounded-xl bg-white/[0.03] border border-white/[0.07] hover:bg-white/[0.07] hover:border-cyan-500/30 transition-all shrink-0"
+                className="h-9 flex items-center gap-2 p-1 pr-1 sm:pr-2.5 rounded-xl bg-white/[0.03] border border-white/[0.07] hover:bg-white/[0.07] hover:border-cyan-500/30 transition-all shrink-0"
               >
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-cyan-500 via-indigo-500 to-purple-500 p-0.5 shadow-[0_0_12px_rgba(6,182,212,0.3)] shrink-0">
                   <div className="w-full h-full rounded-[6px] bg-[#0B0F20] flex items-center justify-center font-bold text-[10px] text-white">
@@ -1293,11 +1290,11 @@ export function ModernAppDashboard({
                 </div>
               </Link>
 
-              {/* Logout button */}
+              {/* Logout button: hidden on small mobile, accessible in Profile tab & drawer */}
               <button
                 type="button"
                 onClick={onLogout}
-                className="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-white/[0.03] border border-white/[0.07] text-slate-400 hover:text-rose-300 hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors text-xs shrink-0"
+                className="hidden sm:inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.03] border border-white/[0.07] text-slate-400 hover:text-rose-300 hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors text-xs shrink-0"
                 title="Log out"
               >
                 ✕
