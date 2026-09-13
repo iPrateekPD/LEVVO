@@ -79,18 +79,16 @@ export async function POST(req: Request) {
         include: { profile: true },
       });
 
-      // Initialize 6 Canonical Attributes
+      // Initialize 6 Canonical Attributes with a single batch query
       const attributes = ["STR", "INT", "WIS", "DEX", "CRE", "CHA"];
-      for (const code of attributes) {
-        await tx.attribute.create({
-          data: {
-            userId: user.id,
-            attributeCode: code,
-            currentXp: 0,
-            currentLevel: 1,
-          },
-        });
-      }
+      await tx.attribute.createMany({
+        data: attributes.map((code) => ({
+          userId: user.id,
+          attributeCode: code,
+          currentXp: 0,
+          currentLevel: 1,
+        })),
+      });
 
       // Starter Welcome Quest
       await tx.task.create({
@@ -135,6 +133,9 @@ export async function POST(req: Request) {
       });
 
       return user;
+    }, {
+      maxWait: 15000,
+      timeout: 30000,
     });
 
     // Generate session token
