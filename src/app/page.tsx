@@ -28,6 +28,10 @@ import {
   Clock,
   Send,
   User,
+  Monitor,
+  Heart,
+  ScrollText,
+  ChevronRight,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import gsap from "gsap";
@@ -361,7 +365,7 @@ export default function LevvoMainPage() {
       {/* 1. TOP NAVBAR (WITH SEAMLESS HUD / OVERVIEW SWITCHER)                     */}
       {/* ========================================================================= */}
       <header className="w-full bg-[#09071A]/95 backdrop-blur-md border-b border-[#281A4C] sticky top-0 z-50 px-3 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between shadow-lg">
-        {/* Left Brand - Professional Video Game Company Studio Logo */}
+        {/* Left Brand */}
         <Link
           href="/"
           onClick={() => {
@@ -373,104 +377,109 @@ export default function LevvoMainPage() {
             <Gamepad2 className="w-5 h-5 text-arcadeGold animate-pulse" />
           </div>
           <div className="flex flex-col">
-            <div className="flex items-center gap-1.5">
-              <span className="font-arcade text-base sm:text-xl text-[#FFE600] neon-glow-gold tracking-widest font-black leading-none group-hover:scale-105 transition-transform">
-                LEVVO
-              </span>
-              <span className="font-arcade text-[9px] px-1.5 py-0.5 rounded bg-synthMagenta/30 border border-synthMagenta/50 text-synthMagenta uppercase tracking-wider hidden sm:inline-block">
-                STUDIOS™
-              </span>
-            </div>
-            <span className="font-arcade text-[8px] sm:text-[9px] text-neonCyan tracking-wider mt-0.5 leading-none">
-              90&apos;S RETRO ARCADE LIFE RPG • レボ
+            <span className="font-arcade text-base sm:text-xl text-[#FFE600] neon-glow-gold tracking-widest font-black leading-none group-hover:scale-105 transition-transform">
+              LEVVO
+            </span>
+            <span className="font-arcade text-[8px] sm:text-[9px] text-gray-300 tracking-wider mt-0.5 leading-none">
+              SMALL STEPS. EPIC YOU.
             </span>
           </div>
         </Link>
 
-        {/* Center: Video Game Studio Hardware Console Status HUD (No generic web links) */}
-        <div className="hidden md:flex items-center gap-3 bg-[#110B24]/90 border border-[#3A1E68] rounded-xl px-4 py-1.5 shadow-[inset_0_0_12px_rgba(0,0,0,0.6)]">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-phosphorGreen animate-ping" />
-            <span className="font-arcade text-[10px] text-phosphorGreen tracking-widest uppercase">
-              1P READY
-            </span>
+        {/* Center Navigation Links (Matching Screenshot: Why Levvo, How It Works, Stories) */}
+        {!currentUser ? (
+          <nav className="hidden md:flex items-center gap-8 text-sm font-sans">
+            <a href="#why-levvo" className="text-gray-300 hover:text-white transition-colors text-xs font-medium">
+              Why Levvo
+            </a>
+            <a href="#how-it-works" className="text-gray-300 hover:text-white transition-colors text-xs font-medium">
+              How It Works
+            </a>
+            <a href="#stories" className="text-gray-300 hover:text-white transition-colors text-xs font-medium">
+              Stories
+            </a>
+          </nav>
+        ) : (
+          <div className="hidden md:flex items-center gap-3 bg-[#110B24]/90 border border-[#3A1E68] rounded-xl px-4 py-1.5 shadow-[inset_0_0_12px_rgba(0,0,0,0.6)]">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-phosphorGreen animate-ping" />
+              <span className="font-arcade text-[10px] text-phosphorGreen tracking-widest uppercase">
+                1P READY
+              </span>
+            </div>
+            <div className="h-3 w-px bg-[#3A1E68]" />
+            <div className="flex items-center gap-1.5 text-[10px] font-mono text-gray-300">
+              <span className="text-synthMagenta font-bold">HI-SCORE:</span>
+              <span className="text-[#FFE600] font-arcade">999,990</span>
+            </div>
+            <div className="h-3 w-px bg-[#3A1E68]" />
+            <div className="flex items-center gap-1.5 font-arcade text-[10px] text-neonCyan">
+              <span>CREDITS:</span>
+              <span className="text-arcadeGold animate-pulse">02</span>
+            </div>
+            <div className="h-3 w-px bg-[#3A1E68]" />
+            <div className="text-[9px] font-mono text-purple-300 uppercase tracking-wider">
+              LEVVO HARDWARE // SYSTEM-94
+            </div>
           </div>
-          <div className="h-3 w-px bg-[#3A1E68]" />
-          <div className="flex items-center gap-1.5 text-[10px] font-mono text-gray-300">
-            <span className="text-synthMagenta font-bold">HI-SCORE:</span>
-            <span className="text-[#FFE600] font-arcade">999,990</span>
-          </div>
-          <div className="h-3 w-px bg-[#3A1E68]" />
-          <div className="flex items-center gap-1.5 font-arcade text-[10px] text-neonCyan">
-            <span>CREDITS:</span>
-            <span className="text-arcadeGold animate-pulse">02</span>
-          </div>
-          <div className="h-3 w-px bg-[#3A1E68]" />
-          <div className="text-[9px] font-mono text-purple-300 uppercase tracking-wider">
-            LEVVO HARDWARE // SYSTEM-94
-          </div>
-        </div>
-
-        {/* Mobile Mini Arcade Badge */}
-        <div className="flex md:hidden items-center gap-1.5 bg-[#170E30] border border-[#3A1E68] rounded-lg px-2 py-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-phosphorGreen animate-pulse" />
-          <span className="font-arcade text-[8px] text-arcadeGold">1P ACTIVE • CR 02</span>
-        </div>
+        )}
 
         {/* Right Action Buttons */}
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-          {/* AI Oracle Button */}
-          <button
-            type="button"
-            onClick={() => {
-              sounds.playClick();
-              setIsAiOpen(true);
-            }}
-            className="arcade-btn px-2 sm:px-3.5 py-1.5 bg-gradient-to-r from-[#8A2BE2] to-[#9932CC] hover:brightness-110 text-white font-arcade text-[10px] sm:text-xs rounded-lg border border-purple-300 shadow-[0_0_15px_rgba(138,43,226,0.4)] flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
-            title="AI Oracle"
-            aria-label="AI Oracle"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-arcadeGold" />
-            <span className="hidden sm:inline">✦ AI ORACLE</span>
-          </button>
-
-          {/* Shop / Wardrobe Button (Desktop/Tablet) */}
-          <Link
-            href="/profile"
-            onClick={() => sounds.playClick()}
-            className="hidden sm:flex arcade-btn px-2.5 sm:px-3 py-1.5 bg-[#FFE600] hover:bg-yellow-400 text-arcadeBlack font-arcade text-xs font-bold rounded-lg border border-yellow-200 shadow-[0_2px_0_#9E8200] items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
-          >
-            <ShoppingBag className="w-3.5 h-3.5" />
-            <span>SHOP</span>
-          </Link>
-
-          {/* Login / Profile Avatar Button */}
           {currentUser ? (
-            <div className="flex items-center gap-1 sm:gap-2">
+            <>
+              {/* AI Oracle Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playClick();
+                  setIsAiOpen(true);
+                }}
+                className="arcade-btn px-2 sm:px-3.5 py-1.5 bg-gradient-to-r from-[#8A2BE2] to-[#9932CC] hover:brightness-110 text-white font-arcade text-[10px] sm:text-xs rounded-lg border border-purple-300 shadow-[0_0_15px_rgba(138,43,226,0.4)] flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                title="AI Oracle"
+                aria-label="AI Oracle"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-arcadeGold" />
+                <span className="hidden sm:inline">✦ AI ORACLE</span>
+              </button>
+
+              {/* Shop / Wardrobe Button (Desktop/Tablet) */}
               <Link
                 href="/profile"
                 onClick={() => sounds.playClick()}
-                className="arcade-btn px-2.5 sm:px-3 py-1.5 bg-neonCyan hover:bg-cyan-300 text-arcadeBlack font-arcade text-[10px] sm:text-xs font-bold rounded-lg border border-cyan-200 shadow-[0_2px_0_#008B99] flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                className="hidden sm:flex arcade-btn px-2.5 sm:px-3 py-1.5 bg-[#FFE600] hover:bg-yellow-400 text-arcadeBlack font-arcade text-xs font-bold rounded-lg border border-yellow-200 shadow-[0_2px_0_#9E8200] items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
               >
-                <span className="truncate max-w-[80px] sm:max-w-none">{currentUser.username}</span>
+                <ShoppingBag className="w-3.5 h-3.5" />
+                <span>SHOP</span>
               </Link>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="p-1.5 rounded-lg bg-[#140E2A] hover:bg-[#201445] border border-cabinetBorder text-gray-400 hover:text-white text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
-                title="Logout"
-              >
-                ✕
-              </button>
-            </div>
+
+              {/* Login / Profile Avatar Button */}
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Link
+                  href="/profile"
+                  onClick={() => sounds.playClick()}
+                  className="arcade-btn px-2.5 sm:px-3 py-1.5 bg-neonCyan hover:bg-cyan-300 text-arcadeBlack font-arcade text-[10px] sm:text-xs font-bold rounded-lg border border-cyan-200 shadow-[0_2px_0_#008B99] flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                >
+                  <span className="truncate max-w-[80px] sm:max-w-none">{currentUser.username}</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="p-1.5 rounded-lg bg-[#140E2A] hover:bg-[#201445] border border-cabinetBorder text-gray-400 hover:text-white text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                  title="Logout"
+                >
+                  ✕
+                </button>
+              </div>
+            </>
           ) : (
             <Link
-              href="/login"
+              href="/login?mode=signup"
               onClick={() => sounds.playClick()}
-              className="arcade-btn px-2.5 sm:px-3 py-1.5 bg-neonCyan hover:bg-cyan-300 text-arcadeBlack font-arcade text-[10px] sm:text-xs font-bold rounded-lg border border-cyan-200 shadow-[0_2px_0_#008B99] flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+              className="arcade-btn px-4 sm:px-5 py-2 bg-[#FFE600] hover:bg-yellow-400 text-arcadeBlack font-arcade text-xs font-bold rounded-xl border border-yellow-200 shadow-[0_2px_0_#9E8200] flex items-center gap-1.5 transition-transform hover:scale-105"
             >
-              <LogIn className="w-3.5 h-3.5" />
-              <span>LOGIN</span>
+              <span>Get Started</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           )}
         </div>
@@ -617,146 +626,175 @@ export default function LevvoMainPage() {
             <div className="absolute inset-0 bg-gradient-to-b from-[#070514]/75 via-[#070514]/50 to-[#070514] z-0" />
             <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#070514]/30 to-[#070514]/90 z-0" />
 
-            {/* Top-Left Terminal Status Overlay */}
-            <div className="hero-anim-item absolute top-6 left-6 z-10 hidden md:flex flex-col gap-1 text-left bg-black/60 backdrop-blur-sm border border-neonCyan/30 rounded-xl p-3 shadow-[0_0_15px_rgba(0,240,255,0.15)] font-mono text-xs">
-              <div className="text-neonCyan">&gt; SYSTEM: ONLINE</div>
-              <div className="text-gray-300">&gt; PLAYERS: 12,428</div>
-              <div className="text-phosphorGreen animate-pulse">&gt; A BETTER YOU AWAITS_</div>
-            </div>
-
-            {/* Left Floating Signpost Overlay */}
-            <div className="hero-anim-item absolute bottom-16 left-6 z-10 hidden lg:flex flex-col gap-1 text-left bg-[#1B112D]/85 backdrop-blur-sm border-2 border-synthMagenta/50 rounded-xl p-3.5 shadow-[0_0_20px_rgba(255,42,133,0.2)] font-arcade text-xs">
-              <div className="text-neonCyan">• DISCIPLINE</div>
-              <div className="text-neonCyan">• SKILLS</div>
-              <div className="text-neonCyan">• HEALTH</div>
-              <div className="text-neonCyan">• CREATIVITY</div>
-              <div className="text-arcadeGold pt-1 border-t border-synthMagenta/40">A BRIGHTER YOU →</div>
-            </div>
-
-            {/* Right Floating Badges Overlay */}
-            <div className="hero-anim-item absolute top-10 right-8 z-10 hidden lg:flex flex-col items-end text-right">
-              <span className="font-arcade text-xs text-arcadeGold neon-glow-gold tracking-widest italic">
-                Good Habits . Brighter Futures
+            {/* Top Right Floating Castle Caption (Matching Screenshot) */}
+            <div className="hero-anim-item absolute top-10 sm:top-14 right-6 sm:right-16 z-10 hidden md:flex flex-col items-center text-center">
+              <span className="font-arcade text-[11px] sm:text-xs text-[#FFE600] neon-glow-gold tracking-widest uppercase font-bold">
+                A BRIGHTER
               </span>
-              <div className="mt-8 bg-purple-950/70 backdrop-blur-sm border border-neonCyan/60 rounded-xl px-3 py-1 text-neonCyan font-arcade text-[10px] shadow-[0_0_15px_rgba(0,240,255,0.3)]">
-                LEVEL UP A BRIGHTER YOU
+              <span className="font-arcade text-[11px] sm:text-xs text-[#FFE600] neon-glow-gold tracking-widest uppercase font-bold mt-0.5">
+                YOU AWAITS
+              </span>
+              <div className="w-6 sm:w-8 h-[2px] bg-[#FFE600]/80 mt-1.5 rounded" />
+            </div>
+
+            {/* Right Floating Wooden Signposts (Matching Screenshot: DISCIPLINE, PROGRESS, FREEDOM) */}
+            <div className="hero-anim-item absolute bottom-10 sm:bottom-16 right-4 sm:right-10 z-10 hidden lg:flex flex-col items-center gap-1.5">
+              <div className="bg-[#24140D]/95 border-2 border-[#543220] shadow-[0_4px_12px_rgba(0,0,0,0.6)] rounded px-3.5 py-1.5 font-arcade text-xs text-amber-200 tracking-wider">
+                DISCIPLINE
+              </div>
+              <div className="bg-[#24140D]/95 border-2 border-[#543220] shadow-[0_4px_12px_rgba(0,0,0,0.6)] rounded px-3.5 py-1.5 font-arcade text-xs text-amber-200 tracking-wider">
+                PROGRESS
+              </div>
+              <div className="bg-[#24140D]/95 border-2 border-[#543220] shadow-[0_4px_12px_rgba(0,0,0,0.6)] rounded px-3.5 py-1.5 font-arcade text-xs text-amber-200 tracking-wider">
+                FREEDOM
               </div>
             </div>
 
             {/* Center Hero Typography */}
             <div className="relative z-10 max-w-3xl flex flex-col items-center gap-2 pt-6 sm:pt-8">
-              <span className="hero-anim-item font-arcade text-xs sm:text-sm text-gray-300 tracking-[0.3em] uppercase">
-                WELCOME TO
-              </span>
+              {/* Eyebrow: A PRODUCTIVITY RPG ── */}
+              <div className="hero-anim-item flex items-center gap-2.5 font-arcade text-xs sm:text-sm text-gray-300 tracking-[0.25em] uppercase">
+                <span>A PRODUCTIVITY RPG</span>
+                <span className="w-6 sm:w-8 h-[2px] bg-gray-400 inline-block" />
+              </div>
 
-              <h1 className="hero-anim-item font-arcade text-4xl sm:text-6xl md:text-7xl text-[#FFE600] neon-glow-gold tracking-widest font-black leading-none select-none drop-shadow-[0_5px_15px_rgba(255,230,0,0.4)]">
-                LEVVO
+              {/* Main Headline: REAL PROGRESS. MORE YOU. */}
+              <h1 className="hero-anim-item font-arcade text-4xl sm:text-6xl md:text-7xl text-white tracking-wider font-black leading-none select-none drop-shadow-[0_5px_15px_rgba(255,255,255,0.2)]">
+                REAL PROGRESS.
               </h1>
 
-              <h2 className="hero-anim-item font-arcade text-sm sm:text-lg md:text-xl text-synthMagenta neon-glow-magenta tracking-widest mt-1 uppercase font-bold">
-                SMALL STEPS. EPIC YOU.
+              <h2 className="hero-anim-item font-arcade text-4xl sm:text-6xl md:text-7xl text-[#FFE600] neon-glow-gold tracking-wider font-black leading-none select-none drop-shadow-[0_5px_20px_rgba(255,230,0,0.4)] mt-1 sm:mt-2">
+                MORE YOU.
               </h2>
 
-              <p className="hero-anim-item text-sm sm:text-base text-gray-200 mt-4 max-w-xl leading-relaxed">
-                Turn your real-life goals into epic quests.<br />
-                Learn. Build habits. Level up. One quest at a time.
+              {/* Subtitle */}
+              <p className="hero-anim-item text-sm sm:text-base text-gray-200 mt-4 max-w-xl leading-relaxed font-sans">
+                Turn your real-life goals into quests, build better habits, and level up your life — one step at a time.
               </p>
 
-              {/* Big Glowing Cyan CTA Button */}
-              <button
-                type="button"
-                onClick={() => {
-                  sounds.playClick();
-                  if (!currentUser) {
-                    window.location.href = "/login?mode=signup";
-                  } else {
-                    setViewMode("DASHBOARD");
-                  }
-                }}
-                className="hero-anim-item arcade-btn mt-6 px-8 py-3.5 bg-[#07192C]/80 hover:bg-neonCyan/20 border-2 border-neonCyan text-neonCyan font-arcade text-sm sm:text-base font-bold rounded-xl shadow-[0_0_25px_rgba(0,240,255,0.6)] flex items-center gap-3 transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
-              >
-                <span>START YOUR JOURNEY</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
+              {/* Action Buttons: Start Your Journey -> & Watch 1-min Video */}
+              <div className="hero-anim-item flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sounds.playClick();
+                    if (!currentUser) {
+                      window.location.href = "/login?mode=signup";
+                    } else {
+                      setViewMode("DASHBOARD");
+                    }
+                  }}
+                  className="arcade-btn px-6 sm:px-8 py-3.5 bg-[#FFE600] hover:bg-yellow-400 text-arcadeBlack font-arcade text-xs sm:text-sm font-bold rounded-xl shadow-[0_0_25px_rgba(255,230,0,0.4)] flex items-center gap-2 transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400"
+                >
+                  <span>Start Your Journey</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
 
-              {/* Under-CTA Text */}
-              <div className="hero-anim-item font-mono text-[10px] sm:text-xs text-gray-400 mt-4 tracking-wider flex items-center gap-2 select-none">
-                <span>FREE TO JOIN</span>
-                <span>•</span>
-                <span>FOR ALL AGE GROUPS</span>
-                <span>•</span>
-                <span>NO PRESSURE, JUST PROGRESS</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sounds.playClick();
+                    showToast("🎬 Launching Levvo 1-min Video Tour!");
+                  }}
+                  className="px-5 py-3.5 bg-black/40 hover:bg-black/60 border border-white/25 text-white font-sans text-xs sm:text-sm rounded-xl flex items-center gap-2.5 transition-colors backdrop-blur-sm"
+                >
+                  <div className="w-6 h-6 rounded-full border border-white/60 flex items-center justify-center bg-white/10">
+                    <Play className="w-3 h-3 fill-white translate-x-0.5" />
+                  </div>
+                  <span>Watch 1-min Video</span>
+                </button>
+              </div>
+
+              {/* Trust Badges under CTA (Matching Screenshot: Free to join, No pressure, Any device, For all ages) */}
+              <div className="hero-anim-item flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-300 mt-6 font-sans select-none">
+                <div className="flex items-center gap-1.5">
+                  <Users className="w-4 h-4 text-neonCyan" />
+                  <span>Free to join</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Shield className="w-4 h-4 text-phosphorGreen" />
+                  <span>No pressure</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Monitor className="w-4 h-4 text-arcadeGold" />
+                  <span>Any device</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Heart className="w-4 h-4 text-pink-400 fill-pink-400" />
+                  <span>For all ages</span>
+                </div>
               </div>
             </div>
           </section>
 
-          {/* FEATURE CARDS ROW (6 COLUMNS) */}
-          <section id="features" ref={featureCardsRef} className="w-full bg-[#09071A] border-b border-[#241744] py-8 px-4 sm:px-8">
-            <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              {/* Card 1 */}
-              <div className="feature-card-anim bg-[#120D2A] border border-[#2B1D54] hover:border-synthMagenta/60 rounded-xl p-4 flex flex-col items-center text-center gap-2 transition-all hover:scale-105 group">
-                <Sword className="w-6 h-6 text-synthMagenta group-hover:scale-110 transition-transform" />
-                <h3 className="font-arcade text-[11px] text-synthMagenta tracking-wider mt-1">
-                  PERSONALIZED QUESTS
-                </h3>
-                <p className="text-[11px] text-gray-400 font-sans leading-tight">
-                  Turn goals into fun daily missions
-                </p>
+          {/* 4-STEP PROCESS SECTION (MATCHING SCREENSHOT) */}
+          <section id="why-levvo" ref={featureCardsRef} className="w-full bg-[#080516] border-b border-[#241744] py-10 px-4 sm:px-8">
+            <div className="max-w-6xl mx-auto flex flex-col items-center gap-8">
+              <div className="w-full flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-3">
+                {/* Step 1: SET GOALS */}
+                <div className="feature-card-anim flex flex-col items-center text-center gap-2 flex-1 max-w-xs">
+                  <div className="w-12 h-12 rounded-xl bg-pink-500/15 border border-pink-500/40 flex items-center justify-center text-pink-400 mb-1 shadow-[0_0_15px_rgba(244,63,94,0.2)]">
+                    <Flag className="w-6 h-6 fill-pink-500/30" />
+                  </div>
+                  <h3 className="font-arcade text-xs text-white tracking-widest uppercase font-bold">
+                    SET GOALS
+                  </h3>
+                  <p className="text-xs text-gray-400 leading-tight font-sans">
+                    Choose what matters to you
+                  </p>
+                </div>
+
+                <ChevronRight className="w-5 h-5 text-gray-600 hidden lg:block shrink-0" />
+
+                {/* Step 2: COMPLETE TASKS */}
+                <div className="feature-card-anim flex flex-col items-center text-center gap-2 flex-1 max-w-xs">
+                  <div className="w-12 h-12 rounded-xl bg-purple-500/15 border border-purple-500/40 flex items-center justify-center text-purple-300 mb-1 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+                    <ScrollText className="w-6 h-6" />
+                  </div>
+                  <h3 className="font-arcade text-xs text-white tracking-widest uppercase font-bold">
+                    COMPLETE TASKS
+                  </h3>
+                  <p className="text-xs text-gray-400 leading-tight font-sans">
+                    Do real work, in real life
+                  </p>
+                </div>
+
+                <ChevronRight className="w-5 h-5 text-gray-600 hidden lg:block shrink-0" />
+
+                {/* Step 3: EARN REWARDS */}
+                <div className="feature-card-anim flex flex-col items-center text-center gap-2 flex-1 max-w-xs">
+                  <div className="w-12 h-12 rounded-xl bg-yellow-500/15 border border-yellow-500/40 flex items-center justify-center text-[#FFE600] mb-1 shadow-[0_0_15px_rgba(255,230,0,0.2)]">
+                    <Star className="w-6 h-6 fill-[#FFE600]/40" />
+                  </div>
+                  <h3 className="font-arcade text-xs text-white tracking-widest uppercase font-bold">
+                    EARN REWARDS
+                  </h3>
+                  <p className="text-xs text-gray-400 leading-tight font-sans">
+                    Gain XP, unlock new possibilities
+                  </p>
+                </div>
+
+                <ChevronRight className="w-5 h-5 text-gray-600 hidden lg:block shrink-0" />
+
+                {/* Step 4: BECOME A BETTER YOU */}
+                <div className="feature-card-anim flex flex-col items-center text-center gap-2 flex-1 max-w-xs">
+                  <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-1 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+                    <BarChart3 className="w-6 h-6" />
+                  </div>
+                  <h3 className="font-arcade text-xs text-white tracking-widest uppercase font-bold">
+                    BECOME A BETTER YOU
+                  </h3>
+                  <p className="text-xs text-gray-400 leading-tight font-sans">
+                    Real progress. A brighter tomorrow.
+                  </p>
+                </div>
               </div>
 
-              {/* Card 2 */}
-              <div className="feature-card-anim bg-[#120D2A] border border-[#2B1D54] hover:border-neonCyan/60 rounded-xl p-4 flex flex-col items-center text-center gap-2 transition-all hover:scale-105 group">
-                <Brain className="w-6 h-6 text-neonCyan group-hover:scale-110 transition-transform" />
-                <h3 className="font-arcade text-[11px] text-neonCyan tracking-wider mt-1">
-                  AI ORACLE
-                </h3>
-                <p className="text-[11px] text-gray-400 font-sans leading-tight">
-                  Get smart quest plans with AI
-                </p>
-              </div>
-
-              {/* Card 3 */}
-              <div className="feature-card-anim bg-[#120D2A] border border-[#2B1D54] hover:border-arcadeGold/60 rounded-xl p-4 flex flex-col items-center text-center gap-2 transition-all hover:scale-105 group">
-                <BarChart3 className="w-6 h-6 text-arcadeGold group-hover:scale-110 transition-transform" />
-                <h3 className="font-arcade text-[11px] text-arcadeGold tracking-wider mt-1">
-                  LEVEL UP
-                </h3>
-                <p className="text-[11px] text-gray-400 font-sans leading-tight">
-                  Track progress, streaks and stats
-                </p>
-              </div>
-
-              {/* Card 4 */}
-              <div className="feature-card-anim bg-[#120D2A] border border-[#2B1D54] hover:border-pink-400/60 rounded-xl p-4 flex flex-col items-center text-center gap-2 transition-all hover:scale-105 group">
-                <Trophy className="w-6 h-6 text-pink-400 group-hover:scale-110 transition-transform" />
-                <h3 className="font-arcade text-[11px] text-pink-400 tracking-wider mt-1">
-                  EPIC REWARDS
-                </h3>
-                <p className="text-[11px] text-gray-400 font-sans leading-tight">
-                  Earn XP, coins and unique items
-                </p>
-              </div>
-
-              {/* Card 5 */}
-              <div className="feature-card-anim bg-[#120D2A] border border-[#2B1D54] hover:border-cyan-400/60 rounded-xl p-4 flex flex-col items-center text-center gap-2 transition-all hover:scale-105 group">
-                <Users className="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform" />
-                <h3 className="font-arcade text-[11px] text-cyan-400 tracking-wider mt-1">
-                  FOR EVERYONE
-                </h3>
-                <p className="text-[11px] text-gray-400 font-sans leading-tight">
-                  Kids, students, professionals, seniors
-                </p>
-              </div>
-
-              {/* Card 6 */}
-              <div className="feature-card-anim bg-[#120D2A] border border-[#2B1D54] hover:border-purple-400/60 rounded-xl p-4 flex flex-col items-center text-center gap-2 transition-all hover:scale-105 group">
-                <Gamepad2 className="w-6 h-6 text-purple-400 group-hover:scale-110 transition-transform" />
-                <h3 className="font-arcade text-[11px] text-purple-400 tracking-wider mt-1">
-                  MAKE LIFE FUN
-                </h3>
-                <p className="text-[11px] text-gray-400 font-sans leading-tight">
-                  Because growth should feel good
-                </p>
+              {/* Bottom Divider Text: REAL LIFE // REAL PROGRESS // LEVVO */}
+              <div className="w-full flex items-center justify-center gap-3 sm:gap-6 text-gray-500 font-mono text-[10px] sm:text-xs tracking-[0.25em] uppercase pt-4 select-none">
+                <span className="w-10 sm:w-24 h-px bg-gray-800" />
+                <span>REAL LIFE &nbsp;//&nbsp; REAL PROGRESS &nbsp;//&nbsp; LEVVO</span>
+                <span className="w-10 sm:w-24 h-px bg-gray-800" />
               </div>
             </div>
           </section>
