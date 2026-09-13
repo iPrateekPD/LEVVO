@@ -62,6 +62,11 @@ import { AiPlanMyDayModal } from "../modals/AiPlanMyDayModal";
 import { QuestFocusModal } from "../modals/QuestFocusModal";
 import { RoutinePacksModal, RoutineQuest } from "../modals/RoutinePacksModal";
 import { ShareVictoryCardModal } from "../modals/ShareVictoryCardModal";
+import { AmbientCursorGlow } from "@/components/animations/AmbientCursorGlow";
+import { MagneticWrapper } from "@/components/animations/MagneticWrapper";
+import { TiltCard } from "@/components/animations/TiltCard";
+import { useParallaxBackground } from "@/components/animations/useParallaxBackground";
+import { QuestSlashEffect } from "@/components/animations/QuestSlashEffect";
 
 interface ModernAppDashboardProps {
   currentUser: { id: string; email: string; username: string };
@@ -120,6 +125,11 @@ export function ModernAppDashboard({
   const [isRoutinePacksOpen, setIsRoutinePacksOpen] = useState(false);
   const [isShareVictoryOpen, setIsShareVictoryOpen] = useState(false);
   const [focusModalTask, setFocusModalTask] = useState<TaskItem | null>(null);
+  const [lastCompletedTaskId, setLastCompletedTaskId] = useState<string | null>(null);
+
+  // Mouse Parallax for Cinematic Dashboard Hero
+  const dashboardHeroBgRef = useRef<HTMLDivElement>(null);
+  useParallaxBackground(dashboardHeroBgRef, { depth: 16 });
 
   // Instant Quick-Capture Task Bar State
   const [quickTitle, setQuickTitle] = useState("");
@@ -233,6 +243,7 @@ export function ModernAppDashboard({
   // Trigger floating particle & complete task
   const handleTaskCheck = (e: React.MouseEvent, t: TaskItem) => {
     sounds.playClick();
+    setLastCompletedTaskId(`${t.id}-${Date.now()}`);
     const rect = (e.target as HTMLElement).getBoundingClientRect();
     const x = rect.left + rect.width / 2;
     const y = rect.top;
@@ -286,6 +297,9 @@ export function ModernAppDashboard({
 
   return (
     <div className="min-h-screen bg-[#070913] text-slate-100 flex flex-col md:flex-row relative selection:bg-cyan-500 selection:text-black font-sans overflow-x-hidden">
+      {/* Ambient Mouse Cursor Follower Glow */}
+      <AmbientCursorGlow />
+
       {/* Floating XP Particles System */}
       <FloatingParticles
         particles={particles}
@@ -549,19 +563,21 @@ export function ModernAppDashboard({
               <span>Ask AI</span>
             </button>
 
-            {/* Share Victory Card Trigger */}
-            <button
-              type="button"
-              onClick={() => {
-                sounds.playClick();
-                setIsShareVictoryOpen(true);
-              }}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold shadow-sm transition-all hover:scale-105 active:scale-95"
-              title="Share your daily hero achievements"
-            >
-              <Trophy className="w-3.5 h-3.5 text-amber-400" />
-              <span>Share Card</span>
-            </button>
+            {/* Share Victory Card Trigger with Magnetic Hover */}
+            <MagneticWrapper strength={0.25} className="hidden sm:inline-block">
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playClick();
+                  setIsShareVictoryOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold shadow-sm transition-all hover:scale-105 active:scale-95"
+                title="Share your daily hero achievements"
+              >
+                <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                <span>Share Card</span>
+              </button>
+            </MagneticWrapper>
 
             {/* Notification Bell */}
             <div className="relative">
@@ -650,9 +666,10 @@ export function ModernAppDashboard({
               <div className="lg:col-span-8 flex flex-col gap-6">
                 {/* 1. CINEMATIC HERO GREETING BANNER */}
                 <div className="relative w-full rounded-2xl overflow-hidden border border-white/[0.09] shadow-[0_12px_40px_rgba(0,0,0,0.5)] min-h-[220px] sm:min-h-[250px] flex flex-col justify-between p-6 sm:p-8 bg-[#0B0F22] group">
-                  {/* Background Artwork with Seamless Vignette Masks */}
+                  {/* Background Artwork with Seamless Vignette Masks & Mouse Parallax */}
                   <div
-                    className="absolute inset-0 bg-cover bg-right sm:bg-center z-0 transition-transform duration-700 group-hover:scale-105 opacity-55"
+                    ref={dashboardHeroBgRef}
+                    className="absolute inset-0 bg-cover bg-right sm:bg-center z-0 scale-105 will-change-transform opacity-55 transition-transform duration-100 ease-out"
                     style={{ backgroundImage: "url('/images/hero-bg.jpg')" }}
                   />
                   {/* Layered Gradient Atmosphere */}
@@ -707,14 +724,16 @@ export function ModernAppDashboard({
                   </div>
                 </div>
 
-                {/* FEATURE 3: DAILY DUNGEON BOSS CARD (PROCRASTINATION DEMON) */}
-                <DailyBossCard
-                  completedTasksCount={completedTasks.length}
-                  totalXpToday={completedTasks.length * 50}
-                  onClaimVictoryLoot={() => {
-                    onRefresh();
-                  }}
-                />
+                {/* FEATURE 3: DAILY DUNGEON BOSS CARD WITH 3D TILT */}
+                <TiltCard maxTilt={5}>
+                  <DailyBossCard
+                    completedTasksCount={completedTasks.length}
+                    totalXpToday={completedTasks.length * 50}
+                    onClaimVictoryLoot={() => {
+                      onRefresh();
+                    }}
+                  />
+                </TiltCard>
 
                 {/* 2. TODAY'S FOCUS (QUEST HUB CARD) */}
                 <div className="bg-[#0C1022]/85 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.35)] flex flex-col gap-4">
@@ -775,44 +794,50 @@ export function ModernAppDashboard({
                     {/* Right: Actions Group */}
                     <div className="flex items-center gap-2 shrink-0">
                       {/* FEATURE 6: AI Plan My Day Trigger */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          sounds.playClick();
-                          setIsAiPlanOpen(true);
-                        }}
-                        className="px-3 py-1.5 bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95"
-                        title="AI Plan My Day: Auto-generate 3 balanced daily quests"
-                      >
-                        <Wand2 className="w-3.5 h-3.5 text-amber-300" />
-                        <span className="hidden sm:inline">Plan Day</span>
-                      </button>
+                      <MagneticWrapper strength={0.25} className="hidden sm:inline-block">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            sounds.playClick();
+                            setIsAiPlanOpen(true);
+                          }}
+                          className="px-3 py-1.5 bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95"
+                          title="AI Plan My Day: Auto-generate 3 balanced daily quests"
+                        >
+                          <Wand2 className="w-3.5 h-3.5 text-amber-300" />
+                          <span>Plan Day</span>
+                        </button>
+                      </MagneticWrapper>
 
                       {/* FEATURE: Curated Routine Packs Trigger */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          sounds.playClick();
-                          setIsRoutinePacksOpen(true);
-                        }}
-                        className="px-3 py-1.5 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95"
-                        title="Curated Routine Packs: 1-click install SWE, Exam, Morning, or Fitness routines"
-                      >
-                        <Package className="w-3.5 h-3.5 text-cyan-300" />
-                        <span className="hidden sm:inline">Routine Packs</span>
-                      </button>
+                      <MagneticWrapper strength={0.25} className="hidden sm:inline-block">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            sounds.playClick();
+                            setIsRoutinePacksOpen(true);
+                          }}
+                          className="px-3 py-1.5 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95"
+                          title="Curated Routine Packs: 1-click install SWE, Exam, Morning, or Fitness routines"
+                        >
+                          <Package className="w-3.5 h-3.5 text-cyan-300" />
+                          <span>Routine Packs</span>
+                        </button>
+                      </MagneticWrapper>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          sounds.playClick();
-                          onOpenCreateQuest();
-                        }}
-                        className="px-3.5 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-[0_0_15px_rgba(99,102,241,0.3)] transition-all hover:scale-105 active:scale-95"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Add Task</span>
-                      </button>
+                      <MagneticWrapper strength={0.25} className="inline-block">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            sounds.playClick();
+                            onOpenCreateQuest();
+                          }}
+                          className="px-3.5 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-[0_0_15px_rgba(99,102,241,0.3)] transition-all hover:scale-105 active:scale-95"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Add Task</span>
+                        </button>
+                      </MagneticWrapper>
                     </div>
                   </div>
 
@@ -895,12 +920,13 @@ export function ModernAppDashboard({
                         return (
                           <div
                             key={t.id}
-                            className={`group p-3 sm:p-3.5 rounded-xl border flex items-center justify-between gap-3 transition-all duration-150 ${
+                            className={`group relative overflow-hidden p-3 sm:p-3.5 rounded-xl border flex items-center justify-between gap-3 transition-all duration-150 ${
                               isDone
                                 ? "bg-[#090D1C]/60 border-white/[0.04] text-slate-400 opacity-75"
                                 : "bg-[#101427]/80 hover:bg-[#141A33] border-white/[0.06] hover:border-cyan-500/30 text-white shadow-sm hover:shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:-translate-y-0.5"
                             }`}
                           >
+                            <QuestSlashEffect triggerKey={lastCompletedTaskId?.startsWith(t.id) ? lastCompletedTaskId : ""} />
                             {/* FEATURE 1: Checkbox with Particle Trigger */}
                             <div className="flex items-center gap-3 min-w-0 flex-1">
                               <button
@@ -1124,10 +1150,12 @@ export function ModernAppDashboard({
                 </div>
 
                 {/* FEATURE 4: 7-DAY WEEKLY MOMENTUM HEATMAP */}
-                <WeeklyMomentumCard
-                  currentStreak={character?.streakCurrent || 1}
-                  completedTasksCount={completedTasks.length}
-                />
+                <TiltCard maxTilt={5}>
+                  <WeeklyMomentumCard
+                    currentStreak={character?.streakCurrent || 1}
+                    completedTasksCount={completedTasks.length}
+                  />
+                </TiltCard>
 
                 {/* 2. WISDOM QUOTE CARD */}
                 <div className="bg-gradient-to-br from-[#0F142A]/80 to-[#0A0D1B]/90 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-4 sm:p-5 shadow-[0_8px_30px_rgba(0,0,0,0.35)] flex items-start gap-3">
@@ -1356,8 +1384,9 @@ export function ModernAppDashboard({
                     {activeTasks.map((t) => (
                       <div
                         key={t.id}
-                        className="p-3 rounded-xl bg-[#101427] border border-white/[0.06] flex items-center justify-between gap-3 hover:border-cyan-500/30 transition-all"
+                        className="relative overflow-hidden p-3 rounded-xl bg-[#101427] border border-white/[0.06] flex items-center justify-between gap-3 hover:border-cyan-500/30 transition-all"
                       >
+                        <QuestSlashEffect triggerKey={lastCompletedTaskId?.startsWith(t.id) ? lastCompletedTaskId : ""} />
                         <div className="flex items-center gap-2.5 min-w-0">
                           <button
                             type="button"

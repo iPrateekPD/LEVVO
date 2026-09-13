@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -8,7 +8,7 @@ import { ArrowLeft, Mail, Lock, Eye, EyeOff, User, Sparkles, LogIn, UserPlus } f
 import gsap from "gsap";
 import { sounds } from "@/lib/sound";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialMode = searchParams.get("mode") === "signup" ? "SIGNUP" : "LOGIN";
@@ -527,5 +527,19 @@ export default function LoginPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#0A0518] flex items-center justify-center text-neonCyan font-arcade text-xs">
+          LOADING LEVVO ARCADE...
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

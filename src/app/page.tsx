@@ -55,6 +55,10 @@ import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
 import { RetroArcadeZone } from "@/components/dashboard/RetroArcadeZone";
 import { ModernAppDashboard } from "@/components/dashboard/ModernAppDashboard";
 import { TaskItem } from "@/components/quests/QuestCard";
+import { AmbientCursorGlow } from "@/components/animations/AmbientCursorGlow";
+import { MagneticWrapper } from "@/components/animations/MagneticWrapper";
+import { useParallaxBackground } from "@/components/animations/useParallaxBackground";
+import { TiltCard } from "@/components/animations/TiltCard";
 
 export default function LevvoMainPage() {
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string; username: string } | null>(null);
@@ -91,9 +95,13 @@ export default function LevvoMainPage() {
 
   // GSAP animation container refs
   const heroRef = useRef<HTMLDivElement>(null);
+  const heroBgRef = useRef<HTMLDivElement>(null);
   const featureCardsRef = useRef<HTMLDivElement>(null);
   const showcaseRef = useRef<HTMLDivElement>(null);
   const dashboardRef = useRef<HTMLDivElement>(null);
+
+  // Mouse Parallax for Hero Background
+  useParallaxBackground(heroBgRef, { depth: 25 });
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -137,6 +145,23 @@ export default function LevvoMainPage() {
             ease: "sine.inOut",
           });
         }
+
+        // Idle sprite floating bobbing animations
+        gsap.to(".wooden-signpost", {
+          y: -6,
+          rotation: 1.5,
+          duration: 2.8,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+        gsap.to(".castle-caption", {
+          y: -4,
+          duration: 2.4,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
       });
       return () => ctx.revert();
     } else {
@@ -537,15 +562,19 @@ export default function LevvoMainPage() {
         /* ========================================================================= */
         /* 3. MODE SWITCH: EXACT HOME / LANDING OVERVIEW PAGE                        */
         /* ========================================================================= */
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col relative">
+          {/* Ambient Cursor Light Glow */}
+          <AmbientCursorGlow />
+
           {/* HERO CANVAS */}
           <section
             ref={heroRef}
             className="relative w-full min-h-[580px] sm:min-h-[660px] md:min-h-[720px] flex flex-col items-center justify-center text-center px-4 overflow-hidden border-b border-[#281A4C]"
           >
-            {/* Background Artwork */}
+            {/* Background Artwork with Smooth Mouse Parallax */}
             <div
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0 scale-100"
+              ref={heroBgRef}
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0 scale-105 will-change-transform transition-transform duration-100 ease-out"
               style={{ backgroundImage: "url('/images/hero-bg.jpg')" }}
             />
 
@@ -554,7 +583,7 @@ export default function LevvoMainPage() {
             <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#070514]/30 to-[#070514]/90 z-0" />
 
             {/* Top Right Floating Castle Caption (Matching Screenshot) */}
-            <div className="hero-anim-item absolute top-10 sm:top-14 right-6 sm:right-16 z-10 hidden md:flex flex-col items-center text-center">
+            <div className="castle-caption hero-anim-item absolute top-10 sm:top-14 right-6 sm:right-16 z-10 hidden md:flex flex-col items-center text-center select-none">
               <span className="font-arcade text-[11px] sm:text-xs text-[#FFE600] neon-glow-gold tracking-widest uppercase font-bold">
                 A BRIGHTER
               </span>
@@ -564,8 +593,8 @@ export default function LevvoMainPage() {
               <div className="w-6 sm:w-8 h-[2px] bg-[#FFE600]/80 mt-1.5 rounded" />
             </div>
 
-            {/* Right Floating Wooden Signposts (Matching Screenshot: DISCIPLINE, PROGRESS, FREEDOM) */}
-            <div className="hero-anim-item absolute bottom-10 sm:bottom-16 right-4 sm:right-10 z-10 hidden lg:flex flex-col items-center gap-1.5">
+            {/* Right Floating Wooden Signposts */}
+            <div className="wooden-signpost hero-anim-item absolute bottom-10 sm:bottom-16 right-4 sm:right-10 z-10 hidden lg:flex flex-col items-center gap-1.5 select-none">
               <div className="bg-[#24140D]/95 border-2 border-[#543220] shadow-[0_4px_12px_rgba(0,0,0,0.6)] rounded px-3.5 py-1.5 font-arcade text-xs text-amber-200 tracking-wider">
                 DISCIPLINE
               </div>
@@ -601,35 +630,39 @@ export default function LevvoMainPage() {
 
               {/* Action Buttons: Start Your Journey -> & Watch 1-min Video */}
               <div className="hero-anim-item flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 mt-6">
-                <button
-                  type="button"
-                  onClick={() => {
-                    sounds.playClick();
-                    if (!currentUser) {
-                      window.location.href = "/login?mode=signup";
-                    } else {
-                      setViewMode("DASHBOARD");
-                    }
-                  }}
-                  className="arcade-btn px-6 sm:px-8 py-3.5 bg-[#FFE600] hover:bg-yellow-400 text-arcadeBlack font-arcade text-xs sm:text-sm font-bold rounded-xl shadow-[0_0_25px_rgba(255,230,0,0.4)] flex items-center gap-2 transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400"
-                >
-                  <span>Start Your Journey</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                <MagneticWrapper strength={0.25}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sounds.playClick();
+                      if (!currentUser) {
+                        window.location.href = "/login?mode=signup";
+                      } else {
+                        setViewMode("DASHBOARD");
+                      }
+                    }}
+                    className="arcade-btn px-6 sm:px-8 py-3.5 bg-[#FFE600] hover:bg-yellow-400 text-arcadeBlack font-arcade text-xs sm:text-sm font-bold rounded-xl shadow-[0_0_25px_rgba(255,230,0,0.4)] flex items-center gap-2 transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400"
+                  >
+                    <span>Start Your Journey</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </MagneticWrapper>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    sounds.playClick();
-                    showToast("🎬 Launching Levvo 1-min Video Tour!");
-                  }}
-                  className="px-5 py-3.5 bg-black/40 hover:bg-black/60 border border-white/25 text-white font-sans text-xs sm:text-sm rounded-xl flex items-center gap-2.5 transition-colors backdrop-blur-sm"
-                >
-                  <div className="w-6 h-6 rounded-full border border-white/60 flex items-center justify-center bg-white/10">
-                    <Play className="w-3 h-3 fill-white translate-x-0.5" />
-                  </div>
-                  <span>Watch 1-min Video</span>
-                </button>
+                <MagneticWrapper strength={0.25}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sounds.playClick();
+                      showToast("🎬 Launching Levvo 1-min Video Tour!");
+                    }}
+                    className="px-5 py-3.5 bg-black/40 hover:bg-black/60 border border-white/25 text-white font-sans text-xs sm:text-sm rounded-xl flex items-center gap-2.5 transition-colors backdrop-blur-sm"
+                  >
+                    <div className="w-6 h-6 rounded-full border border-white/60 flex items-center justify-center bg-white/10">
+                      <Play className="w-3 h-3 fill-white translate-x-0.5" />
+                    </div>
+                    <span>Watch 1-min Video</span>
+                  </button>
+                </MagneticWrapper>
               </div>
 
               {/* Trust Badges under CTA (Matching Screenshot: Free to join, No pressure, Any device, For all ages) */}
@@ -783,61 +816,63 @@ export default function LevvoMainPage() {
               <div className="lg:col-span-5 flex items-center justify-center relative">
                 <div className="floating-card w-full max-w-md flex flex-col gap-3 relative">
                   {/* Daily Quests Centerpiece Card */}
-                  <div className="bg-[#120B24] border-2 border-synthMagenta rounded-2xl p-4 sm:p-5 shadow-[0_0_30px_rgba(255,42,133,0.3)] flex flex-col gap-3 relative z-20">
-                    <div className="flex items-center justify-between pb-2 border-b border-[#2C1948]">
-                      <div className="flex items-center gap-2">
-                        <span className="text-synthMagenta">✦</span>
-                        <span className="font-arcade text-xs text-neonCyan tracking-wider">
-                          DAILY QUESTS
-                        </span>
-                      </div>
-                      <span className="text-[9px] font-mono text-gray-400">ACTIVE MISSIONS</span>
-                    </div>
-
-                    {/* Checkbox Quest Items */}
-                    <div className="flex flex-col gap-2">
-                      {showcaseQuests.map((q) => (
-                        <button
-                          key={q.id}
-                          type="button"
-                          onClick={() => handleToggleShowcaseQuest(q.id)}
-                          className={`p-2.5 rounded-xl border flex items-center justify-between gap-3 text-left transition-all ${
-                            q.done
-                              ? "bg-phosphorGreen/15 border-phosphorGreen/60 text-gray-400"
-                              : "bg-[#1A1032] border-[#311E58] hover:border-synthMagenta/50 text-white"
-                          }`}
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <div
-                              className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
-                                q.done
-                                  ? "bg-phosphorGreen border-phosphorGreen text-arcadeBlack"
-                                  : "border-gray-500 bg-black/40"
-                              }`}
-                            >
-                              {q.done && <Check className="w-3 h-3 stroke-[3]" />}
-                            </div>
-                            <span className={`text-xs truncate ${q.done ? "line-through text-gray-400" : "font-medium"}`}>
-                              {q.title}
-                            </span>
-                          </div>
-                          <span className="font-arcade text-[10px] text-arcadeGold shrink-0">
-                            {q.xp}
+                  <TiltCard maxTilt={5}>
+                    <div className="bg-[#120B24] border-2 border-synthMagenta rounded-2xl p-4 sm:p-5 shadow-[0_0_30px_rgba(255,42,133,0.3)] flex flex-col gap-3 relative z-20">
+                      <div className="flex items-center justify-between pb-2 border-b border-[#2C1948]">
+                        <div className="flex items-center gap-2">
+                          <span className="text-synthMagenta">✦</span>
+                          <span className="font-arcade text-xs text-neonCyan tracking-wider">
+                            DAILY QUESTS
                           </span>
-                        </button>
-                      ))}
-                    </div>
+                        </div>
+                        <span className="text-[9px] font-mono text-gray-400">ACTIVE MISSIONS</span>
+                      </div>
 
-                    {/* Complete Quest Action Button */}
-                    <button
-                      type="button"
-                      onClick={handleCompleteShowcase}
-                      className="arcade-btn w-full py-2.5 bg-gradient-to-r from-emerald-500 to-phosphorGreen hover:brightness-110 text-arcadeBlack font-arcade text-xs font-bold rounded-xl border border-emerald-300 shadow-[0_3px_0_#008A36] flex items-center justify-center gap-2 mt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
-                    >
-                      <Check className="w-4 h-4 stroke-[3]" />
-                      <span>COMPLETE QUEST</span>
-                    </button>
-                  </div>
+                      {/* Checkbox Quest Items */}
+                      <div className="flex flex-col gap-2">
+                        {showcaseQuests.map((q) => (
+                          <button
+                            key={q.id}
+                            type="button"
+                            onClick={() => handleToggleShowcaseQuest(q.id)}
+                            className={`p-2.5 rounded-xl border flex items-center justify-between gap-3 text-left transition-all ${
+                              q.done
+                                ? "bg-phosphorGreen/15 border-phosphorGreen/60 text-gray-400"
+                                : "bg-[#1A1032] border-[#311E58] hover:border-synthMagenta/50 text-white"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div
+                                className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
+                                  q.done
+                                    ? "bg-phosphorGreen border-phosphorGreen text-arcadeBlack"
+                                    : "border-gray-500 bg-black/40"
+                                }`}
+                              >
+                                {q.done && <Check className="w-3 h-3 stroke-[3]" />}
+                              </div>
+                              <span className={`text-xs truncate ${q.done ? "line-through text-gray-400" : "font-medium"}`}>
+                                {q.title}
+                              </span>
+                            </div>
+                            <span className="font-arcade text-[10px] text-arcadeGold shrink-0">
+                              {q.xp}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Complete Quest Action Button */}
+                      <button
+                        type="button"
+                        onClick={handleCompleteShowcase}
+                        className="arcade-btn w-full py-2.5 bg-gradient-to-r from-emerald-500 to-phosphorGreen hover:brightness-110 text-arcadeBlack font-arcade text-xs font-bold rounded-xl border border-emerald-300 shadow-[0_3px_0_#008A36] flex items-center justify-center gap-2 mt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                      >
+                        <Check className="w-4 h-4 stroke-[3]" />
+                        <span>COMPLETE QUEST</span>
+                      </button>
+                    </div>
+                  </TiltCard>
 
                   {/* Player Status & Rewards Shop Mini-Ribbon */}
                   <div className="grid grid-cols-2 gap-3 z-10">

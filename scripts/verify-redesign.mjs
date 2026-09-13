@@ -24,17 +24,15 @@ async function run() {
   await page.type('input[placeholder*="Password"]', 'password123');
   const submitBtn = await page.$('button[type="submit"]');
   if (submitBtn) {
-    await Promise.all([
-      page.waitForNavigation({ waitUntil: 'networkidle2' }).catch(() => {}),
-      submitBtn.click(),
-    ]);
-    await new Promise(r => setTimeout(r, 2000));
+    await submitBtn.click();
+    console.log('Clicked submit, waiting for authentication...');
+    await new Promise(r => setTimeout(r, 3000));
   }
 
   // Navigate to / (the authenticated dashboard)
   console.log('Navigating to http://localhost:3000...');
   await page.goto('http://localhost:3000', { waitUntil: 'networkidle2' });
-  await new Promise(r => setTimeout(r, 2000));
+  await new Promise(r => setTimeout(r, 3000));
 
   // Check desktop metrics
   const desktopMetrics = await page.evaluate(() => {
