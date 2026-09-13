@@ -170,6 +170,33 @@ class SoundEngine {
     } catch {}
   }
 
+  /**
+   * Classic retro 2-tone gold coin pickup sound
+   */
+  public playCoin() {
+    if (this.isMuted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(987.77, ctx.currentTime); // B5
+      osc.frequency.setValueAtTime(1318.51, ctx.currentTime + 0.08); // E6
+
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+    } catch {}
+  }
+
   public playError() {
     if (this.isMuted) return;
     const ctx = this.getContext();

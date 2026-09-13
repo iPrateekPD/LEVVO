@@ -469,6 +469,48 @@ export default function LevvoMainPage() {
             onDecrementTracker={handleDecrementTracker}
             onTimerComplete={handleTimerComplete}
             onLogQuickWin={handleLogQuickWin}
+            onQuickCreateTask={async (taskData) => {
+              try {
+                const res = await fetch("/api/v1/tasks", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(taskData),
+                });
+                const data = await res.json();
+                if (data.success && data.data) {
+                  setTasks((prev) => [data.data, ...prev]);
+                  sounds.playCoin();
+                  showToast(`⚔️ Quest "${data.data.title}" added to log!`);
+                }
+              } catch (err) {
+                console.error("Failed to quick create quest:", err);
+              }
+            }}
+            onBatchCreateTasks={async (newQuests) => {
+              try {
+                for (const q of newQuests) {
+                  const res = await fetch("/api/v1/tasks", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      title: q.title,
+                      description: q.description,
+                      attributeCode: q.attributeCode,
+                      difficulty: q.difficulty,
+                    }),
+                  });
+                  const data = await res.json();
+                  if (data.success && data.data) {
+                    setTasks((prev) => [data.data, ...prev]);
+                  }
+                }
+                sounds.playLevelUp();
+                showToast(`⚔️ Enrolled 3 AI daily quests!`);
+                loadAllData();
+              } catch (err) {
+                console.error("Failed to batch create quests:", err);
+              }
+            }}
             onLogout={handleLogout}
             onRefresh={loadAllData}
           />

@@ -34,14 +34,24 @@ import {
   Award,
   Play,
   Share2,
+  Volume2,
+  VolumeX,
+  Music,
+  Send,
+  Wand2,
 } from "lucide-react";
 import { sounds } from "@/lib/sound";
+import { lofiMusic } from "@/lib/lofiSynthesizer";
 import { TaskItem } from "@/components/quests/QuestCard";
 import { ArcadeTimer } from "./ArcadeTimer";
 import { RetroArcadeZone } from "./RetroArcadeZone";
 import { PredefinedTrackers } from "./PredefinedTrackers";
 import { JourneyProgress } from "./JourneyProgress";
 import { QuickMilestone } from "./QuickMilestone";
+import { DailyBossCard } from "./DailyBossCard";
+import { WeeklyMomentumCard } from "./WeeklyMomentumCard";
+import { FloatingParticles, FloatingParticleItem } from "./FloatingParticles";
+import { AiPlanMyDayModal } from "../modals/AiPlanMyDayModal";
 
 interface ModernAppDashboardProps {
   currentUser: { id: string; email: string; username: string };
@@ -57,6 +67,8 @@ interface ModernAppDashboardProps {
   onDecrementTracker: (key: string) => Promise<void>;
   onTimerComplete: (title: string, minutes: number) => Promise<void>;
   onLogQuickWin: (title: string, difficulty: "Trivial" | "Easy" | "Medium") => Promise<void>;
+  onQuickCreateTask?: (taskData: { title: string; attributeCode: string; difficulty: string; xpReward: number }) => Promise<void>;
+  onBatchCreateTasks?: (quests: any[]) => Promise<void>;
   onLogout: () => Promise<void>;
   onRefresh: () => Promise<void>;
 }
@@ -75,6 +87,8 @@ export function ModernAppDashboard({
   onDecrementTracker,
   onTimerComplete,
   onLogQuickWin,
+  onQuickCreateTask,
+  onBatchCreateTasks,
   onLogout,
   onRefresh,
 }: ModernAppDashboardProps) {
@@ -85,6 +99,31 @@ export function ModernAppDashboard({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Floating Particles State
+  const [particles, setParticles] = useState<FloatingParticleItem[]>([]);
+
+  // AI Plan My Day Modal State
+  const [isAiPlanOpen, setIsAiPlanOpen] = useState(false);
+
+  // Instant Quick-Capture Task Bar State
+  const [quickTitle, setQuickTitle] = useState("");
+  const [quickAttr, setQuickAttr] = useState<"INT" | "STR" | "WIS" | "DEX">("INT");
+  const [isQuickSubmitting, setIsQuickSubmitting] = useState(false);
+
+  // Lo-Fi Ambient Synthesizer Music State
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [musicTrackName, setMusicTrackName] = useState("Cosmic Lo-Fi");
+
+  useEffect(() => {
+    if (lofiMusic) {
+      const unsub = lofiMusic.subscribe((playing: boolean, track: string) => {
+        setIsMusicPlaying(playing);
+        setMusicTrackName(track);
+      });
+      return () => unsub();
+    }
+  }, []);
 
   // Time-aware greeting & icon
   const timeContext = useMemo(() => {
@@ -107,7 +146,7 @@ export function ModernAppDashboard({
     }).format(new Date());
   }, []);
 
-  // Keyboard shortcut for Search (⌘K / Ctrl+K)
+  // Keyboard shortcuts (⌘K for Search, N for New Quest)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -151,6 +190,56 @@ export function ModernAppDashboard({
     return Math.round((completedTasks.length / tasks.length) * 100);
   }, [tasks, completedTasks]);
 
+  // Handle Quick Quest Submission
+  const handleQuickSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickTitle.trim() || isQuickSubmitting) return;
+
+    setIsQuickSubmitting(true);
+    try {
+      if (onQuickCreateTask) {
+        await onQuickCreateTask({
+          title: quickTitle.trim(),
+          attributeCode: quickAttr,
+          difficulty: "Medium",
+          xpReward: 40,
+        });
+      } else {
+        onOpenCreateQuest();
+      }
+      setQuickTitle("");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsQuickSubmitting(false);
+    }
+  };
+
+  // Trigger floating particle & complete task
+  const handleTaskCheck = (e: React.MouseEvent, t: TaskItem) => {
+    sounds.playClick();
+    const rect = (e.target as HTMLElement).getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top;
+
+    const isCrit = Math.random() < 0.2; // 20% critical hit chance!
+    const xp = t.xpReward || 40;
+    const particleText = isCrit ? `+${xp * 2} XP` : `+${xp} XP`;
+
+    setParticles((prev) => [
+      ...prev,
+      {
+        id: `${t.id}-${Date.now()}`,
+        x,
+        y,
+        text: particleText,
+        isCrit,
+      },
+    ]);
+
+    onCompleteTask(t.id);
+  };
+
   const navItems = [
     { id: "HOME", label: "Home", icon: Home },
     { id: "TODAY", label: "Today", icon: CheckCircle2, count: activeTasks.length },
@@ -166,7 +255,7 @@ export function ModernAppDashboard({
   const firstName = displayName.split(" ")[0];
   const initials = (firstName.slice(0, 2) || "LV").toUpperCase();
 
-  // Category Colors
+  // Category Styles
   const categoryStyles: Record<string, { label: string; bg: string; text: string; border: string }> = {
     INT: { label: "Learning", bg: "bg-purple-500/10", text: "text-purple-300", border: "border-purple-500/25" },
     STR: { label: "Health", bg: "bg-emerald-500/10", text: "text-emerald-300", border: "border-emerald-500/25" },
@@ -180,6 +269,23 @@ export function ModernAppDashboard({
 
   return (
     <div className="min-h-screen bg-[#070913] text-slate-100 flex flex-col md:flex-row relative selection:bg-cyan-500 selection:text-black font-sans overflow-x-hidden">
+      {/* Floating XP Particles System */}
+      <FloatingParticles
+        particles={particles}
+        onRemove={(id) => setParticles((prev) => prev.filter((p) => p.id !== id))}
+      />
+
+      {/* AI Plan My Day Modal */}
+      <AiPlanMyDayModal
+        isOpen={isAiPlanOpen}
+        onClose={() => setIsAiPlanOpen(false)}
+        onAcceptQuests={async (quests) => {
+          if (onBatchCreateTasks) {
+            await onBatchCreateTasks(quests);
+          }
+        }}
+      />
+
       {/* Subtle Atmospheric Ambient Lighting */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[140px]" />
@@ -299,7 +405,7 @@ export function ModernAppDashboard({
       {/* 2. MAIN CONTENT AREA (APP BAR + CLEAN 2-COLUMN DASHBOARD)                 */}
       {/* ========================================================================= */}
       <div className="flex-1 flex flex-col min-w-0 z-10">
-        {/* Top App Bar (Search + Notifications + User Menu) */}
+        {/* Top App Bar (Search + Lo-Fi Music + Notifications + User Menu) */}
         <header className="h-16 bg-[#080B17]/80 border-b border-white/[0.07] px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30 backdrop-blur-xl">
           {/* Mobile Menu Toggle + Left Search Input */}
           <div className="flex items-center gap-3 flex-1 max-w-md">
@@ -330,6 +436,53 @@ export function ModernAppDashboard({
 
           {/* Right Action Icons & User Badge */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* FEATURE 5: Lo-Fi Ambient Synthesizer Music Player */}
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playClick();
+                  if (lofiMusic) {
+                    lofiMusic.toggle();
+                  }
+                }}
+                className={`hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-mono transition-all ${
+                  isMusicPlaying
+                    ? "bg-cyan-500/20 text-cyan-300 border-cyan-400/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                    : "bg-white/[0.04] text-slate-400 border-white/[0.08] hover:text-slate-200 hover:bg-white/[0.08]"
+                }`}
+                title="Toggle Lo-Fi Study Synthwave Music"
+              >
+                <Music className={`w-3.5 h-3.5 ${isMusicPlaying ? "text-cyan-400 animate-bounce" : ""}`} />
+                <span className="hidden lg:inline">{isMusicPlaying ? musicTrackName : "Lo-Fi BGM"}</span>
+
+                {/* Animated Equalizer Wave Bars */}
+                {isMusicPlaying && (
+                  <div className="flex items-end gap-0.5 h-3">
+                    <span className="w-0.5 h-full bg-cyan-400 animate-pulse" />
+                    <span className="w-0.5 h-2 bg-purple-400 animate-pulse delay-75" />
+                    <span className="w-0.5 h-3 bg-cyan-300 animate-pulse delay-150" />
+                  </div>
+                )}
+              </button>
+
+              {isMusicPlaying && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    sounds.playClick();
+                    if (lofiMusic) {
+                      lofiMusic.nextTrack();
+                    }
+                  }}
+                  className="hidden sm:inline-flex p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/[0.06] text-xs font-mono"
+                  title="Next ambient track"
+                >
+                  ⏭️
+                </button>
+              )}
+            </div>
+
             {/* Ask AI Companion Button */}
             <button
               type="button"
@@ -482,6 +635,15 @@ export function ModernAppDashboard({
                   </div>
                 </div>
 
+                {/* FEATURE 3: DAILY DUNGEON BOSS CARD (PROCRASTINATION DEMON) */}
+                <DailyBossCard
+                  completedTasksCount={completedTasks.length}
+                  totalXpToday={completedTasks.length * 50}
+                  onClaimVictoryLoot={() => {
+                    onRefresh();
+                  }}
+                />
+
                 {/* 2. TODAY'S FOCUS (QUEST HUB CARD) */}
                 <div className="bg-[#0C1022]/85 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.35)] flex flex-col gap-4">
                   {/* Card Header & Filter Tabs */}
@@ -498,7 +660,7 @@ export function ModernAppDashboard({
                       </span>
                     </div>
 
-                    {/* Filter Pills + Add Task */}
+                    {/* Filter Pills + AI Plan My Day + Add Task */}
                     <div className="flex items-center gap-2 flex-wrap">
                       <div className="flex items-center bg-[#070915] p-1 rounded-xl border border-white/[0.08] text-[11px]">
                         <button
@@ -536,6 +698,20 @@ export function ModernAppDashboard({
                         </button>
                       </div>
 
+                      {/* FEATURE 6: AI Plan My Day Trigger */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sounds.playClick();
+                          setIsAiPlanOpen(true);
+                        }}
+                        className="px-2.5 py-1.5 bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all"
+                        title="AI Plan My Day: Auto-generate 3 balanced daily quests"
+                      >
+                        <Wand2 className="w-3.5 h-3.5 text-amber-300" />
+                        <span className="hidden sm:inline">Plan Day</span>
+                      </button>
+
                       <button
                         type="button"
                         onClick={() => {
@@ -549,6 +725,52 @@ export function ModernAppDashboard({
                       </button>
                     </div>
                   </div>
+
+                  {/* FEATURE 2: INSTANT QUICK-CAPTURE TASK BAR */}
+                  <form onSubmit={handleQuickSubmit} className="relative flex flex-col sm:flex-row items-center gap-2 p-1.5 rounded-xl bg-[#090D1E]/90 border border-white/[0.08] shadow-inner focus-within:border-cyan-500/50 transition-all">
+                    <div className="relative flex-1 w-full flex items-center">
+                      <Zap className="w-4 h-4 text-amber-400 absolute left-3 pointer-events-none" />
+                      <input
+                        type="text"
+                        value={quickTitle}
+                        onChange={(e) => setQuickTitle(e.target.value)}
+                        placeholder="Quick capture a quest... (e.g. Read 20 pages, 30m Workout)"
+                        className="w-full bg-transparent pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* Quick Category Selector */}
+                    <div className="flex items-center gap-1 shrink-0 w-full sm:w-auto justify-between sm:justify-start px-2 sm:px-0">
+                      <div className="flex items-center gap-1">
+                        {(["INT", "STR", "WIS", "DEX"] as const).map((attr) => (
+                          <button
+                            key={attr}
+                            type="button"
+                            onClick={() => {
+                              sounds.playClick();
+                              setQuickAttr(attr);
+                            }}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-mono transition-all ${
+                              quickAttr === attr
+                                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold"
+                                : "bg-white/[0.04] text-slate-400 hover:text-slate-200"
+                            }`}
+                          >
+                            {attr}
+                          </button>
+                        ))}
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={!quickTitle.trim() || isQuickSubmitting}
+                        className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all disabled:opacity-40"
+                      >
+                        <Send className="w-3 h-3" />
+                        <span>Add</span>
+                      </button>
+                    </div>
+                  </form>
 
                   {/* Task List Items */}
                   {filteredTasks.length === 0 ? (
@@ -589,13 +811,12 @@ export function ModernAppDashboard({
                                 : "bg-[#101427]/80 hover:bg-[#141A33] border-white/[0.06] hover:border-cyan-500/30 text-white shadow-sm hover:shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:-translate-y-0.5"
                             }`}
                           >
-                            {/* Checkbox & Title */}
+                            {/* FEATURE 1: Checkbox with Particle Trigger */}
                             <div className="flex items-center gap-3 min-w-0 flex-1">
                               <button
                                 type="button"
-                                onClick={() => {
-                                  sounds.playClick();
-                                  if (!isDone) onCompleteTask(t.id);
+                                onClick={(e) => {
+                                  if (!isDone) handleTaskCheck(e, t);
                                 }}
                                 disabled={isDone}
                                 aria-label={`Complete quest ${t.title}`}
@@ -812,6 +1033,12 @@ export function ModernAppDashboard({
                   </div>
                 </div>
 
+                {/* FEATURE 4: 7-DAY WEEKLY MOMENTUM HEATMAP */}
+                <WeeklyMomentumCard
+                  currentStreak={character?.streakCurrent || 1}
+                  completedTasksCount={completedTasks.length}
+                />
+
                 {/* 2. WISDOM QUOTE CARD */}
                 <div className="bg-gradient-to-br from-[#0F142A]/80 to-[#0A0D1B]/90 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-4 sm:p-5 shadow-[0_8px_30px_rgba(0,0,0,0.35)] flex items-start gap-3">
                   <span className="text-purple-400 font-serif text-2xl leading-none select-none">
@@ -1014,7 +1241,7 @@ export function ModernAppDashboard({
                         <div className="flex items-center gap-2.5 min-w-0">
                           <button
                             type="button"
-                            onClick={() => onCompleteTask(t.id)}
+                            onClick={(e) => handleTaskCheck(e, t)}
                             className="w-5 h-5 rounded-lg border border-slate-500 hover:border-emerald-400 flex items-center justify-center shrink-0 transition-colors"
                           >
                             <Check className="w-3.5 h-3.5 opacity-0 hover:opacity-100 text-emerald-400" />
