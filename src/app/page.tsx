@@ -52,6 +52,7 @@ import { LevelUpCelebration } from "@/components/modals/LevelUpCelebration";
 import { ArcadeAuthModal } from "@/components/auth/ArcadeAuthModal";
 import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
 import { RetroArcadeZone } from "@/components/dashboard/RetroArcadeZone";
+import { ModernAppDashboard } from "@/components/dashboard/ModernAppDashboard";
 import { TaskItem } from "@/components/quests/QuestCard";
 
 export default function LevvoMainPage() {
@@ -362,9 +363,10 @@ export default function LevvoMainPage() {
   return (
     <div className="min-h-screen bg-[#060414] text-white flex flex-col selection:bg-synthMagenta selection:text-white font-sans relative overflow-x-hidden">
       {/* ========================================================================= */}
-      {/* 1. TOP NAVBAR (WITH SEAMLESS HUD / OVERVIEW SWITCHER)                     */}
+      {/* 1. TOP NAVBAR (SHOWN FOR GUESTS / LANDING)                                */}
       {/* ========================================================================= */}
-      <header className="w-full bg-[#09071A]/95 backdrop-blur-md border-b border-[#281A4C] sticky top-0 z-50 px-3 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between shadow-lg">
+      {!currentUser && (
+        <header className="w-full bg-[#09071A]/95 backdrop-blur-md border-b border-[#281A4C] sticky top-0 z-50 px-3 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between shadow-lg">
         {/* Left Brand */}
         <Link
           href="/"
@@ -426,173 +428,50 @@ export default function LevvoMainPage() {
 
         {/* Right Action Buttons */}
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-          {currentUser ? (
-            <>
-              {/* AI Oracle Button */}
-              <button
-                type="button"
-                onClick={() => {
-                  sounds.playClick();
-                  setIsAiOpen(true);
-                }}
-                className="arcade-btn px-2 sm:px-3.5 py-1.5 bg-gradient-to-r from-[#8A2BE2] to-[#9932CC] hover:brightness-110 text-white font-arcade text-[10px] sm:text-xs rounded-lg border border-purple-300 shadow-[0_0_15px_rgba(138,43,226,0.4)] flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
-                title="AI Oracle"
-                aria-label="AI Oracle"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-arcadeGold" />
-                <span className="hidden sm:inline">✦ AI ORACLE</span>
-              </button>
-
-              {/* Shop / Wardrobe Button (Desktop/Tablet) */}
-              <Link
-                href="/profile"
-                onClick={() => sounds.playClick()}
-                className="hidden sm:flex arcade-btn px-2.5 sm:px-3 py-1.5 bg-[#FFE600] hover:bg-yellow-400 text-arcadeBlack font-arcade text-xs font-bold rounded-lg border border-yellow-200 shadow-[0_2px_0_#9E8200] items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
-              >
-                <ShoppingBag className="w-3.5 h-3.5" />
-                <span>SHOP</span>
-              </Link>
-
-              {/* Login / Profile Avatar Button */}
-              <div className="flex items-center gap-1 sm:gap-2">
-                <Link
-                  href="/profile"
-                  onClick={() => sounds.playClick()}
-                  className="arcade-btn px-2.5 sm:px-3 py-1.5 bg-neonCyan hover:bg-cyan-300 text-arcadeBlack font-arcade text-[10px] sm:text-xs font-bold rounded-lg border border-cyan-200 shadow-[0_2px_0_#008B99] flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
-                >
-                  <span className="truncate max-w-[80px] sm:max-w-none">{currentUser.username}</span>
-                </Link>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="p-1.5 rounded-lg bg-[#140E2A] hover:bg-[#201445] border border-cabinetBorder text-gray-400 hover:text-white text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
-                  title="Logout"
-                >
-                  ✕
-                </button>
-              </div>
-            </>
-          ) : (
-            <Link
-              href="/login?mode=signup"
-              onClick={() => sounds.playClick()}
-              className="arcade-btn px-4 sm:px-5 py-2 bg-[#FFE600] hover:bg-yellow-400 text-arcadeBlack font-arcade text-xs font-bold rounded-xl border border-yellow-200 shadow-[0_2px_0_#9E8200] flex items-center gap-1.5 transition-transform hover:scale-105"
-            >
-              <span>Get Started</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          )}
+          <Link
+            href="/login"
+            onClick={() => sounds.playClick()}
+            className="hidden sm:inline-flex px-3.5 py-2 text-xs font-bold text-gray-300 hover:text-white transition-colors"
+          >
+            Sign In
+          </Link>
+          <Link
+            href="/login?mode=signup"
+            onClick={() => sounds.playClick()}
+            className="arcade-btn px-4 sm:px-5 py-2 bg-[#FFE600] hover:bg-yellow-400 text-arcadeBlack font-arcade text-xs font-bold rounded-xl border border-yellow-200 shadow-[0_2px_0_#9E8200] flex items-center gap-1.5 transition-transform hover:scale-105"
+          >
+            <span>Get Started</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
       </header>
+      )}
 
       {/* ========================================================================= */}
-      {/* 2. AUTHENTICATED USER: EXCLUSIVELY SHOW RPG DASHBOARD HUD                 */}
+      {/* 2. AUTHENTICATED USER: CLEAN MODERN RPG DASHBOARD                         */}
       {/* ========================================================================= */}
       {currentUser ? (
         character ? (
-          <div ref={dashboardRef} className="w-full flex-1 flex flex-col items-center p-1 sm:p-6 max-w-full overflow-hidden box-border">
-            <CrtContainer scanlines={scanlines}>
-              {/* Dashboard Marquee Bar */}
-              <ArcadeMarquee
-                scanlines={scanlines}
-                onToggleScanlines={() => setScanlines(!scanlines)}
-                currentUser={currentUser}
-                onOpenAuth={() => setIsAuthOpen(true)}
-                onLogout={handleLogout}
-              />
-
-              {/* Main Single-Page Stack (8 Ordered Sections + Retro Arcade Zone) */}
-              <main className="w-full flex-1 max-w-4xl mx-auto flex flex-col gap-5 sm:gap-6 mt-4">
-                {/* 2. Player Card */}
-                <PlayerCard
-                  username={character.username}
-                  title={character.title}
-                  level={character.currentLevel}
-                  currentLevelXp={character.currentLevelXp}
-                  xpToNextLevel={character.xpToNextLevel}
-                  progressPercent={character.progressPercent}
-                  gold={character.gold}
-                  streak={character.streakCurrent}
-                  streakPaused={character.streakPaused}
-                  avatarId={character.avatarId}
-                  ageGroup={character.ageGroup}
-                />
-
-                {/* 3. Quick Stats Row */}
-                <QuickStatsRow
-                  momentum={character.momentumScore}
-                  currentAp={character.currentAp ?? 100}
-                  maxAp={character.maxAp ?? 100}
-                  completedTasksCount={completedTasksCount}
-                  totalXp={character.totalXp}
-                />
-
-                {/* 4. Today's Quests */}
-                <div className="bg-cabinetSurface/90 border-2 border-cabinetBorder rounded-xl p-4 sm:p-5 shadow-lg">
-                  <QuestList
-                    tasks={tasks}
-                    onComplete={handleCompleteTask}
-                    onDelete={async (id) => {
-                      await fetch(`/api/v1/tasks/${id}`, { method: "DELETE" });
-                      setTasks((prev) => prev.filter((t) => t.id !== id));
-                    }}
-                    onEdit={(t) => setEditingTask(t)}
-                    onOpenCreateModal={() => setIsCreateOpen(true)}
-                    onOpenAiModal={() => setIsAiOpen(true)}
-                    onQuickAddQuest={async (q) => {
-                      const res = await fetch("/api/v1/tasks", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(q),
-                      });
-                      const d = await res.json();
-                      if (d.success) setTasks((prev) => [d.data, ...prev]);
-                    }}
-                  />
-                </div>
-
-                {/* 5. Predefined Trackers */}
-                <PredefinedTrackers
-                  trackers={[
-                    { key: "water", label: "Water", icon: "💧", count: trackerCounts["water"] ?? 0, target: 8, unit: "glasses" },
-                    { key: "gym", label: "Gym Workout", icon: "🏋️", count: trackerCounts["gym"] ?? 0, target: 1, unit: "session" },
-                    { key: "cycling", label: "Cycling", icon: "🚴", count: trackerCounts["cycling"] ?? 0, target: 1, unit: "ride" },
-                    { key: "reading", label: "Reading", icon: "📖", count: trackerCounts["reading"] ?? 0, target: 20, unit: "pages" },
-                    { key: "meditation", label: "Meditation", icon: "🧘", count: trackerCounts["meditation"] ?? 0, target: 10, unit: "mins" },
-                  ]}
-                  onIncrementTracker={handleIncrementTracker}
-                  onDecrementTracker={handleDecrementTracker}
-                />
-
-                {/* 6. Focus Chamber Timer (With 90's Pac-Man Sprint Corridor) */}
-                <ArcadeTimer tasks={tasks} onSessionComplete={handleTimerComplete} />
-
-                {/* 7. OG 90's Video Game Zone (Pac-Man Maze, Snakes & Ladders, Ludo Quadrant) */}
-                <RetroArcadeZone
-                  currentLevel={character.currentLevel}
-                  streak={character.streakCurrent}
-                  completedTasksCount={completedTasksCount}
-                  totalXp={character.totalXp}
-                  onAwardBonusXp={(amount: number, reason: string) => {
-                    showToast(`🎮 90's Arcade Win: +${amount} XP awarded for ${reason}!`);
-                    loadAllData();
-                  }}
-                />
-
-                {/* 8. Hero Journey / Progress */}
-                <JourneyProgress
-                  currentLevel={character.currentLevel}
-                  totalXp={character.totalXp}
-                  totalCompletedQuests={completedTasksCount}
-                  streakCurrent={character.streakCurrent}
-                  streakLongest={character.streakLongest}
-                />
-
-                {/* 9. Quick Milestone: Log a quick win */}
-                <QuickMilestone onLogWin={handleLogQuickWin} />
-              </main>
-            </CrtContainer>
-          </div>
+          <ModernAppDashboard
+            currentUser={currentUser}
+            character={character}
+            tasks={tasks}
+            trackerCounts={trackerCounts}
+            onCompleteTask={handleCompleteTask}
+            onDeleteTask={async (id) => {
+              await fetch(`/api/v1/tasks/${id}`, { method: "DELETE" });
+              setTasks((prev) => prev.filter((t) => t.id !== id));
+            }}
+            onEditTask={(t) => setEditingTask(t)}
+            onOpenCreateQuest={() => setIsCreateOpen(true)}
+            onOpenAiOracle={() => setIsAiOpen(true)}
+            onIncrementTracker={handleIncrementTracker}
+            onDecrementTracker={handleDecrementTracker}
+            onTimerComplete={handleTimerComplete}
+            onLogQuickWin={handleLogQuickWin}
+            onLogout={handleLogout}
+            onRefresh={loadAllData}
+          />
         ) : (
           <div className="w-full flex-1 flex flex-col items-center justify-center p-8 text-center min-h-[60vh]">
             <div className="w-16 h-16 rounded-2xl bg-synthMagenta/20 border-2 border-synthMagenta flex items-center justify-center mb-4 shadow-[0_0_25px_rgba(255,42,133,0.5)] animate-pulse">
@@ -1030,31 +909,33 @@ export default function LevvoMainPage() {
       {/* ========================================================================= */}
       {/* 4. FOOTER (EXACT MATCH TO SCREENSHOT)                                    */}
       {/* ========================================================================= */}
-      <footer className="w-full bg-[#05030E] border-t border-[#1C1236] py-5 px-4 sm:px-8 mt-auto">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 font-arcade text-xs">
-          {/* Left Brand */}
-          <div className="flex items-center gap-2">
-            <span className="text-synthMagenta">✦</span>
-            <span className="text-synthMagenta tracking-widest font-bold">LEVVO</span>
-          </div>
+      {!currentUser && (
+        <footer className="w-full bg-[#05030E] border-t border-[#1C1236] py-5 px-4 sm:px-8 mt-auto">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 font-arcade text-xs">
+            {/* Left Brand */}
+            <div className="flex items-center gap-2">
+              <span className="text-synthMagenta">✦</span>
+              <span className="text-synthMagenta tracking-widest font-bold">LEVVO</span>
+            </div>
 
-          {/* Center Pillars */}
-          <div className="text-[10px] sm:text-xs text-gray-400 tracking-widest flex items-center gap-2 select-none">
-            <span>LEARN</span>
-            <span>•</span>
-            <span>IMPROVE</span>
-            <span>•</span>
-            <span>EXPLORE</span>
-            <span>•</span>
-            <span>LEVEL UP</span>
-          </div>
+            {/* Center Pillars */}
+            <div className="text-[10px] sm:text-xs text-gray-400 tracking-widest flex items-center gap-2 select-none">
+              <span>LEARN</span>
+              <span>•</span>
+              <span>IMPROVE</span>
+              <span>•</span>
+              <span>EXPLORE</span>
+              <span>•</span>
+              <span>LEVEL UP</span>
+            </div>
 
-          {/* Right Slogan */}
-          <div className="text-[10px] text-gray-400 tracking-widest">
-            90&apos;S RETRO ARCADE LIFE RPG • LEVVO STUDIOS™
+            {/* Right Slogan */}
+            <div className="text-[10px] text-gray-400 tracking-widest">
+              90&apos;S RETRO ARCADE LIFE RPG • LEVVO STUDIOS™
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      )}
 
       {/* ========================================================================= */}
       {/* MODALS                                                                    */}
