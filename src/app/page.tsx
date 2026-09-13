@@ -180,8 +180,17 @@ export default function LevvoMainPage() {
   }, [viewMode]);
 
   const initApp = async () => {
-    await checkAuth();
-    await loadAllData();
+    setLoading(true);
+    try {
+      const user = await checkAuth();
+      if (user) {
+        await loadAllData();
+      }
+    } catch (err) {
+      console.error("Init app error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const checkAuth = async () => {
@@ -191,13 +200,16 @@ export default function LevvoMainPage() {
       if (data.success && data.user) {
         setCurrentUser(data.user);
         setViewMode("DASHBOARD");
+        return data.user;
       } else {
         setCurrentUser(null);
         setViewMode("OVERVIEW");
+        return null;
       }
     } catch {
       setCurrentUser(null);
       setViewMode("OVERVIEW");
+      return null;
     }
   };
 
@@ -227,8 +239,6 @@ export default function LevvoMainPage() {
       if (trackersData.success && trackersData.data) setTrackerCounts(trackersData.data);
     } catch (err) {
       console.error("Failed to load dashboard data:", err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -385,6 +395,77 @@ export default function LevvoMainPage() {
   };
 
   const completedTasksCount = tasks.filter((t) => t.status === "COMPLETED").length;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen w-full bg-[#070514] flex flex-col items-center justify-center p-4 relative overflow-hidden select-none">
+        {/* Background Arcade Ambient Grid */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#1B0F3A]/70 via-[#0A0518]/95 to-[#05030D] z-0" />
+        <div
+          className="absolute inset-0 opacity-[0.08] z-0 pointer-events-none"
+          style={{
+            backgroundImage: "linear-gradient(#00F0FF 1px, transparent 1px), linear-gradient(90deg, #00F0FF 1px, transparent 1px)",
+            backgroundSize: "32px 32px",
+          }}
+        />
+
+        {/* CRT Scanline Overlay */}
+        <div className="absolute inset-0 pointer-events-none z-20 crt-scanlines opacity-40" />
+
+        {/* Center Arcade Cabinet Box */}
+        <div className="relative z-10 max-w-md w-full flex flex-col items-center text-center p-8 rounded-3xl bg-[#100B24]/95 border-2 border-[#FFE600]/40 shadow-[0_0_50px_rgba(255,230,0,0.25),inset_0_0_30px_rgba(0,0,0,0.8)] backdrop-blur-xl">
+          {/* Retro Header Badge */}
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#1C1238] border border-[#FFE600]/40 mb-6 shadow-inner">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span className="font-arcade text-[10px] text-emerald-300 tracking-widest">
+              ARCADE HARDWARE SYSTEM-94
+            </span>
+          </div>
+
+          {/* Animated Pulsing Gold Coin Slot */}
+          <div className="relative my-3 flex flex-col items-center group">
+            {/* Outer Gold Ring Glow */}
+            <div className="w-24 h-24 rounded-full bg-gradient-to-b from-[#FFE600] via-[#FFB800] to-[#8C6200] p-1.5 shadow-[0_0_35px_rgba(255,230,0,0.5)] animate-pulse">
+              <div className="w-full h-full rounded-full bg-[#140D2B] border-2 border-[#FFE600]/60 flex flex-col items-center justify-center relative overflow-hidden">
+                {/* Coin Slot Slit */}
+                <div className="w-3 h-11 bg-black rounded-sm border border-[#FFE600]/50 shadow-[inset_0_0_8px_rgba(0,0,0,0.9)] flex items-center justify-center">
+                  <div className="w-0.5 h-8 bg-[#FFE600] animate-pulse" />
+                </div>
+              </div>
+            </div>
+            {/* Coin Value Text */}
+            <span className="font-arcade text-[10px] text-[#FFE600] mt-2 tracking-widest">
+              25¢ INSERT COIN
+            </span>
+          </div>
+
+          {/* Pulsing Loading Banner */}
+          <div className="mt-4">
+            <h2 className="font-arcade text-base sm:text-lg text-[#FFE600] neon-glow-gold tracking-widest uppercase animate-pulse">
+              INSERT COIN // READY
+            </h2>
+            <p className="font-mono text-xs text-cyan-300 mt-1.5 tracking-wider">
+              SYNCHRONIZING HERO REALM &amp; GUILD DATA...
+            </p>
+          </div>
+
+          {/* Pixel Progress Bar */}
+          <div className="w-full max-w-xs mt-6 bg-[#080512] p-1 rounded-lg border border-cyan-500/30 shadow-inner">
+            <div className="h-2.5 w-full bg-[#0D0A1C] rounded overflow-hidden flex gap-0.5 p-0.5">
+              <div className="h-full w-full bg-gradient-to-r from-[#00F0FF] via-[#FF2A85] to-[#FFE600] rounded-sm animate-[pulse_1.2s_ease-in-out_infinite]" />
+            </div>
+          </div>
+
+          {/* Bottom Credits & Status Indicator */}
+          <div className="mt-6 flex items-center justify-between w-full text-[10px] font-arcade text-slate-400 border-t border-white/[0.08] pt-4">
+            <span className="text-cyan-400">CREDIT: 02</span>
+            <span className="text-emerald-400 animate-pulse">● 1P READY</span>
+            <span className="text-amber-400">STAGE: 01</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#060414] text-white flex flex-col selection:bg-synthMagenta selection:text-white font-sans relative overflow-x-hidden">

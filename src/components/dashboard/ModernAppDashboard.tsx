@@ -449,6 +449,62 @@ export function ModernAppDashboard({
           })}
         </nav>
 
+        {/* Mobile Quick Action Utilities (Lo-Fi BGM, Ask AI, Share Card) */}
+        <div className="md:hidden px-3 pt-2 pb-2 border-t border-white/[0.06] flex flex-col gap-1.5">
+          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider px-1">Quick Tools</span>
+          
+          <button
+            type="button"
+            onClick={() => {
+              sounds.playClick();
+              if (lofiMusic) lofiMusic.toggle();
+            }}
+            className={`w-full px-3 py-2 rounded-xl border text-xs font-mono flex items-center justify-between transition-all ${
+              isMusicPlaying
+                ? "bg-cyan-500/20 text-cyan-300 border-cyan-400/50 shadow-[0_0_12px_rgba(6,182,212,0.3)]"
+                : "bg-white/[0.04] text-slate-400 border-white/[0.08]"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Music className={`w-3.5 h-3.5 ${isMusicPlaying ? "text-cyan-400 animate-bounce" : ""}`} />
+              <span>{isMusicPlaying ? musicTrackName : "Lo-Fi BGM"}</span>
+            </div>
+            <span className="text-[10px] text-cyan-400 font-bold">{isMusicPlaying ? "PLAYING" : "OFF"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              sounds.playClick();
+              setMobileMenuOpen(false);
+              onOpenAiOracle();
+            }}
+            className="w-full px-3 py-2 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-200 text-xs font-medium flex items-center justify-between"
+          >
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              <span>Ask AI Companion</span>
+            </div>
+            <span className="text-[10px] text-purple-300 font-mono">ORACLE</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              sounds.playClick();
+              setMobileMenuOpen(false);
+              setIsShareVictoryOpen(true);
+            }}
+            className="w-full px-3 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-between"
+          >
+            <div className="flex items-center gap-2">
+              <Trophy className="w-3.5 h-3.5 text-amber-400" />
+              <span>Share Victory Card</span>
+            </div>
+            <span className="text-[10px] text-amber-400 font-mono">EXPORT</span>
+          </button>
+        </div>
+
         {/* Bottom Sidebar Pixel Character & Quote Widget */}
         <div className="p-3.5 m-3 rounded-xl border border-white/[0.07] bg-gradient-to-br from-[#10152B] to-[#0A0D1A] flex items-center gap-3 shadow-inner">
           <div className="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0 text-lg select-none shadow-[0_0_12px_rgba(6,182,212,0.15)]">
@@ -513,7 +569,7 @@ export function ModernAppDashboard({
                     lofiMusic.toggle();
                   }
                 }}
-                className={`hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-mono transition-all ${
+                className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border text-xs font-mono transition-all ${
                   isMusicPlaying
                     ? "bg-cyan-500/20 text-cyan-300 border-cyan-400/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
                     : "bg-white/[0.04] text-slate-400 border-white/[0.08] hover:text-slate-200 hover:bg-white/[0.08]"
@@ -521,7 +577,8 @@ export function ModernAppDashboard({
                 title="Toggle Lo-Fi Study Synthwave Music"
               >
                 <Music className={`w-3.5 h-3.5 ${isMusicPlaying ? "text-cyan-400 animate-bounce" : ""}`} />
-                <span className="hidden lg:inline">{isMusicPlaying ? musicTrackName : "Lo-Fi BGM"}</span>
+                <span className="hidden md:inline">{isMusicPlaying ? musicTrackName : "Lo-Fi BGM"}</span>
+                <span className="md:hidden text-[10px] font-mono">BGM</span>
 
                 {/* Animated Equalizer Wave Bars */}
                 {isMusicPlaying && (
@@ -542,7 +599,7 @@ export function ModernAppDashboard({
                       lofiMusic.nextTrack();
                     }
                   }}
-                  className="hidden sm:inline-flex p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/[0.06] text-xs font-mono"
+                  className="inline-flex p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/[0.06] text-xs font-mono"
                   title="Next ambient track"
                 >
                   ⏭️
@@ -557,25 +614,28 @@ export function ModernAppDashboard({
                 sounds.playClick();
                 onOpenAiOracle();
               }}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-200 text-xs font-medium hover:bg-purple-500/30 hover:border-purple-400/50 transition-all hover:scale-[1.02] shadow-[0_0_15px_rgba(168,85,247,0.15)]"
+              className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-200 text-xs font-medium hover:bg-purple-500/30 hover:border-purple-400/50 transition-all hover:scale-[1.02] shadow-[0_0_15px_rgba(168,85,247,0.15)]"
+              title="Ask AI Companion Oracle"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin-slow" />
-              <span>Ask AI</span>
+              <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin-slow shrink-0" />
+              <span className="hidden sm:inline">Ask </span>
+              <span>AI</span>
             </button>
 
             {/* Share Victory Card Trigger with Magnetic Hover */}
-            <MagneticWrapper strength={0.25} className="hidden sm:inline-block">
+            <MagneticWrapper strength={0.25} className="inline-block">
               <button
                 type="button"
                 onClick={() => {
                   sounds.playClick();
                   setIsShareVictoryOpen(true);
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold shadow-sm transition-all hover:scale-105 active:scale-95"
+                className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold shadow-sm transition-all hover:scale-105 active:scale-95"
                 title="Share your daily hero achievements"
               >
-                <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                <span>Share Card</span>
+                <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span className="hidden sm:inline">Share </span>
+                <span>Card</span>
               </button>
             </MagneticWrapper>
 
@@ -1548,14 +1608,22 @@ export function ModernAppDashboard({
           {/* TAB: LEADERBOARD (ARCADE HIGH-SCORE HALL OF LEGENDS) */}
           {activeTab === "LEADERBOARD" && (
             <div className="flex flex-col gap-6">
-              <SocialLeaderboard />
+              <SocialLeaderboard
+                currentUserName={character?.username || currentUser?.username}
+                currentUserLevel={character?.currentLevel}
+                currentUserXp={character?.totalXp}
+                currentUserStreak={character?.streakCurrent}
+              />
             </div>
           )}
 
           {/* TAB: GUILD (CO-OP GUILD RAID BOSS BATTLE) */}
           {activeTab === "GUILD" && (
             <div className="flex flex-col gap-6">
-              <PartyRaidSection onDealBossDamage={() => onRefresh()} />
+              <PartyRaidSection
+                onDealBossDamage={() => onRefresh()}
+                currentUserName={character?.username || currentUser?.username}
+              />
             </div>
           )}
 

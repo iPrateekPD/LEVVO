@@ -9,7 +9,10 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   try {
     const session = await getSessionUser(req);
-    const userId = session?.userId ?? "default-user-hero";
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const userId = session.userId;
 
     // Fetch activity logs for this user
     const logs = await prisma.activityLog.findMany({

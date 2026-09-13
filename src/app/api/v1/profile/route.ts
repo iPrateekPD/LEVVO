@@ -22,7 +22,10 @@ const UpdateProfileSchema = z.object({
 export async function GET(req: Request) {
   try {
     const session = await getSessionUser(req);
-    const userId = session?.userId ?? "default-user-hero";
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const userId = session.userId;
 
     const profile = await prisma.profile.findUnique({
       where: { userId },
@@ -73,7 +76,10 @@ export async function GET(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const session = await getSessionUser(req);
-    const userId = session?.userId ?? "default-user-hero";
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const userId = session.userId;
 
     const body = await req.json();
     const parsed = UpdateProfileSchema.safeParse(body);

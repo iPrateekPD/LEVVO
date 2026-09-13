@@ -41,7 +41,10 @@ const GenerateCampaignSchema = z.object({
 export async function POST(req: Request) {
   try {
     const session = await getSessionUser(req);
-    const userId = session?.userId ?? "default-user-hero";
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const userId = session.userId;
 
     // 1. Enforce 5/hour rate limit
     const rateLimit = checkAiRateLimit(userId);

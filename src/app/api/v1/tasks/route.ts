@@ -54,7 +54,10 @@ const CreateTaskSchema = z.object({
 export async function GET(req: Request) {
   try {
     const session = await getSessionUser(req);
-    const userId = session?.userId ?? "default-user-hero";
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const userId = session.userId;
 
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status");
@@ -89,7 +92,10 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const session = await getSessionUser(req);
-    const userId = session?.userId ?? "default-user-hero";
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const userId = session.userId;
 
     // 1. Enforce sliding-window rate limit (max 20 new tasks per 24 hours per user)
     const rateLimit = checkTaskCreationRateLimit(userId);

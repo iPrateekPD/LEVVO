@@ -14,7 +14,10 @@ const StageSchema = z.object({
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getSessionUser(req);
-    const userId = session?.userId ?? "default-user-hero";
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const userId = session.userId;
 
     const { id } = params;
     const body = await req.json();

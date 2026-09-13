@@ -8,7 +8,10 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   try {
     const session = await getSessionUser(req);
-    const userId = session?.userId ?? "default-user-hero";
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const userId = session.userId;
 
     // Find guild membership
     let membership = await prisma.guildMember.findFirst({
@@ -129,7 +132,10 @@ const RaidAttackSchema = z.object({
 export async function POST(req: Request) {
   try {
     const session = await getSessionUser(req);
-    const userId = session?.userId ?? "default-user-hero";
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const userId = session.userId;
 
     const body = await req.json();
     const parsed = RaidAttackSchema.safeParse(body);

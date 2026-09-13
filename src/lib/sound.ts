@@ -6,12 +6,37 @@
 class SoundEngine {
   private ctx: AudioContext | null = null;
   private isMuted: boolean = false;
+  private isUnlocked: boolean = false;
 
   constructor() {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("life_rpg_sfx_muted");
       this.isMuted = saved === "true";
+      this.setupMobileUnlock();
     }
+  }
+
+  private setupMobileUnlock() {
+    if (typeof window === "undefined") return;
+    const unlockEvents = ["touchstart", "touchend", "pointerdown", "click"];
+    const unlock = () => {
+      this.getContext();
+      if (this.ctx && this.ctx.state === "suspended") {
+        this.ctx.resume().catch(() => {});
+      }
+      if (this.ctx) {
+        try {
+          const buffer = this.ctx.createBuffer(1, 1, 22050);
+          const source = this.ctx.createBufferSource();
+          source.buffer = buffer;
+          source.connect(this.ctx.destination);
+          source.start(0);
+          this.isUnlocked = true;
+        } catch {}
+      }
+      unlockEvents.forEach((ev) => window.removeEventListener(ev, unlock, true));
+    };
+    unlockEvents.forEach((ev) => window.addEventListener(ev, unlock, { capture: true, passive: true }));
   }
 
   private getContext(): AudioContext | null {
@@ -23,7 +48,7 @@ class SoundEngine {
       }
     }
     if (this.ctx && this.ctx.state === "suspended") {
-      this.ctx.resume();
+      this.ctx.resume().catch(() => {});
     }
     return this.ctx;
   }

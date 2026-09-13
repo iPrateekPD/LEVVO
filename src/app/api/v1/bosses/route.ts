@@ -24,7 +24,10 @@ const CreateBossSchema = z.object({
 export async function GET(req: Request) {
   try {
     const session = await getSessionUser(req);
-    const userId = session?.userId ?? "default-user-hero";
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const userId = session.userId;
 
     const bosses = await prisma.boss.findMany({
       where: { userId },
@@ -46,7 +49,10 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const session = await getSessionUser(req);
-    const userId = session?.userId ?? "default-user-hero";
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const userId = session.userId;
 
     const body = await req.json();
     const parsed = CreateBossSchema.safeParse(body);

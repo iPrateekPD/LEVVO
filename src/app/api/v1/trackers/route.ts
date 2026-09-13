@@ -17,7 +17,10 @@ const TrackerUpdateSchema = z.object({
 export async function GET(req: Request) {
   try {
     const session = await getSessionUser(req);
-    const userId = session?.userId ?? "default-user-hero";
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const userId = session.userId;
 
     const now = new Date();
     const todayStr = now.toISOString().split("T")[0];
@@ -44,7 +47,10 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const session = await getSessionUser(req);
-    const userId = session?.userId ?? "default-user-hero";
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const userId = session.userId;
 
     const body = await req.json();
     const parsed = TrackerUpdateSchema.safeParse(body);

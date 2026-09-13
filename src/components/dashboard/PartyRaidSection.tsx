@@ -15,9 +15,10 @@ interface Companion {
 
 interface PartyRaidSectionProps {
   onDealBossDamage?: (dmg: number) => void;
+  currentUserName?: string;
 }
 
-export function PartyRaidSection({ onDealBossDamage }: PartyRaidSectionProps) {
+export function PartyRaidSection({ onDealBossDamage, currentUserName }: PartyRaidSectionProps) {
   const [bossHp, setBossHp] = useState(340);
   const maxBossHp = 2000;
   const [isStriking, setIsStriking] = useState(false);
@@ -31,7 +32,7 @@ export function PartyRaidSection({ onDealBossDamage }: PartyRaidSectionProps) {
     { id: "1", name: "Aria", avatar: "🧙‍♀️", role: "Arcanist", damage: 420, isReady: true },
     { id: "2", name: "Kaelen", avatar: "🛡️", role: "Warden", damage: 580, isReady: true },
     { id: "3", name: "Boran", avatar: "🏹", role: "Ranger", damage: 310, isReady: true },
-    { id: "4", name: "Prateek (You)", avatar: "⚡", role: "Paladin", damage: 350, isReady: true },
+    { id: "4", name: currentUserName ? `${currentUserName} (You)` : "Hero (You)", avatar: "⚡", role: "Paladin", damage: 350, isReady: true },
   ];
 
   const handleStrike = () => {

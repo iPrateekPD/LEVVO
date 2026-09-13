@@ -16,8 +16,25 @@ interface LeaderboardPlayer {
   isCurrentUser?: boolean;
 }
 
-export function SocialLeaderboard() {
+interface SocialLeaderboardProps {
+  currentUserName?: string;
+  currentUserLevel?: number;
+  currentUserXp?: number;
+  currentUserStreak?: number;
+}
+
+export function SocialLeaderboard({
+  currentUserName,
+  currentUserLevel,
+  currentUserXp,
+  currentUserStreak,
+}: SocialLeaderboardProps) {
   const [activeTab, setActiveTab] = useState<"global" | "guild" | "weekly">("global");
+
+  const resolvedName = (currentUserName || "EXPLORER").toUpperCase();
+  const resolvedLevel = currentUserLevel || 4;
+  const resolvedXp = currentUserXp || 1450;
+  const resolvedStreak = currentUserStreak || 5;
 
   const players: LeaderboardPlayer[] = [
     {
@@ -52,12 +69,12 @@ export function SocialLeaderboard() {
     },
     {
       rank: 4,
-      name: "PRATEEK (YOU)",
+      name: resolvedName,
       avatar: "⚡",
       archetype: "Cyber Knight",
-      level: 5,
-      xp: 1450,
-      streak: 6,
+      level: resolvedLevel,
+      xp: resolvedXp,
+      streak: resolvedStreak,
       badge: "RISING STAR",
       isCurrentUser: true,
     },
