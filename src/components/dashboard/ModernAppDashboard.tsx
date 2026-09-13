@@ -275,7 +275,6 @@ export function ModernAppDashboard({
     { id: "ARCADE", label: "Arcade", icon: Gamepad2 },
     { id: "LEADERBOARD", label: "Legends", icon: Trophy },
     { id: "GUILD", label: "Co-Op Raid", icon: Swords },
-    { id: "PROFILE", label: "Profile", icon: User },
   ] as const;
 
   // Determine user display name & initials
@@ -296,7 +295,7 @@ export function ModernAppDashboard({
   const TimeIcon = timeContext.icon;
 
   return (
-    <div className="min-h-screen bg-[#070913] text-slate-100 flex flex-col md:flex-row relative selection:bg-cyan-500 selection:text-black font-sans overflow-x-hidden">
+    <div className="min-h-screen md:h-screen md:overflow-hidden bg-[#070913] text-slate-100 flex flex-col md:flex-row relative selection:bg-cyan-500 selection:text-black font-sans">
       {/* Ambient Mouse Cursor Follower Glow */}
       <AmbientCursorGlow />
 
@@ -360,13 +359,16 @@ export function ModernAppDashboard({
       {/* ========================================================================= */}
       {/* 1. LEFT MODERN SIDEBAR                                                    */}
       {/* ========================================================================= */}
+      {/* ========================================================================= */}
+      {/* 1. LEFT MODERN SIDEBAR (FIXED & CONSISTENT ON ALL VIEWS)                  */}
+      {/* ========================================================================= */}
       <aside
-        className={`w-64 bg-[#0A0D1B]/95 backdrop-blur-xl border-r border-white/[0.07] flex flex-col shrink-0 z-40 transition-transform duration-200 ease-in-out md:translate-x-0 ${
-          mobileMenuOpen ? "fixed inset-y-0 left-0 shadow-2xl" : "hidden md:flex"
+        className={`w-64 bg-[#0A0D1B]/95 backdrop-blur-xl border-r border-white/[0.07] flex flex-col shrink-0 z-40 md:h-full md:max-h-full transition-transform duration-200 ease-in-out md:translate-x-0 ${
+          mobileMenuOpen ? "fixed inset-y-0 left-0 h-screen max-h-screen shadow-2xl" : "hidden md:flex"
         }`}
       >
         {/* Brand Header */}
-        <div className="p-5 flex items-center justify-between border-b border-white/[0.07]">
+        <div className="p-4 sm:p-5 flex items-center justify-between border-b border-white/[0.07] shrink-0">
           <Link
             href="/"
             onClick={() => {
@@ -405,108 +407,167 @@ export function ModernAppDashboard({
           </button>
         </div>
 
-        {/* Navigation Links */}
-        <nav className="flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            return (
+        {/* Scrollable Navigation & Quick Actions Area */}
+        <div className="flex-1 px-3 py-3 flex flex-col gap-3 overflow-y-auto min-h-0">
+          {/* Main Navigation Links */}
+          <nav className="flex flex-col gap-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    sounds.playClick();
+                    setActiveTab(item.id as any);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full px-3.5 py-2 rounded-xl text-xs flex items-center justify-between transition-all group ${
+                    isActive
+                      ? "bg-gradient-to-r from-cyan-500/15 via-purple-500/10 to-transparent text-cyan-300 font-semibold border-l-2 border-cyan-400 shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon
+                      className={`w-4 h-4 transition-colors ${
+                        isActive ? "text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]" : "text-slate-400 group-hover:text-slate-200"
+                      }`}
+                    />
+                    <span>{item.label}</span>
+                  </div>
+                  {"count" in item && item.count !== undefined && item.count > 0 && (
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-mono transition-colors ${
+                        isActive
+                          ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
+                          : "bg-white/[0.06] text-slate-300 border border-white/[0.08]"
+                      }`}
+                    >
+                      {item.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Quick Actions (Brought directly into the left section for easy 1-click access across all tabs) */}
+          <div className="pt-2 border-t border-white/[0.06] flex flex-col gap-2">
+            <div className="flex items-center gap-1.5 px-2 text-[10px] font-mono uppercase tracking-wider text-amber-400 font-bold">
+              <Zap className="w-3.5 h-3.5 text-amber-400" />
+              <span>Quick Actions</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-1.5 px-0.5">
+              {/* New Task */}
               <button
-                key={item.id}
                 type="button"
                 onClick={() => {
                   sounds.playClick();
-                  setActiveTab(item.id as any);
                   setMobileMenuOpen(false);
+                  onOpenCreateQuest();
                 }}
-                className={`w-full px-3.5 py-2.5 rounded-xl text-xs flex items-center justify-between transition-all group ${
-                  isActive
-                    ? "bg-gradient-to-r from-cyan-500/15 via-purple-500/10 to-transparent text-cyan-300 font-semibold border-l-2 border-cyan-400 shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]"
-                }`}
+                className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-cyan-500/40 flex flex-col items-center justify-center gap-1 text-center transition-all group shadow-sm hover:scale-[1.02]"
+                title="Create a new task"
               >
-                <div className="flex items-center gap-3">
-                  <Icon
-                    className={`w-4 h-4 transition-colors ${
-                      isActive ? "text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]" : "text-slate-400 group-hover:text-slate-200"
-                    }`}
-                  />
-                  <span>{item.label}</span>
+                <div className="w-6 h-6 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                  <Plus className="w-3.5 h-3.5" />
                 </div>
-                {"count" in item && item.count !== undefined && item.count > 0 && (
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-mono transition-colors ${
-                      isActive
-                        ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
-                        : "bg-white/[0.06] text-slate-300 border border-white/[0.08]"
-                    }`}
-                  >
-                    {item.count}
-                  </span>
-                )}
+                <span className="text-[10px] font-medium text-slate-300">New Task</span>
               </button>
-            );
-          })}
-        </nav>
 
-        {/* Mobile Quick Action Utilities (Lo-Fi BGM, Ask AI, Share Card) */}
-        <div className="md:hidden px-3 pt-2 pb-2 border-t border-white/[0.06] flex flex-col gap-1.5">
-          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider px-1">Quick Tools</span>
-          
-          <button
-            type="button"
-            onClick={() => {
-              sounds.playClick();
-              if (lofiMusic) lofiMusic.toggle();
-            }}
-            className={`w-full px-3 py-2 rounded-xl border text-xs font-mono flex items-center justify-between transition-all ${
-              isMusicPlaying
-                ? "bg-cyan-500/20 text-cyan-300 border-cyan-400/50 shadow-[0_0_12px_rgba(6,182,212,0.3)]"
-                : "bg-white/[0.04] text-slate-400 border-white/[0.08]"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <Music className={`w-3.5 h-3.5 ${isMusicPlaying ? "text-cyan-400 animate-bounce" : ""}`} />
-              <span>{isMusicPlaying ? musicTrackName : "Lo-Fi BGM"}</span>
-            </div>
-            <span className="text-[10px] text-cyan-400 font-bold">{isMusicPlaying ? "PLAYING" : "OFF"}</span>
-          </button>
+              {/* Focus Mode */}
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playClick();
+                  setMobileMenuOpen(false);
+                  setActiveTab("FOCUS");
+                }}
+                className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-purple-500/40 flex flex-col items-center justify-center gap-1 text-center transition-all group shadow-sm hover:scale-[1.02]"
+                title="Enter Focus Mode"
+              >
+                <div className="w-6 h-6 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                  <Clock className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-[10px] font-medium text-slate-300">Focus Mode</span>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              sounds.playClick();
-              setMobileMenuOpen(false);
-              onOpenAiOracle();
-            }}
-            className="w-full px-3 py-2 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-200 text-xs font-medium flex items-center justify-between"
-          >
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>Ask AI Companion</span>
-            </div>
-            <span className="text-[10px] text-purple-300 font-mono">ORACLE</span>
-          </button>
+              {/* Ask AI */}
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playClick();
+                  setMobileMenuOpen(false);
+                  onOpenAiOracle();
+                }}
+                className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-amber-500/40 flex flex-col items-center justify-center gap-1 text-center transition-all group shadow-sm hover:scale-[1.02]"
+                title="Consult AI Oracle"
+              >
+                <div className="w-6 h-6 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                  <Sparkles className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-[10px] font-medium text-slate-300">Ask AI</span>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              sounds.playClick();
-              setMobileMenuOpen(false);
-              setIsShareVictoryOpen(true);
-            }}
-            className="w-full px-3 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-between"
-          >
-            <div className="flex items-center gap-2">
-              <Trophy className="w-3.5 h-3.5 text-amber-400" />
-              <span>Share Victory Card</span>
+              {/* Progress */}
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playClick();
+                  setMobileMenuOpen(false);
+                  setActiveTab("PROGRESS");
+                }}
+                className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-emerald-500/40 flex flex-col items-center justify-center gap-1 text-center transition-all group shadow-sm hover:scale-[1.02]"
+                title="View Progress"
+              >
+                <div className="w-6 h-6 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                  <BarChart3 className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-[10px] font-medium text-slate-300">Progress</span>
+              </button>
+
+              {/* Legends */}
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playClick();
+                  setMobileMenuOpen(false);
+                  setActiveTab("LEADERBOARD");
+                }}
+                className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-amber-500/40 flex flex-col items-center justify-center gap-1 text-center transition-all group shadow-sm hover:scale-[1.02]"
+                title="Arcade Hall of Legends"
+              >
+                <div className="w-6 h-6 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                  <Trophy className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-[10px] font-medium text-slate-300">Legends</span>
+              </button>
+
+              {/* Co-Op Raid */}
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playClick();
+                  setMobileMenuOpen(false);
+                  setActiveTab("GUILD");
+                }}
+                className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-rose-500/40 flex flex-col items-center justify-center gap-1 text-center transition-all group shadow-sm hover:scale-[1.02]"
+                title="Co-Op Guild Raid"
+              >
+                <div className="w-6 h-6 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400 group-hover:scale-110 transition-transform">
+                  <Swords className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-[10px] font-medium text-slate-300">Co-Op Raid</span>
+              </button>
             </div>
-            <span className="text-[10px] text-amber-400 font-mono">EXPORT</span>
-          </button>
+          </div>
         </div>
 
-        {/* Bottom Sidebar Pixel Character & Quote Widget */}
-        <div className="p-3.5 m-3 rounded-xl border border-white/[0.07] bg-gradient-to-br from-[#10152B] to-[#0A0D1A] flex items-center gap-3 shadow-inner">
+        {/* Pinned Bottom Sidebar Pixel Character & Quote Widget (Permanently visible in full) */}
+        <div className="p-3.5 m-3 rounded-xl border border-white/[0.07] bg-gradient-to-br from-[#10152B] to-[#0A0D1A] flex items-center gap-3 shadow-inner shrink-0 mt-auto">
           <div className="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0 text-lg select-none shadow-[0_0_12px_rgba(6,182,212,0.15)]">
             🧙‍♂️
           </div>
@@ -527,9 +588,9 @@ export function ModernAppDashboard({
       {/* ========================================================================= */}
       {/* 2. MAIN CONTENT AREA (APP BAR + CLEAN 2-COLUMN DASHBOARD)                 */}
       {/* ========================================================================= */}
-      <div className="flex-1 flex flex-col min-w-0 z-10">
+      <div className="flex-1 flex flex-col min-w-0 z-10 md:h-full md:overflow-y-auto">
         {/* Top App Bar (Search + Lo-Fi Music + Notifications + User Menu) */}
-        <header className="h-16 bg-[#080B17]/80 border-b border-white/[0.07] px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30 backdrop-blur-xl">
+        <header className="h-16 bg-[#080B17]/80 border-b border-white/[0.07] px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30 backdrop-blur-xl shrink-0">
           {/* Mobile Menu Toggle + Left Search Input */}
           <div className="flex items-center gap-3 flex-1 max-w-md">
             <button
@@ -1304,115 +1365,14 @@ export function ModernAppDashboard({
                           className="w-6 h-6 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] flex items-center justify-center text-slate-300 text-xs transition-colors"
                           aria-label="Increase water count"
                         >
-                          +
                         </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-
-                {/* 4. QUICK ACTIONS (2x2 GRID) */}
-                <div className="bg-[#0C1022]/85 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-[0_8px_30px_rgba(0,0,0,0.35)] flex flex-col gap-3">
-                  <div className="flex items-center gap-2 text-xs font-bold text-white tracking-wide">
-                    <Zap className="w-4 h-4 text-amber-400" />
-                    <span>Quick Actions</span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {/* Action 1: New Task */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        sounds.playClick();
-                        onOpenCreateQuest();
-                      }}
-                      className="p-3 rounded-xl bg-[#101427]/80 hover:bg-[#151B33] border border-white/[0.06] hover:border-cyan-500/40 flex flex-col items-center justify-center gap-1.5 transition-all text-center group shadow-sm hover:scale-[1.02]"
-                    >
-                      <div className="w-7 h-7 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
-                        <Plus className="w-4 h-4" />
-                      </div>
-                      <span className="text-[11px] font-semibold text-slate-200">New Task</span>
-                    </button>
-
-                    {/* Action 2: Focus Mode */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        sounds.playClick();
-                        setActiveTab("FOCUS");
-                      }}
-                      className="p-3 rounded-xl bg-[#101427]/80 hover:bg-[#151B33] border border-white/[0.06] hover:border-purple-500/40 flex flex-col items-center justify-center gap-1.5 transition-all text-center group shadow-sm hover:scale-[1.02]"
-                    >
-                      <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
-                        <Clock className="w-4 h-4" />
-                      </div>
-                      <span className="text-[11px] font-semibold text-slate-200">Focus Mode</span>
-                    </button>
-
-                    {/* Action 3: Ask AI */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        sounds.playClick();
-                        onOpenAiOracle();
-                      }}
-                      className="p-3 rounded-xl bg-[#101427]/80 hover:bg-[#151B33] border border-white/[0.06] hover:border-amber-500/40 flex flex-col items-center justify-center gap-1.5 transition-all text-center group shadow-sm hover:scale-[1.02]"
-                    >
-                      <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
-                        <Sparkles className="w-4 h-4" />
-                      </div>
-                      <span className="text-[11px] font-semibold text-slate-200">Ask AI</span>
-                    </button>
-
-                    {/* Action 4: View Progress */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        sounds.playClick();
-                        setActiveTab("PROGRESS");
-                      }}
-                      className="p-3 rounded-xl bg-[#101427]/80 hover:bg-[#151B33] border border-white/[0.06] hover:border-emerald-500/40 flex flex-col items-center justify-center gap-1.5 transition-all text-center group shadow-sm hover:scale-[1.02]"
-                    >
-                      <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-                        <BarChart3 className="w-4 h-4" />
-                      </div>
-                      <span className="text-[11px] font-semibold text-slate-200">Progress</span>
-                    </button>
-
-                    {/* Action 5: Legends */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        sounds.playClick();
-                        setActiveTab("LEADERBOARD");
-                      }}
-                      className="p-3 rounded-xl bg-[#101427]/80 hover:bg-[#151B33] border border-white/[0.06] hover:border-amber-500/40 flex flex-col items-center justify-center gap-1.5 transition-all text-center group shadow-sm hover:scale-[1.02]"
-                    >
-                      <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
-                        <Trophy className="w-4 h-4" />
-                      </div>
-                      <span className="text-[11px] font-semibold text-slate-200">Legends</span>
-                    </button>
-
-                    {/* Action 6: Co-Op Raid */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        sounds.playClick();
-                        setActiveTab("GUILD");
-                      }}
-                      className="p-3 rounded-xl bg-[#101427]/80 hover:bg-[#151B33] border border-white/[0.06] hover:border-rose-500/40 flex flex-col items-center justify-center gap-1.5 transition-all text-center group shadow-sm hover:scale-[1.02]"
-                    >
-                      <div className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400 group-hover:scale-110 transition-transform">
-                        <Swords className="w-4 h-4" />
-                      </div>
-                      <span className="text-[11px] font-semibold text-slate-200">Co-Op Raid</span>
-                    </button>
-                  </div>
-                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* TAB 2: TODAY (FULL-LENGTH QUEST MANAGER) */}
           {activeTab === "TODAY" && (
