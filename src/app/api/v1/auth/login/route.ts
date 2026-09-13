@@ -96,8 +96,9 @@ export async function POST(req: Request) {
     });
 
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Login error:", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
+    const msg = error?.message || "Login failed due to a server error. Please try again or use Instant Guest Demo.";
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
