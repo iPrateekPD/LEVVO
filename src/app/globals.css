@@ -64,6 +64,19 @@ body {
   text-shadow: 0 0 8px rgba(255, 230, 0, 0.8), 0 0 20px rgba(255, 230, 0, 0.4);
 }
 
+/* Sharp, readable mobile phone text shadow (prevents blurry glow smears on small screens) */
+@media (max-width: 640px) {
+  .neon-glow-cyan {
+    text-shadow: 0 1px 0 #005577, 0 2px 4px rgba(0, 0, 0, 0.9);
+  }
+  .neon-glow-magenta {
+    text-shadow: 0 1px 0 #770033, 0 2px 4px rgba(0, 0, 0, 0.9);
+  }
+  .neon-glow-gold {
+    text-shadow: 0 1px 0 #996600, 0 2px 4px rgba(0, 0, 0, 0.9);
+  }
+}
+
 /* Tactile 3D Arcade Push Buttons */
 .arcade-btn {
   transition: all 0.08s ease-in-out;

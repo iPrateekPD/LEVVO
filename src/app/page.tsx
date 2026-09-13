@@ -615,11 +615,11 @@ export default function LevvoMainPage() {
               </div>
 
               {/* Main Headline: REAL PROGRESS. MORE YOU. */}
-              <h1 className="hero-anim-item font-arcade text-4xl sm:text-6xl md:text-7xl text-white tracking-wider font-black leading-none select-none drop-shadow-[0_5px_15px_rgba(255,255,255,0.2)]">
+              <h1 className="hero-anim-item font-arcade text-4xl sm:text-6xl md:text-7xl text-white tracking-wider font-black leading-none select-none drop-shadow-none sm:drop-shadow-[0_5px_15px_rgba(255,255,255,0.2)]">
                 REAL PROGRESS.
               </h1>
 
-              <h2 className="hero-anim-item font-arcade text-4xl sm:text-6xl md:text-7xl text-[#FFE600] neon-glow-gold tracking-wider font-black leading-none select-none drop-shadow-[0_5px_20px_rgba(255,230,0,0.4)] mt-1 sm:mt-2">
+              <h2 className="hero-anim-item font-arcade text-4xl sm:text-6xl md:text-7xl text-[#FFE600] neon-glow-gold tracking-wider font-black leading-none select-none drop-shadow-none sm:drop-shadow-[0_5px_20px_rgba(255,230,0,0.4)] mt-1 sm:mt-2">
                 MORE YOU.
               </h2>
 
