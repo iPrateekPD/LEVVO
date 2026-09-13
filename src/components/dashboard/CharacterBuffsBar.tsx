@@ -32,9 +32,16 @@ export function CharacterBuffsBar({ currentStreak }: CharacterBuffsBarProps) {
     {
       id: "early_bird",
       label: "+10 GP Early Bird",
-      desc: "Complete quests before 12:00 PM to earn +10 bonus Gold Coins per quest.",
+      desc: "Complete quests before 12:00 PM to earn +10 bonus Gold Coins per quest (Sonic 100-Ring Rush).",
       icon: Coffee,
       color: "text-purple-300 bg-purple-500/15 border-purple-500/30",
+    },
+    {
+      id: "star_power",
+      label: "★ Star Power",
+      desc: "Super Mario invincibility: Focus through distractions to maintain your combo.",
+      icon: Zap,
+      color: "text-amber-300 bg-amber-500/15 border-amber-500/30",
     },
   ];
 

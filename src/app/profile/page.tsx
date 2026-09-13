@@ -244,25 +244,26 @@ export default function ProfilePage() {
 
   return (
     <div className={activeTheme === "gameboy" ? "theme-gameboy min-h-screen" : "min-h-screen"}>
-      <CrtContainer scanlines={true}>
+      <CrtContainer scanlines={false}>
         {/* Navigation Header */}
-        <header className="w-full max-w-4xl mx-auto mb-6 flex items-center justify-between border-b-2 border-cabinetBorder pb-4">
+        <header className="w-full max-w-4xl mx-auto mb-6 sm:mb-8 flex flex-wrap items-center justify-between gap-3 border-b-2 border-cabinetBorder pb-4 sm:pb-5">
           <Link
             href="/"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cabinetSurface hover:bg-[#21193D] border border-cabinetBorder text-neonCyan hover:text-white font-arcade text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+            className="h-10 px-3.5 sm:px-4 rounded-xl bg-cabinetSurface hover:bg-[#21193D] border border-cabinetBorder text-neonCyan hover:text-white font-arcade text-[10px] sm:text-xs flex items-center gap-2.5 transition-all shadow-sm hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 shrink-0"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>RETURN TO ARCADE HUD</span>
+            <ArrowLeft className="w-4 h-4 sm:w-4.5 sm:h-4.5 shrink-0 text-cyan-400" />
+            <span className="hidden xs:inline">RETURN TO ARCADE HUD</span>
+            <span className="xs:hidden">ARCADE HUD</span>
           </Link>
 
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-black/60 border border-arcadeGold/40 text-arcadeGold">
-              <Coins className="w-4 h-4" />
-              <span className="font-arcade text-xs">{profile.gold} GP</span>
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+            <div className="h-10 px-3 sm:px-3.5 rounded-xl bg-black/60 border border-arcadeGold/40 text-arcadeGold flex items-center gap-2 shadow-inner">
+              <Coins className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-amber-400 shrink-0" />
+              <span className="font-arcade text-[10px] sm:text-xs whitespace-nowrap">{profile.gold} GP</span>
             </div>
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-black/60 border border-arcadeRed/40 text-arcadeRed">
-              <Flame className="w-4 h-4" />
-              <span className="font-arcade text-xs">{profile.streakCurrent} DAYS</span>
+            <div className="h-10 px-3 sm:px-3.5 rounded-xl bg-black/60 border border-arcadeRed/40 text-arcadeRed flex items-center gap-2 shadow-inner">
+              <Flame className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-rose-400 shrink-0" />
+              <span className="font-arcade text-[10px] sm:text-xs whitespace-nowrap">{profile.streakCurrent} DAYS</span>
             </div>
           </div>
         </header>

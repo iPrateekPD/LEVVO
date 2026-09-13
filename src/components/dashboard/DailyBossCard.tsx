@@ -29,11 +29,13 @@ export function DailyBossCard({
 
   const [isHit, setIsHit] = useState(false);
   const [lootClaimed, setLootClaimed] = useState(false);
+  const [comboCount, setComboCount] = useState(0);
 
   // Trigger hit animation when currentHp decreases
   useEffect(() => {
     if (completedTasksCount > 0) {
       setIsHit(true);
+      setComboCount((prev) => prev + 1);
       const t = setTimeout(() => setIsHit(false), 600);
       return () => clearTimeout(t);
     }
@@ -43,6 +45,7 @@ export function DailyBossCard({
     if (isDefeated) return;
     sounds.playBossHit();
     setIsHit(true);
+    setComboCount((prev) => prev + 1);
     const dmg = 35;
     setBonusDamage((prev) => prev + dmg);
     onBossStrike?.(dmg);
@@ -81,7 +84,7 @@ export function DailyBossCard({
             {isDefeated ? "🏆" : "👹"}
           </div>
           <div className="flex flex-col">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <span className="font-extrabold text-xs text-white uppercase tracking-wider">
                 {isDefeated ? "DUNGEON CLEARED" : "DAILY BOSS BATTLE"}
               </span>
@@ -92,16 +95,27 @@ export function DailyBossCard({
                     : "bg-rose-500/20 text-rose-300 border border-rose-500/40"
                 }`}
               >
-                {isDefeated ? "SLAYED" : "ACTIVE"}
+                {isDefeated ? "K.O. VICTORY" : "ROUND 1 · FIGHT!"}
               </span>
+              {!isDefeated && currentHp <= 120 && (
+                <span className="px-1.5 py-0.2 rounded text-[8px] font-arcade text-amber-300 bg-amber-500/20 border border-amber-500/40 animate-pulse">
+                  ⚡ FINISH HIM!
+                </span>
+              )}
             </div>
             <span className="text-[11px] text-slate-400">
-              {isDefeated ? "The Sloth Demon has fallen!" : "Malakor, The Procrastination Titan"}
+              {isDefeated ? "The Sloth Demon has fallen!" : "Malakor, The Procrastination Titan (OG Boss)"}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          {comboCount > 0 && !isDefeated && (
+            <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 font-arcade text-[9px] animate-bounce">
+              🔥 COMBO x{comboCount}
+            </span>
+          )}
+
           {!isDefeated && (
             <button
               type="button"

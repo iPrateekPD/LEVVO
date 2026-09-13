@@ -47,7 +47,12 @@ export function ArcadeAuthModal({ isOpen, onClose, onAuthenticated }: ArcadeAuth
       }
 
       sounds.playLevelUp();
-      onAuthenticated(data.data.user);
+      const user = data.data?.user || data.user;
+      if (typeof window !== "undefined" && user) {
+        localStorage.setItem("levvo_is_logged_in", "true");
+        localStorage.setItem("levvo_cached_user", JSON.stringify(user));
+      }
+      onAuthenticated(user);
       onClose();
       setEmail("");
       setPassword("");
@@ -81,7 +86,12 @@ export function ArcadeAuthModal({ isOpen, onClose, onAuthenticated }: ArcadeAuth
       }
 
       sounds.playLevelUp();
-      onAuthenticated(data.data.user);
+      const user = data.data?.user || data.user;
+      if (typeof window !== "undefined" && user) {
+        localStorage.setItem("levvo_is_logged_in", "true");
+        localStorage.setItem("levvo_cached_user", JSON.stringify(user));
+      }
+      onAuthenticated(user);
       onClose();
     } catch {
       setError("Network error during demo login");

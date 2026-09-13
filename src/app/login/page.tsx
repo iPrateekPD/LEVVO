@@ -101,11 +101,16 @@ function LoginForm() {
         }
 
         sounds.playLevelUp();
+        const user = data.data?.user || data.user;
+        if (typeof window !== "undefined") {
+          localStorage.setItem("levvo_is_logged_in", "true");
+          if (user) localStorage.setItem("levvo_cached_user", JSON.stringify(user));
+        }
         setSuccessMsg("🎉 Welcome back, Explorer! Entering LEVVO...");
         setTimeout(() => {
           router.push("/");
           router.refresh();
-        }, 800);
+        }, 500);
       } else {
         // SIGNUP
         if (!email.trim() || !username.trim() || !password) {
@@ -131,11 +136,16 @@ function LoginForm() {
         }
 
         sounds.playLevelUp();
+        const user = data.data?.user || data.user;
+        if (typeof window !== "undefined") {
+          localStorage.setItem("levvo_is_logged_in", "true");
+          if (user) localStorage.setItem("levvo_cached_user", JSON.stringify(user));
+        }
         setSuccessMsg("✨ Adventurer profile registered! Entering LEVVO...");
         setTimeout(() => {
           router.push("/");
           router.refresh();
-        }, 800);
+        }, 500);
       }
     } catch {
       setError("Network error while connecting to LEVVO arcade auth realm.");
@@ -159,11 +169,16 @@ function LoginForm() {
       const data = await res.json();
       if (data.success) {
         sounds.playLevelUp();
+        const user = data.data?.user || data.user;
+        if (typeof window !== "undefined") {
+          localStorage.setItem("levvo_is_logged_in", "true");
+          if (user) localStorage.setItem("levvo_cached_user", JSON.stringify(user));
+        }
         setSuccessMsg("⚡ 1-Click Guest Hero session loaded! Entering LEVVO...");
         setTimeout(() => {
           router.push("/");
           router.refresh();
-        }, 600);
+        }, 400);
       } else {
         setError(data.error || "Demo login failed");
       }
@@ -189,11 +204,16 @@ function LoginForm() {
       const data = await res.json();
       if (data.success) {
         sounds.playLevelUp();
+        const user = data.data?.user || data.user;
+        if (typeof window !== "undefined") {
+          localStorage.setItem("levvo_is_logged_in", "true");
+          if (user) localStorage.setItem("levvo_cached_user", JSON.stringify(user));
+        }
         setSuccessMsg(`⚡ Connected with ${provider} Guest Session! Entering LEVVO...`);
         setTimeout(() => {
           router.push("/");
           router.refresh();
-        }, 600);
+        }, 400);
       } else {
         setError(data.error || "Social demo login failed");
       }

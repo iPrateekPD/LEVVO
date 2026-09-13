@@ -54,7 +54,7 @@ export function QuestSlashEffect({ triggerKey, className = "" }: QuestSlashEffec
   }, [triggerKey]);
 
   return (
-    <div className={`relative pointer-events-none ${className}`}>
+    <div className={`absolute inset-0 pointer-events-none z-10 ${className}`}>
       {/* Neon Slash Beam */}
       <div
         ref={lineRef}

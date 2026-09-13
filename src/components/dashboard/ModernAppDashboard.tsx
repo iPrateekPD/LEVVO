@@ -43,7 +43,11 @@ import {
   Trophy,
   Swords,
   Package,
+  Heart,
+  Crown,
+  Sword,
 } from "lucide-react";
+import confetti from "canvas-confetti";
 import { sounds } from "@/lib/sound";
 import { lofiMusic } from "@/lib/lofiSynthesizer";
 import { TaskItem } from "@/components/quests/QuestCard";
@@ -54,6 +58,7 @@ import { JourneyProgress } from "./JourneyProgress";
 import { QuickMilestone } from "./QuickMilestone";
 import { DailyBossCard } from "./DailyBossCard";
 import { WeeklyMomentumCard } from "./WeeklyMomentumCard";
+import { OGArcaneRelicsCard } from "./OGArcaneRelicsCard";
 import { FloatingParticles, FloatingParticleItem } from "./FloatingParticles";
 import { CharacterBuffsBar } from "./CharacterBuffsBar";
 import { SocialLeaderboard } from "./SocialLeaderboard";
@@ -114,8 +119,39 @@ export function ModernAppDashboard({
   const [searchQuery, setSearchQuery] = useState("");
   const [taskFilter, setTaskFilter] = useState<"ALL" | "ACTIVE" | "COMPLETED">("ALL");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
+  const sidebarRef = useRef<HTMLElement>(null);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const [searchFocused, setSearchFocused] = useState(false);
+
+  // Auto-collapse mobile sidebar when touching anywhere outside or pressing Escape
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const handleTouchOrClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(e.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleTouchOrClickOutside);
+    document.addEventListener("touchstart", handleTouchOrClickOutside, { passive: true });
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handleTouchOrClickOutside);
+      document.removeEventListener("touchstart", handleTouchOrClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [mobileMenuOpen]);
 
   // Floating Particles State
   const [particles, setParticles] = useState<FloatingParticleItem[]>([]);
@@ -129,7 +165,7 @@ export function ModernAppDashboard({
 
   // Mouse Parallax for Cinematic Dashboard Hero
   const dashboardHeroBgRef = useRef<HTMLDivElement>(null);
-  useParallaxBackground(dashboardHeroBgRef, { depth: 16 });
+  useParallaxBackground(dashboardHeroBgRef, { depth: 25 });
 
   // Instant Quick-Capture Task Bar State
   const [quickTitle, setQuickTitle] = useState("");
@@ -171,21 +207,178 @@ export function ModernAppDashboard({
     }).format(new Date());
   }, []);
 
-  // Keyboard shortcuts (⌘K for Search, N for New Quest)
+  // Konami Code Easter Egg State
+  const [isKonamiUnlocked, setIsKonamiUnlocked] = useState(false);
+  const [isKonamiModalOpen, setIsKonamiModalOpen] = useState(false);
+  const konamiSequenceRef = useRef<string[]>([]);
+  const KONAMI_CODE = useMemo(
+    () => [
+      "ArrowUp",
+      "ArrowUp",
+      "ArrowDown",
+      "ArrowDown",
+      "ArrowLeft",
+      "ArrowRight",
+      "ArrowLeft",
+      "ArrowRight",
+      "b",
+      "a",
+    ],
+    []
+  );
+
+  const triggerKonamiEasterEgg = () => {
+    sounds.playLevelUp();
+    sounds.playCoin();
+    confetti({
+      particleCount: 150,
+      spread: 90,
+      origin: { y: 0.6 },
+    });
+    setIsKonamiUnlocked(true);
+    setIsKonamiModalOpen(true);
+  };
+
+  // Close search dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(e.target as Node)
+      ) {
+        setSearchFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Player Goals for Global Search & Right Rail
+  const playerGoals = useMemo(
+    () => [
+      { id: "g1", title: "Final Year Project", progress: 60, category: "INT", icon: Laptop },
+      { id: "g2", title: "Learn React & DSA", progress: 45, category: "INT", icon: Code },
+      { id: "g3", title: "30-Day Fitness & Strength", progress: 70, category: "STR", icon: Flame },
+      { id: "g4", title: "Daily Deep Work Focus", progress: 85, category: "WIS", icon: Sparkles },
+    ],
+    []
+  );
+
+  // Quick navigation shortcuts for search dropdown
+  const quickActions = useMemo(
+    () => [
+      { id: "act-today", title: "Active Quests Hub", icon: Target, tab: "TODAY" },
+      { id: "act-boss", title: "Battle Procrastination Boss", icon: Swords, tab: "HOME" },
+      { id: "act-focus", title: "Arcade Focus Timer", icon: Clock, tab: "FOCUS" },
+      { id: "act-arcade", title: "90's Retro Arcade Zone", icon: Gamepad2, tab: "ARCADE" },
+      { id: "act-legends", title: "Hall of Legends", icon: Trophy, tab: "LEADERBOARD" },
+      { id: "act-ai", title: "Ask AI Strategy Coach", icon: Wand2, modal: "AI" },
+      { id: "act-bgm", title: "Toggle Lo-Fi Synthwave BGM", icon: Music, action: "BGM" },
+    ],
+    []
+  );
+
+  // Filtered goals & actions for search dropdown
+  const filteredGoals = useMemo(() => {
+    if (!searchQuery.trim()) return playerGoals.slice(0, 2);
+    const q = searchQuery.toLowerCase();
+    return playerGoals.filter(
+      (g) => g.title.toLowerCase().includes(q) || g.category.toLowerCase().includes(q)
+    );
+  }, [searchQuery, playerGoals]);
+
+  const filteredQuickActions = useMemo(() => {
+    if (!searchQuery.trim()) return quickActions.slice(0, 4);
+    const q = searchQuery.toLowerCase();
+    return quickActions.filter((a) => a.title.toLowerCase().includes(q));
+  }, [searchQuery, quickActions]);
+
+  // Quests filtered for search dropdown
+  const filteredQuestsForSearch = useMemo(() => {
+    if (!searchQuery.trim()) return tasks.slice(0, 4);
+    const q = searchQuery.toLowerCase();
+    return tasks.filter(
+      (t) =>
+        t.title.toLowerCase().includes(q) ||
+        t.description?.toLowerCase().includes(q) ||
+        t.attributeCode?.toLowerCase().includes(q)
+    );
+  }, [tasks, searchQuery]);
+
+  const isEasterEggQuery = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    return (
+      q.includes("konami") ||
+      q.includes("cheat") ||
+      q.includes("zelda") ||
+      q.includes("mario") ||
+      q.includes("pokemon") ||
+      q.includes("iddqd") ||
+      q.includes("doom") ||
+      q.includes("sonic")
+    );
+  }, [searchQuery]);
+
+  const handleQuickCreateFromSearch = async (title: string) => {
+    if (!title.trim() || isQuickSubmitting) return;
+    setIsQuickSubmitting(true);
+    try {
+      const res = await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: title.trim(),
+          attributeCode: "INT",
+          status: "ACTIVE",
+          xpReward: 50,
+          goldReward: 10,
+        }),
+      });
+      if (res.ok) {
+        sounds.playComplete();
+        setSearchQuery("");
+        setSearchFocused(false);
+        onRefresh();
+      }
+    } catch {
+      sounds.playError();
+    } finally {
+      setIsQuickSubmitting(false);
+    }
+  };
+
+  // Keyboard shortcuts (⌘K for Search, N for New Quest, Konami code)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         searchInputRef.current?.focus();
+        setSearchFocused(true);
       }
       if (e.key === "Escape") {
-        setSearchQuery("");
+        setSearchFocused(false);
         searchInputRef.current?.blur();
+      }
+
+      // Check Konami Code
+      const key = e.key;
+      konamiSequenceRef.current.push(key);
+      if (konamiSequenceRef.current.length > KONAMI_CODE.length) {
+        konamiSequenceRef.current.shift();
+      }
+      if (
+        konamiSequenceRef.current.length === KONAMI_CODE.length &&
+        konamiSequenceRef.current.every(
+          (k, i) => k.toLowerCase() === KONAMI_CODE[i].toLowerCase()
+        )
+      ) {
+        triggerKonamiEasterEgg();
+        konamiSequenceRef.current = [];
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [KONAMI_CODE]);
 
   // Filter tasks based on search & active filter
   const filteredTasks = useMemo(() => {
@@ -278,7 +471,7 @@ export function ModernAppDashboard({
   ] as const;
 
   // Determine user display name & initials
-  const displayName = character?.username || currentUser.username || "Adventurer";
+  const displayName = character?.username || currentUser?.username || "Adventurer";
   const firstName = displayName.split(" ")[0];
   const initials = (firstName.slice(0, 2) || "LV").toUpperCase();
 
@@ -349,6 +542,66 @@ export function ModernAppDashboard({
         currentStreak={character?.streakCurrent || 1}
       />
 
+      {/* 90'S RETRO KONAMI CODE 30-LIVES EASTER EGG MODAL */}
+      {isKonamiModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-md bg-gradient-to-b from-[#141A35] to-[#0A0D1B] border-2 border-amber-400/80 rounded-2xl shadow-[0_0_50px_rgba(251,191,36,0.35)] p-6 flex flex-col items-center text-center gap-4">
+            <button
+              type="button"
+              onClick={() => setIsKonamiModalOpen(false)}
+              className="absolute top-3 right-3 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/[0.06]"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-3xl shadow-[0_0_20px_rgba(251,191,36,0.4)] animate-bounce select-none">
+              🕹️
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <span className="font-arcade text-[10px] text-amber-300 tracking-widest leading-none">
+                SECRET CHEAT ACTIVATED
+              </span>
+              <h2 className="font-arcade text-xl sm:text-2xl text-[#FFE600] neon-glow-gold tracking-widest mt-1">
+                30 LIVES UNLOCKED!
+              </h2>
+              <p className="text-xs text-slate-300 max-w-sm mt-1 leading-relaxed">
+                You entered the legendary Konami sequence: <span className="font-mono text-cyan-300 font-bold">↑ ↑ ↓ ↓ ← → ← → B A</span>. A true gamer from the golden arcade era!
+              </p>
+            </div>
+
+            <div className="w-full grid grid-cols-2 gap-3 py-1">
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center gap-2">
+                <Coins className="w-5 h-5 text-amber-400" />
+                <div className="flex flex-col text-left">
+                  <span className="font-extrabold text-sm text-white">+100 Gold</span>
+                  <span className="text-[10px] text-slate-400">Bonus Loot</span>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center gap-2">
+                <Sparkles className="w-5 h-5 text-cyan-400" />
+                <div className="flex flex-col text-left">
+                  <span className="font-extrabold text-sm text-white">+250 XP</span>
+                  <span className="text-[10px] text-slate-400">Arcade Boost</span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                sounds.playComplete();
+                setIsKonamiModalOpen(false);
+              }}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-black font-arcade text-xs tracking-wider font-black shadow-[0_0_20px_rgba(251,191,36,0.4)] hover:scale-[1.02] active:scale-95 transition-all"
+            >
+              CLAIM 30 LIVES & RESUME
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Subtle Atmospheric Ambient Lighting */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[140px]" />
@@ -357,55 +610,79 @@ export function ModernAppDashboard({
       </div>
 
       {/* ========================================================================= */}
-      {/* 1. LEFT MODERN SIDEBAR                                                    */}
-      {/* ========================================================================= */}
-      {/* ========================================================================= */}
       {/* 1. LEFT MODERN SIDEBAR (FIXED & CONSISTENT ON ALL VIEWS)                  */}
       {/* ========================================================================= */}
+      {/* Full-screen Dark Backdrop on Mobile: Touching anywhere on dashboard collapses hamburger menu */}
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label="Close navigation menu"
+        onClick={() => setMobileMenuOpen(false)}
+        onTouchStart={() => setMobileMenuOpen(false)}
+        className={`md:hidden fixed inset-0 bg-black/65 backdrop-blur-[2px] z-40 transition-opacity duration-300 ease-in-out ${
+          mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      />
+
       <aside
-        className={`w-64 bg-[#0A0D1B]/95 backdrop-blur-xl border-r border-white/[0.07] flex flex-col shrink-0 z-40 md:h-full md:max-h-full transition-transform duration-200 ease-in-out md:translate-x-0 ${
-          mobileMenuOpen ? "fixed inset-y-0 left-0 h-screen max-h-screen shadow-2xl" : "hidden md:flex"
+        ref={sidebarRef}
+        className={`bg-[#0A0D1B]/95 backdrop-blur-xl flex flex-col shrink-0 z-50 transition-all duration-300 ease-in-out overflow-hidden ${
+          /* Mobile styles: fixed slide-over drawer */
+          mobileMenuOpen
+            ? "fixed inset-y-0 left-0 w-64 h-screen max-h-screen shadow-2xl translate-x-0 border-r border-white/[0.07]"
+            : "fixed inset-y-0 left-0 w-64 h-screen max-h-screen -translate-x-full shadow-none border-r-0"
+        } ${
+          /* Desktop/Laptop styles: responsive collapsible sidebar */
+          desktopSidebarOpen
+            ? "md:relative md:inset-auto md:w-64 md:translate-x-0 md:h-full md:max-h-full md:opacity-100 md:pointer-events-auto md:border-r md:border-white/[0.07]"
+            : "md:relative md:inset-auto md:w-0 md:translate-x-0 md:h-full md:max-h-full md:opacity-0 md:pointer-events-none md:border-r-0"
         }`}
       >
-        {/* Brand Header */}
-        <div className="p-4 sm:p-5 flex items-center justify-between border-b border-white/[0.07] shrink-0">
-          <Link
-            href="/"
-            onClick={() => {
-              sounds.playClick();
-              setActiveTab("HOME");
-            }}
-            className="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-xl"
-          >
-            <Image
-              src="/logo.png"
-              alt="LEVVO Logo"
-              width={32}
-              height={32}
-              className="w-8 h-8 object-contain drop-shadow-[0_0_12px_rgba(251,191,36,0.4)] group-hover:scale-105 transition-transform shrink-0"
-              priority
-            />
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-base tracking-widest text-white leading-none group-hover:text-cyan-300 transition-colors">
+        <div className="w-64 h-full flex flex-col shrink-0">
+          {/* Brand Header */}
+          <div className="h-16 px-4 flex items-center justify-between border-b border-white/[0.07] shrink-0">
+            <Link
+              href="/"
+              onClick={() => {
+                sounds.playClick();
+                setActiveTab("HOME");
+              }}
+              className="flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-xl"
+            >
+              <Image
+                src="/logo.png"
+                alt="LEVVO Logo"
+                width={32}
+                height={32}
+                className="w-8 h-8 object-contain drop-shadow-[0_0_12px_rgba(251,191,36,0.5)] group-hover:scale-105 transition-transform shrink-0"
+                priority
+              />
+              <div className="flex flex-col">
+                <span className="font-arcade text-base text-[#FFE600] neon-glow-gold tracking-widest font-black leading-none group-hover:scale-105 transition-transform">
                   LEVVO
                 </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse" />
+                <span className="font-arcade text-[8px] text-gray-300 tracking-wider mt-1 leading-none whitespace-nowrap">
+                  SMALL STEPS. EPIC YOU.
+                </span>
               </div>
-              <span className="font-mono text-[9px] text-slate-400 tracking-wider mt-1 leading-none uppercase">
-                Life RPG System
-              </span>
-            </div>
-          </Link>
+            </Link>
 
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(false)}
-            className="md:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/[0.06]"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={() => {
+                sounds.playClick();
+                if (typeof window !== "undefined" && window.innerWidth < 768) {
+                  setMobileMenuOpen(false);
+                } else {
+                  setDesktopSidebarOpen(false);
+                }
+              }}
+              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/[0.06] transition-colors"
+              title="Collapse Navigation"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
         {/* Scrollable Navigation & Quick Actions Area */}
         <div className="flex-1 px-3 py-3 flex flex-col gap-3 overflow-y-auto min-h-0">
@@ -567,8 +844,8 @@ export function ModernAppDashboard({
         </div>
 
         {/* Pinned Bottom Sidebar Pixel Character & Quote Widget (Permanently visible in full) */}
-        <div className="p-3.5 m-3 rounded-xl border border-white/[0.07] bg-gradient-to-br from-[#10152B] to-[#0A0D1A] flex items-center gap-3 shadow-inner shrink-0 mt-auto">
-          <div className="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0 text-lg select-none shadow-[0_0_12px_rgba(6,182,212,0.15)]">
+        <div className="p-3 m-3 mb-2 rounded-xl border border-white/[0.07] bg-gradient-to-br from-[#10152B] to-[#0A0D1A] flex items-center gap-3 shadow-inner shrink-0 mt-auto">
+          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0 text-base select-none shadow-[0_0_12px_rgba(6,182,212,0.15)]">
             🧙‍♂️
           </div>
           <div className="flex flex-col min-w-0">
@@ -583,90 +860,339 @@ export function ModernAppDashboard({
             </span>
           </div>
         </div>
+
+        {/* Profile Tab Button below Quotes */}
+        <div className="px-3 pb-3 shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              sounds.playClick();
+              setActiveTab("PROFILE");
+              setMobileMenuOpen(false);
+            }}
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl border transition-all group ${
+              activeTab === "PROFILE"
+                ? "bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.25)] font-semibold"
+                : "bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.12] text-slate-300 hover:text-white"
+            }`}
+            title="Open Profile Tab"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div
+                className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${
+                  activeTab === "PROFILE"
+                    ? "bg-cyan-500/20 text-cyan-300"
+                    : "bg-white/[0.04] text-slate-400 group-hover:text-cyan-400"
+                }`}
+              >
+                <User className="w-3.5 h-3.5" />
+              </div>
+              <span className="text-xs font-medium truncate">Profile</span>
+            </div>
+
+            <ChevronRight
+              className={`w-3.5 h-3.5 transition-transform ${
+                activeTab === "PROFILE"
+                  ? "text-cyan-400 translate-x-0.5"
+                  : "text-slate-500 group-hover:text-slate-300"
+              }`}
+            />
+          </button>
+        </div>
+        </div>
       </aside>
 
       {/* ========================================================================= */}
       {/* 2. MAIN CONTENT AREA (APP BAR + CLEAN 2-COLUMN DASHBOARD)                 */}
       {/* ========================================================================= */}
-      <div className="flex-1 flex flex-col min-w-0 z-10 md:h-full md:overflow-y-auto">
+      <div
+        onClick={() => {
+          if (mobileMenuOpen) setMobileMenuOpen(false);
+        }}
+        onTouchStart={() => {
+          if (mobileMenuOpen) setMobileMenuOpen(false);
+        }}
+        className="flex-1 flex flex-col min-w-0 z-10 md:h-full md:overflow-y-auto"
+      >
         {/* Top App Bar (Search + Lo-Fi Music + Notifications + User Menu) */}
-        <header className="h-16 bg-[#080B17]/80 border-b border-white/[0.07] px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30 backdrop-blur-xl shrink-0">
-          {/* Mobile Menu Toggle + Left Search Input */}
-          <div className="flex items-center gap-3 flex-1 max-w-md">
+        <header className="h-16 bg-[#080B17]/80 border-b border-white/[0.07] px-3 sm:px-6 md:px-8 flex items-center justify-between sticky top-0 z-30 backdrop-blur-xl shrink-0">
+          {/* Mobile Menu Toggle + Compact Search Input + OG Gaming Life & Hi-Score Badges */}
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
             <button
               type="button"
-              onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/[0.06]"
+              onClick={() => {
+                sounds.playClick();
+                if (typeof window !== "undefined" && window.innerWidth < 768) {
+                  setMobileMenuOpen((prev) => !prev);
+                } else {
+                  setDesktopSidebarOpen((prev) => !prev);
+                }
+              }}
+              className="h-9 w-9 inline-flex items-center justify-center text-slate-400 hover:text-white rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-all hover:scale-105 active:scale-95 shrink-0"
+              title="Toggle Sidebar Navigation"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-4 h-4" />
             </button>
 
-            {/* Global Search Bar (⌘K shortcut) */}
-            <div className="relative w-full max-w-xs sm:max-w-sm">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            {/* Compact Global Search Bar with Live Command Dropdown */}
+            <div
+              ref={searchContainerRef}
+              className="relative w-28 xs:w-32 sm:w-44 md:w-56 transition-all duration-200 focus-within:w-40 sm:focus-within:w-60 shrink-0"
+            >
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 ref={searchInputRef}
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search quests, skills, tags... (⌘K)"
-                className="w-full bg-[#101427]/80 border border-white/[0.08] rounded-xl pl-9 pr-12 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-500/15 transition-all"
+                onFocus={() => setSearchFocused(true)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setSearchFocused(true);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && searchQuery.trim()) {
+                    if (filteredQuestsForSearch.length > 0) {
+                      setActiveTab("HOME");
+                      setSearchFocused(false);
+                    } else {
+                      handleQuickCreateFromSearch(searchQuery.trim());
+                    }
+                  }
+                }}
+                placeholder="Search... (⌘K)"
+                className="w-full h-9 bg-[#101427]/90 border border-white/[0.09] rounded-xl pl-8 pr-7 py-1 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400/60 focus:ring-1 focus:ring-cyan-500/20 transition-all shadow-inner"
               />
-              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 font-mono text-[9px] text-slate-400 bg-[#161B33] px-1.5 py-0.5 rounded border border-white/[0.08]">
-                ⌘K
-              </span>
+              {searchQuery ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    searchInputRef.current?.focus();
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-0.5"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              ) : (
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[8px] text-slate-400 bg-[#161B33] px-1 py-0.5 rounded border border-white/[0.08] pointer-events-none hidden sm:inline">
+                  ⌘K
+                </span>
+              )}
+
+              {/* FLOATING LIVE COMMAND PALETTE / SEARCH DROPDOWN */}
+              {searchFocused && (
+                <div className="absolute top-full left-0 mt-2 w-[310px] sm:w-[380px] bg-[#0A0E1F]/95 backdrop-blur-2xl border border-cyan-500/30 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.85)] p-3 z-50 flex flex-col gap-2.5 max-h-[460px] overflow-y-auto animate-in fade-in zoom-in-95">
+                  {/* Secret Easter Egg Banner if query triggers it */}
+                  {isEasterEggQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        triggerKonamiEasterEgg();
+                        setSearchFocused(false);
+                      }}
+                      className="p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/50 text-amber-300 flex items-center justify-between hover:scale-[1.02] transition-transform text-left"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🕹️</span>
+                        <div>
+                          <div className="font-arcade text-[10px] text-[#FFE600] tracking-wider">
+                            90&apos;S CHEAT CODE DETECTED!
+                          </div>
+                          <div className="text-[10px] text-slate-300 font-mono">
+                            Click to unlock 30 Lives & +250 XP
+                          </div>
+                        </div>
+                      </div>
+                      <span className="font-arcade text-[9px] px-2 py-0.5 rounded bg-amber-500/30 text-amber-200">
+                        ACTIVATE
+                      </span>
+                    </button>
+                  )}
+
+                  {/* Quests Section */}
+                  <div>
+                    <div className="flex items-center justify-between px-1 pb-1 text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+                      <span>Quests ({filteredQuestsForSearch.length})</span>
+                      {searchQuery && (
+                        <span className="text-cyan-400">Matching &ldquo;{searchQuery}&rdquo;</span>
+                      )}
+                    </div>
+                    {filteredQuestsForSearch.length > 0 ? (
+                      <div className="flex flex-col gap-1">
+                        {filteredQuestsForSearch.slice(0, 4).map((task) => (
+                          <div
+                            key={task.id}
+                            onClick={() => {
+                              sounds.playClick();
+                              setActiveTab("HOME");
+                              setSearchFocused(false);
+                            }}
+                            className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] hover:border-cyan-500/30 flex items-center justify-between cursor-pointer transition-all group"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span
+                                className={`w-2 h-2 rounded-full shrink-0 ${
+                                  task.status === "COMPLETED" ? "bg-emerald-400" : "bg-cyan-400"
+                                }`}
+                              />
+                              <span className="text-xs text-white group-hover:text-cyan-300 truncate font-medium">
+                                {task.title}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-white/[0.06] text-slate-300">
+                                {task.attributeCode || "INT"}
+                              </span>
+                              <span className="text-[10px] font-mono text-amber-400">
+                                +{task.xpReward || 50} XP
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-2 text-center text-xs text-slate-400 bg-white/[0.02] rounded-xl border border-white/[0.04]">
+                        No quests match &ldquo;{searchQuery}&rdquo;
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Goals Section */}
+                  {filteredGoals.length > 0 && (
+                    <div>
+                      <div className="px-1 pb-1 text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+                        Goals ({filteredGoals.length})
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        {filteredGoals.map((goal) => {
+                          const Icon = goal.icon;
+                          return (
+                            <div
+                              key={goal.id}
+                              onClick={() => {
+                                sounds.playClick();
+                                setActiveTab("GOALS");
+                                setSearchFocused(false);
+                              }}
+                              className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] flex items-center justify-between cursor-pointer transition-all group"
+                            >
+                              <div className="flex items-center gap-2">
+                                <Icon className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                                <span className="text-xs text-white group-hover:text-cyan-300 font-medium">
+                                  {goal.title}
+                                </span>
+                              </div>
+                              <span className="text-[10px] font-mono text-cyan-400 font-bold">
+                                {goal.progress}%
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Quick Shortcuts & Navigation */}
+                  <div>
+                    <div className="px-1 pb-1 text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+                      Quick Shortcuts
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {filteredQuickActions.slice(0, 4).map((act) => {
+                        const Icon = act.icon;
+                        return (
+                          <button
+                            key={act.id}
+                            type="button"
+                            onClick={() => {
+                              sounds.playClick();
+                              if (act.tab) setActiveTab(act.tab as any);
+                              if (act.modal === "AI") setIsAiPlanOpen(true);
+                              if (act.action === "BGM") lofiMusic?.toggle();
+                              setSearchFocused(false);
+                            }}
+                            className="p-1.5 rounded-lg bg-white/[0.03] hover:bg-cyan-500/15 hover:border-cyan-500/30 border border-white/[0.05] flex items-center gap-2 text-left transition-all text-slate-300 hover:text-white"
+                          >
+                            <Icon className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                            <span className="text-[11px] truncate font-medium">{act.title}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Quick Add Quest Option if user is typing */}
+                  {searchQuery.trim() && (
+                    <button
+                      type="button"
+                      onClick={() => handleQuickCreateFromSearch(searchQuery.trim())}
+                      className="p-2 rounded-xl bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 border border-cyan-500/30 hover:border-cyan-400 flex items-center justify-between text-xs text-cyan-300 font-semibold transition-all group"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <Plus className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        <span className="truncate">Add quest &ldquo;{searchQuery}&rdquo;</span>
+                      </div>
+                      <span className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-500/40 shrink-0">
+                        Enter ↵
+                      </span>
+                    </button>
+                  )}
+
+                  <div className="pt-1 border-t border-white/[0.06] flex items-center justify-between text-[9px] font-mono text-slate-500">
+                    <span>ESC to close</span>
+                    <span>⌘K to toggle</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* OG Zelda 3-Heart Health Containers */}
+            <div
+              className="hidden lg:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[10px] font-mono cursor-default shadow-sm select-none shrink-0 whitespace-nowrap"
+              title="Zelda Life Containers: 3/3 Full Life"
+            >
+              <span className="text-[9px] font-arcade text-rose-300">LIFE</span>
+              <Heart className="w-3 h-3 fill-rose-500 text-rose-400 animate-pulse" />
+              <Heart className="w-3 h-3 fill-rose-500 text-rose-400 animate-pulse delay-100" />
+              <Heart className="w-3 h-3 fill-rose-500 text-rose-400 animate-pulse delay-200" />
+            </div>
+
+            {/* OG Arcade 1P Hi-Score Badge */}
+            <div
+              className="hidden xl:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-amber-500/10 border border-amber-500/25 font-arcade text-[9px] text-[#FFE600] tracking-wider cursor-pointer hover:bg-amber-500/20 transition-colors shadow-sm select-none shrink-0 whitespace-nowrap"
+              onClick={() => triggerKonamiEasterEgg()}
+              title="Click to trigger Retro High-Score Easter Egg"
+            >
+              <span className="text-cyan-400">1P</span>
+              <span className="text-slate-300">HI-SCORE</span>
+              <span className="neon-glow-gold">99,990</span>
             </div>
           </div>
 
           {/* Right Action Icons & User Badge */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* FEATURE 5: Lo-Fi Ambient Synthesizer Music Player */}
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => {
-                  sounds.playClick();
-                  if (lofiMusic) {
-                    lofiMusic.toggle();
-                  }
-                }}
-                className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border text-xs font-mono transition-all ${
-                  isMusicPlaying
-                    ? "bg-cyan-500/20 text-cyan-300 border-cyan-400/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
-                    : "bg-white/[0.04] text-slate-400 border-white/[0.08] hover:text-slate-200 hover:bg-white/[0.08]"
-                }`}
-                title="Toggle Lo-Fi Study Synthwave Music"
-              >
-                <Music className={`w-3.5 h-3.5 ${isMusicPlaying ? "text-cyan-400 animate-bounce" : ""}`} />
-                <span className="hidden md:inline">{isMusicPlaying ? musicTrackName : "Lo-Fi BGM"}</span>
-                <span className="md:hidden text-[10px] font-mono">BGM</span>
-
-                {/* Animated Equalizer Wave Bars */}
-                {isMusicPlaying && (
-                  <div className="flex items-end gap-0.5 h-3">
-                    <span className="w-0.5 h-full bg-cyan-400 animate-pulse" />
-                    <span className="w-0.5 h-2 bg-purple-400 animate-pulse delay-75" />
-                    <span className="w-0.5 h-3 bg-cyan-300 animate-pulse delay-150" />
-                  </div>
-                )}
-              </button>
-
-              {isMusicPlaying && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    sounds.playClick();
-                    if (lofiMusic) {
-                      lofiMusic.nextTrack();
-                    }
-                  }}
-                  className="inline-flex p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/[0.06] text-xs font-mono"
-                  title="Next ambient track"
-                >
-                  ⏭️
-                </button>
-              )}
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                sounds.playClick();
+                if (lofiMusic) {
+                  lofiMusic.toggle();
+                }
+              }}
+              className={`h-9 w-[50px] sm:w-[114px] inline-flex items-center justify-center gap-1.5 rounded-xl border text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
+                isMusicPlaying
+                  ? "bg-cyan-500/20 text-cyan-300 border-cyan-400/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                  : "bg-white/[0.04] text-slate-400 border-white/[0.08] hover:text-slate-200 hover:bg-white/[0.08]"
+              }`}
+              title="Toggle Lo-Fi Study Synthwave Music"
+            >
+              <Music className={`w-3.5 h-3.5 shrink-0 ${isMusicPlaying ? "text-cyan-400 animate-bounce" : ""}`} />
+              <span className="hidden sm:inline truncate max-w-[65px]">
+                {isMusicPlaying ? musicTrackName : "Lo-Fi BGM"}
+              </span>
+              <span className="sm:hidden text-[10px] font-mono">BGM</span>
+            </button>
 
             {/* Ask AI Companion Button */}
             <button
@@ -675,40 +1201,40 @@ export function ModernAppDashboard({
                 sounds.playClick();
                 onOpenAiOracle();
               }}
-              className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-200 text-xs font-medium hover:bg-purple-500/30 hover:border-purple-400/50 transition-all hover:scale-[1.02] shadow-[0_0_15px_rgba(168,85,247,0.15)]"
+              className="h-9 w-[50px] sm:w-[114px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-200 text-xs font-semibold whitespace-nowrap hover:bg-purple-500/30 hover:border-purple-400/50 transition-all hover:scale-[1.02] shadow-[0_0_15px_rgba(168,85,247,0.15)] shrink-0"
               title="Ask AI Companion Oracle"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin-slow shrink-0" />
-              <span className="hidden sm:inline">Ask </span>
-              <span>AI</span>
+              <span className="hidden sm:inline">Ask AI</span>
+              <span className="sm:hidden text-[10px]">AI</span>
             </button>
 
             {/* Share Victory Card Trigger with Magnetic Hover */}
-            <MagneticWrapper strength={0.25} className="inline-block">
+            <MagneticWrapper strength={0.25} className="inline-block shrink-0">
               <button
                 type="button"
                 onClick={() => {
                   sounds.playClick();
                   setIsShareVictoryOpen(true);
                 }}
-                className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold shadow-sm transition-all hover:scale-105 active:scale-95"
+                className="h-9 w-[50px] sm:w-[114px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold whitespace-nowrap shadow-sm transition-all hover:scale-105 active:scale-95 shrink-0"
                 title="Share your daily hero achievements"
               >
                 <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <span className="hidden sm:inline">Share </span>
-                <span>Card</span>
+                <span className="hidden sm:inline">Share Card</span>
+                <span className="sm:hidden text-[10px]">Card</span>
               </button>
             </MagneticWrapper>
 
             {/* Notification Bell */}
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 type="button"
                 onClick={() => {
                   sounds.playClick();
                   setNotificationsOpen(!notificationsOpen);
                 }}
-                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors relative"
+                className="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] text-slate-400 hover:text-white hover:bg-white/[0.08] transition-colors relative shrink-0"
                 title="Notifications"
               >
                 <Bell className="w-4 h-4" />
@@ -746,14 +1272,14 @@ export function ModernAppDashboard({
             </div>
 
             {/* User Profile Pill */}
-            <div className="flex items-center gap-2 pl-2 border-l border-white/[0.08]">
+            <div className="flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2 border-l border-white/[0.08] shrink-0">
               <Link
                 href="/profile"
                 onClick={() => sounds.playClick()}
-                className="flex items-center gap-2.5 group p-1 pr-2 rounded-xl hover:bg-white/[0.06] transition-colors"
+                className="h-9 flex items-center gap-2 p-1 pr-1.5 sm:pr-2.5 rounded-xl bg-white/[0.03] border border-white/[0.07] hover:bg-white/[0.07] hover:border-cyan-500/30 transition-all shrink-0"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 via-indigo-500 to-purple-500 p-0.5 shadow-[0_0_12px_rgba(6,182,212,0.3)]">
-                  <div className="w-full h-full rounded-full bg-[#0B0F20] flex items-center justify-center font-bold text-xs text-white">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-cyan-500 via-indigo-500 to-purple-500 p-0.5 shadow-[0_0_12px_rgba(6,182,212,0.3)] shrink-0">
+                  <div className="w-full h-full rounded-[6px] bg-[#0B0F20] flex items-center justify-center font-bold text-[10px] text-white">
                     {initials}
                   </div>
                 </div>
@@ -771,7 +1297,7 @@ export function ModernAppDashboard({
               <button
                 type="button"
                 onClick={onLogout}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors text-xs"
+                className="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-white/[0.03] border border-white/[0.07] text-slate-400 hover:text-rose-300 hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors text-xs shrink-0"
                 title="Log out"
               >
                 ✕
@@ -796,7 +1322,7 @@ export function ModernAppDashboard({
                   {/* Background Artwork with Seamless Vignette Masks & Mouse Parallax */}
                   <div
                     ref={dashboardHeroBgRef}
-                    className="absolute inset-0 bg-cover bg-right sm:bg-center z-0 scale-105 will-change-transform opacity-55 transition-transform duration-100 ease-out"
+                    className="absolute -inset-6 bg-cover bg-right sm:bg-center z-0 scale-105 will-change-transform opacity-55 pointer-events-none"
                     style={{ backgroundImage: "url('/images/hero-bg.jpg')" }}
                   />
                   {/* Layered Gradient Atmosphere */}
@@ -804,11 +1330,18 @@ export function ModernAppDashboard({
                   <div className="absolute inset-0 bg-gradient-to-t from-[#080B18] via-transparent to-transparent z-0" />
                   <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
-                  {/* Top Bar inside Hero: Time Greeting + Date */}
-                  <div className="relative z-10 flex items-center justify-between">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/[0.1] text-slate-300 text-xs font-medium">
-                      <TimeIcon className="w-3.5 h-3.5 text-amber-400" />
-                      <span>{timeContext.greeting} · {timeContext.label}</span>
+                  {/* Top Bar inside Hero: Time Greeting + Date + OG World Marker */}
+                  <div className="relative z-10 flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/[0.1] text-slate-300 text-xs font-medium">
+                        <TimeIcon className="w-3.5 h-3.5 text-amber-400" />
+                        <span>{timeContext.greeting} · {timeContext.label}</span>
+                      </div>
+                      {/* OG Super Mario Stage / World Badge */}
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-500/15 backdrop-blur-md border border-cyan-500/30 font-arcade text-[8px] sm:text-[9px] text-cyan-300 tracking-wider">
+                        <span>WORLD 1-4</span>
+                        <span className="text-amber-400">★ CITADEL OF FOCUS</span>
+                      </div>
                     </div>
 
                     <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] backdrop-blur-md border border-white/[0.08] text-slate-400 font-mono text-[11px]">
@@ -825,18 +1358,25 @@ export function ModernAppDashboard({
                       <span className="px-2.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300 font-mono text-[11px] font-semibold tracking-wide">
                         LVL {character?.currentLevel || 1} ADVENTURER
                       </span>
+                      <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-arcade text-[9px] font-semibold tracking-wider">
+                        1-UP: READY
+                      </span>
                     </div>
                     <p className="text-xs sm:text-sm text-slate-300 mt-1.5 max-w-lg leading-relaxed font-normal">
                       Small steps today, a brighter you tomorrow. Defeat procrastination and claim your daily victory.
                     </p>
                   </div>
 
-                  {/* Bottom Footer Quote & Tag */}
+                  {/* Bottom Footer Quote & Tag with OG Gaming Wisdom */}
                   <div className="relative z-10 flex items-center justify-between flex-wrap gap-3 pt-2">
                     <div className="inline-flex items-center gap-2 bg-[#060813]/70 backdrop-blur-md border border-white/[0.08] rounded-xl px-3.5 py-1.5 text-xs text-slate-300 shadow-sm">
-                      <span className="text-cyan-400 font-serif text-sm">&ldquo;</span>
-                      <span>A better you is a series of small wins.</span>
-                      <span className="text-cyan-400 font-serif text-sm">&rdquo;</span>
+                      <span className="text-amber-400 text-sm">🗡️</span>
+                      <span className="italic text-slate-200">
+                        &ldquo;It&apos;s dangerous to go alone! Take this daily quest.&rdquo;
+                      </span>
+                      <span className="text-[10px] font-mono text-cyan-400 pl-1 border-l border-white/[0.1] hidden sm:inline">
+                        Zelda 1986
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-2 text-xs font-mono text-cyan-300/90 tracking-wide">
@@ -1284,14 +1824,25 @@ export function ModernAppDashboard({
                   />
                 </TiltCard>
 
-                {/* 2. WISDOM QUOTE CARD */}
+                {/* OG 90'S ARCANA & GAMING RELICS VAULT CARD */}
+                <OGArcaneRelicsCard
+                  onTriggerKonami={triggerKonamiEasterEgg}
+                  isKonamiActive={isKonamiUnlocked}
+                />
+
+                {/* 2. OG GAMING WISDOM CARD */}
                 <div className="bg-gradient-to-br from-[#0F142A]/80 to-[#0A0D1B]/90 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-4 sm:p-5 shadow-[0_8px_30px_rgba(0,0,0,0.35)] flex items-start gap-3">
-                  <span className="text-purple-400 font-serif text-2xl leading-none select-none">
-                    &ldquo;
+                  <span className="text-amber-400 text-xl leading-none select-none">
+                    🎮
                   </span>
-                  <p className="text-xs text-slate-300 leading-relaxed italic">
-                    You&apos;re not just doing tasks. You&apos;re building a better you.
-                  </p>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-xs text-slate-200 leading-relaxed italic">
+                      &ldquo;It&apos;s dangerous to go alone! Complete your quests and level up daily.&rdquo;
+                    </p>
+                    <span className="text-[10px] font-mono text-cyan-400">
+                      — The Legend of Zelda (1986)
+                    </span>
+                  </div>
                 </div>
 
                 {/* 3. YOUR GOALS & HABITS */}
@@ -1413,7 +1964,7 @@ export function ModernAppDashboard({
                         className="relative overflow-hidden p-3 rounded-xl bg-[#101427] border border-white/[0.06] flex items-center justify-between gap-3 hover:border-cyan-500/30 transition-all"
                       >
                         <QuestSlashEffect triggerKey={lastCompletedTaskId?.startsWith(t.id) ? lastCompletedTaskId : ""} />
-                        <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
                           <button
                             type="button"
                             onClick={(e) => handleTaskCheck(e, t)}
@@ -1423,7 +1974,7 @@ export function ModernAppDashboard({
                           </button>
                           <span className="text-xs font-medium text-slate-200 truncate">{t.title}</span>
                         </div>
-                        <span className="font-mono text-[10px] text-amber-300 font-bold">+{t.difficulty === "Hard" ? 50 : 30} XP</span>
+                        <span className="font-mono text-[10px] text-amber-300 font-bold shrink-0">+{t.difficulty === "Hard" ? 50 : 30} XP</span>
                       </div>
                     ))}
                   </div>
@@ -1442,13 +1993,13 @@ export function ModernAppDashboard({
                         key={t.id}
                         className="p-3 rounded-xl bg-[#090D1C]/60 border border-white/[0.04] flex items-center justify-between gap-3 text-slate-400"
                       >
-                        <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
                           <div className="w-5 h-5 rounded-lg bg-emerald-500 text-black flex items-center justify-center shrink-0 shadow-sm">
                             <Check className="w-3.5 h-3.5 stroke-[3]" />
                           </div>
                           <span className="text-xs line-through truncate">{t.title}</span>
                         </div>
-                        <span className="text-[10px] font-mono text-emerald-400">BANKED</span>
+                        <span className="text-[10px] font-mono text-emerald-400 shrink-0">BANKED</span>
                       </div>
                     ))}
                   </div>
@@ -1603,10 +2154,10 @@ export function ModernAppDashboard({
                   </span>
                 </div>
               </div>
-              <div className="pt-4 border-t border-white/[0.08] flex items-center gap-3">
+              <div className="pt-4 border-t border-white/[0.08] flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
                 <Link
                   href="/profile"
-                  className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-md transition-all"
+                  className="flex-1 h-10 px-4 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-2 shadow-md transition-all text-center"
                 >
                   <span>Open Full Wardrobe & Shop</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -1614,7 +2165,7 @@ export function ModernAppDashboard({
                 <button
                   type="button"
                   onClick={onLogout}
-                  className="px-4 py-2 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-semibold rounded-xl transition-colors"
+                  className="flex-1 sm:flex-none h-10 px-6 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-semibold rounded-xl transition-colors flex items-center justify-center text-center"
                 >
                   Logout
                 </button>

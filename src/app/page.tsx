@@ -61,11 +61,13 @@ import { useParallaxBackground } from "@/components/animations/useParallaxBackgr
 import { TiltCard } from "@/components/animations/TiltCard";
 
 export default function LevvoMainPage() {
+  const [mounted, setMounted] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string; username: string } | null>(null);
+  const [isKnownUser, setIsKnownUser] = useState(false);
   const [character, setCharacter] = useState<any>(null);
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [trackerCounts, setTrackerCounts] = useState<Record<string, number>>({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // View state: if user is logged in, default to DASHBOARD; if guest, default to OVERVIEW
   const [viewMode, setViewMode] = useState<"OVERVIEW" | "DASHBOARD">("OVERVIEW");
@@ -101,7 +103,7 @@ export default function LevvoMainPage() {
   const dashboardRef = useRef<HTMLDivElement>(null);
 
   // Mouse Parallax for Hero Background
-  useParallaxBackground(heroBgRef, { depth: 25 });
+  useParallaxBackground(heroBgRef, { depth: 35 });
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -109,6 +111,19 @@ export default function LevvoMainPage() {
   };
 
   useEffect(() => {
+    // Instant session restoration from localStorage to prevent homepage flash
+    try {
+      const isLogged = localStorage.getItem("levvo_is_logged_in") === "true";
+      const cached = localStorage.getItem("levvo_cached_user");
+      if (isLogged) {
+        setIsKnownUser(true);
+        setViewMode("DASHBOARD");
+        if (cached) {
+          setCurrentUser(JSON.parse(cached));
+        }
+      }
+    } catch {}
+    setMounted(true);
     initApp();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -199,16 +214,24 @@ export default function LevvoMainPage() {
       const data = await res.json();
       if (data.success && data.user) {
         setCurrentUser(data.user);
+        setIsKnownUser(true);
         setViewMode("DASHBOARD");
+        if (typeof window !== "undefined") {
+          localStorage.setItem("levvo_is_logged_in", "true");
+          localStorage.setItem("levvo_cached_user", JSON.stringify(data.user));
+        }
         return data.user;
       } else {
         setCurrentUser(null);
+        setIsKnownUser(false);
         setViewMode("OVERVIEW");
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("levvo_is_logged_in");
+          localStorage.removeItem("levvo_cached_user");
+        }
         return null;
       }
     } catch {
-      setCurrentUser(null);
-      setViewMode("OVERVIEW");
       return null;
     }
   };
@@ -246,12 +269,18 @@ export default function LevvoMainPage() {
     sounds.playClick();
     try {
       await fetch("/api/v1/auth/logout", { method: "POST" });
-      setCurrentUser(null);
-      setViewMode("OVERVIEW");
-      showToast("👋 Logged out. Return soon, Adventurer!");
-      await loadAllData();
     } catch (err) {
       console.error("Logout error:", err);
+    } finally {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("levvo_is_logged_in");
+        localStorage.removeItem("levvo_cached_user");
+      }
+      setCurrentUser(null);
+      setCharacter(null);
+      setIsKnownUser(false);
+      setViewMode("OVERVIEW");
+      showToast("👋 Logged out. Return soon, Adventurer!");
     }
   };
 
@@ -396,75 +425,8 @@ export default function LevvoMainPage() {
 
   const completedTasksCount = tasks.filter((t) => t.status === "COMPLETED").length;
 
-  if (loading) {
-    return (
-      <div className="min-h-screen w-full bg-[#070514] flex flex-col items-center justify-center p-4 relative overflow-hidden select-none">
-        {/* Background Arcade Ambient Grid */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#1B0F3A]/70 via-[#0A0518]/95 to-[#05030D] z-0" />
-        <div
-          className="absolute inset-0 opacity-[0.08] z-0 pointer-events-none"
-          style={{
-            backgroundImage: "linear-gradient(#00F0FF 1px, transparent 1px), linear-gradient(90deg, #00F0FF 1px, transparent 1px)",
-            backgroundSize: "32px 32px",
-          }}
-        />
-
-        {/* CRT Scanline Overlay */}
-        <div className="absolute inset-0 pointer-events-none z-20 crt-scanlines opacity-40" />
-
-        {/* Center Arcade Cabinet Box */}
-        <div className="relative z-10 max-w-md w-full flex flex-col items-center text-center p-8 rounded-3xl bg-[#100B24]/95 border-2 border-[#FFE600]/40 shadow-[0_0_50px_rgba(255,230,0,0.25),inset_0_0_30px_rgba(0,0,0,0.8)] backdrop-blur-xl">
-          {/* Retro Header Badge */}
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#1C1238] border border-[#FFE600]/40 mb-6 shadow-inner">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span className="font-arcade text-[10px] text-emerald-300 tracking-widest">
-              ARCADE HARDWARE SYSTEM-94
-            </span>
-          </div>
-
-          {/* Animated Pulsing Gold Coin Slot */}
-          <div className="relative my-3 flex flex-col items-center group">
-            {/* Outer Gold Ring Glow */}
-            <div className="w-24 h-24 rounded-full bg-gradient-to-b from-[#FFE600] via-[#FFB800] to-[#8C6200] p-1.5 shadow-[0_0_35px_rgba(255,230,0,0.5)] animate-pulse">
-              <div className="w-full h-full rounded-full bg-[#140D2B] border-2 border-[#FFE600]/60 flex flex-col items-center justify-center relative overflow-hidden">
-                {/* Coin Slot Slit */}
-                <div className="w-3 h-11 bg-black rounded-sm border border-[#FFE600]/50 shadow-[inset_0_0_8px_rgba(0,0,0,0.9)] flex items-center justify-center">
-                  <div className="w-0.5 h-8 bg-[#FFE600] animate-pulse" />
-                </div>
-              </div>
-            </div>
-            {/* Coin Value Text */}
-            <span className="font-arcade text-[10px] text-[#FFE600] mt-2 tracking-widest">
-              25¢ INSERT COIN
-            </span>
-          </div>
-
-          {/* Pulsing Loading Banner */}
-          <div className="mt-4">
-            <h2 className="font-arcade text-base sm:text-lg text-[#FFE600] neon-glow-gold tracking-widest uppercase animate-pulse">
-              INSERT COIN // READY
-            </h2>
-            <p className="font-mono text-xs text-cyan-300 mt-1.5 tracking-wider">
-              SYNCHRONIZING HERO REALM &amp; GUILD DATA...
-            </p>
-          </div>
-
-          {/* Pixel Progress Bar */}
-          <div className="w-full max-w-xs mt-6 bg-[#080512] p-1 rounded-lg border border-cyan-500/30 shadow-inner">
-            <div className="h-2.5 w-full bg-[#0D0A1C] rounded overflow-hidden flex gap-0.5 p-0.5">
-              <div className="h-full w-full bg-gradient-to-r from-[#00F0FF] via-[#FF2A85] to-[#FFE600] rounded-sm animate-[pulse_1.2s_ease-in-out_infinite]" />
-            </div>
-          </div>
-
-          {/* Bottom Credits & Status Indicator */}
-          <div className="mt-6 flex items-center justify-between w-full text-[10px] font-arcade text-slate-400 border-t border-white/[0.08] pt-4">
-            <span className="text-cyan-400">CREDIT: 02</span>
-            <span className="text-emerald-400 animate-pulse">● 1P READY</span>
-            <span className="text-amber-400">STAGE: 01</span>
-          </div>
-        </div>
-      </div>
-    );
+  if (!mounted) {
+    return <div className="min-h-screen bg-[#060414]" />;
   }
 
   return (
@@ -472,7 +434,7 @@ export default function LevvoMainPage() {
       {/* ========================================================================= */}
       {/* 1. TOP NAVBAR (SHOWN FOR GUESTS / LANDING)                                */}
       {/* ========================================================================= */}
-      {!currentUser && (
+      {!isKnownUser && !currentUser && (
         <header className="w-full bg-[#09071A]/95 backdrop-blur-md border-b border-[#281A4C] sticky top-0 z-50 px-3 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between shadow-lg">
         {/* Left Brand */}
         <Link
@@ -541,13 +503,6 @@ export default function LevvoMainPage() {
         {/* Right Action Buttons */}
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
           <Link
-            href="/login"
-            onClick={() => sounds.playClick()}
-            className="hidden sm:inline-flex px-3.5 py-2 text-xs font-bold text-gray-300 hover:text-white transition-colors"
-          >
-            Sign In
-          </Link>
-          <Link
             href="/login?mode=signup"
             onClick={() => sounds.playClick()}
             className="arcade-btn px-4 sm:px-5 py-2 bg-[#FFE600] hover:bg-yellow-400 text-arcadeBlack font-arcade text-xs font-bold rounded-xl border border-yellow-200 shadow-[0_2px_0_#9E8200] flex items-center gap-1.5 transition-transform hover:scale-105"
@@ -562,83 +517,69 @@ export default function LevvoMainPage() {
       {/* ========================================================================= */}
       {/* 2. AUTHENTICATED USER: CLEAN MODERN RPG DASHBOARD                         */}
       {/* ========================================================================= */}
-      {currentUser ? (
-        character ? (
-          <ModernAppDashboard
-            currentUser={currentUser}
-            character={character}
-            tasks={tasks}
-            trackerCounts={trackerCounts}
-            onCompleteTask={handleCompleteTask}
-            onDeleteTask={async (id) => {
-              await fetch(`/api/v1/tasks/${id}`, { method: "DELETE" });
-              setTasks((prev) => prev.filter((t) => t.id !== id));
-            }}
-            onEditTask={(t) => setEditingTask(t)}
-            onOpenCreateQuest={() => setIsCreateOpen(true)}
-            onOpenAiOracle={() => setIsAiOpen(true)}
-            onIncrementTracker={handleIncrementTracker}
-            onDecrementTracker={handleDecrementTracker}
-            onTimerComplete={handleTimerComplete}
-            onLogQuickWin={handleLogQuickWin}
-            onQuickCreateTask={async (taskData) => {
-              try {
+      {isKnownUser || currentUser ? (
+        <ModernAppDashboard
+          currentUser={currentUser || { id: "hero", email: "", username: "Adventurer" }}
+          character={character}
+          tasks={tasks}
+          trackerCounts={trackerCounts}
+          onCompleteTask={handleCompleteTask}
+          onDeleteTask={async (id) => {
+            await fetch(`/api/v1/tasks/${id}`, { method: "DELETE" });
+            setTasks((prev) => prev.filter((t) => t.id !== id));
+          }}
+          onEditTask={(t) => setEditingTask(t)}
+          onOpenCreateQuest={() => setIsCreateOpen(true)}
+          onOpenAiOracle={() => setIsAiOpen(true)}
+          onIncrementTracker={handleIncrementTracker}
+          onDecrementTracker={handleDecrementTracker}
+          onTimerComplete={handleTimerComplete}
+          onLogQuickWin={handleLogQuickWin}
+          onQuickCreateTask={async (taskData) => {
+            try {
+              const res = await fetch("/api/v1/tasks", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(taskData),
+              });
+              const data = await res.json();
+              if (data.success && data.data) {
+                setTasks((prev) => [data.data, ...prev]);
+                sounds.playCoin();
+                showToast(`⚔️ Quest "${data.data.title}" added to log!`);
+              }
+            } catch (err) {
+              console.error("Failed to quick create quest:", err);
+            }
+          }}
+          onBatchCreateTasks={async (newQuests) => {
+            try {
+              for (const q of newQuests) {
                 const res = await fetch("/api/v1/tasks", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(taskData),
+                  body: JSON.stringify({
+                    title: q.title,
+                    description: q.description,
+                    attributeCode: q.attributeCode,
+                    difficulty: q.difficulty,
+                  }),
                 });
                 const data = await res.json();
                 if (data.success && data.data) {
                   setTasks((prev) => [data.data, ...prev]);
-                  sounds.playCoin();
-                  showToast(`⚔️ Quest "${data.data.title}" added to log!`);
                 }
-              } catch (err) {
-                console.error("Failed to quick create quest:", err);
               }
-            }}
-            onBatchCreateTasks={async (newQuests) => {
-              try {
-                for (const q of newQuests) {
-                  const res = await fetch("/api/v1/tasks", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      title: q.title,
-                      description: q.description,
-                      attributeCode: q.attributeCode,
-                      difficulty: q.difficulty,
-                    }),
-                  });
-                  const data = await res.json();
-                  if (data.success && data.data) {
-                    setTasks((prev) => [data.data, ...prev]);
-                  }
-                }
-                sounds.playLevelUp();
-                showToast(`⚔️ Enrolled 3 AI daily quests!`);
-                loadAllData();
-              } catch (err) {
-                console.error("Failed to batch create quests:", err);
-              }
-            }}
-            onLogout={handleLogout}
-            onRefresh={loadAllData}
-          />
-        ) : (
-          <div className="w-full flex-1 flex flex-col items-center justify-center p-8 text-center min-h-[60vh]">
-            <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.1] flex items-center justify-center mb-4 shadow-[0_0_25px_rgba(251,191,36,0.3)] animate-pulse">
-              <Image src="/logo.png" alt="LEVVO Logo" width={48} height={48} className="w-12 h-12 object-contain" priority />
-            </div>
-            <h2 className="font-arcade text-lg sm:text-xl text-arcadeGold neon-glow-gold tracking-widest">
-              INSERT COIN // LOADING HERO HUD...
-            </h2>
-            <p className="font-mono text-xs text-neonCyan mt-2 tracking-wider">
-              SYNCHRONIZING 90&apos;S HARDWARE SYSTEM
-            </p>
-          </div>
-        )
+              sounds.playLevelUp();
+              showToast(`⚔️ Enrolled 3 AI daily quests!`);
+              loadAllData();
+            } catch (err) {
+              console.error("Failed to batch create quests:", err);
+            }
+          }}
+          onLogout={handleLogout}
+          onRefresh={loadAllData}
+        />
       ) : (
         /* ========================================================================= */
         /* 3. MODE SWITCH: EXACT HOME / LANDING OVERVIEW PAGE                        */
@@ -655,7 +596,7 @@ export default function LevvoMainPage() {
             {/* Background Artwork with Smooth Mouse Parallax */}
             <div
               ref={heroBgRef}
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0 scale-105 will-change-transform transition-transform duration-100 ease-out"
+              className="absolute -inset-8 bg-cover bg-center bg-no-repeat z-0 scale-105 will-change-transform pointer-events-none"
               style={{ backgroundImage: "url('/images/hero-bg.jpg')" }}
             />
 
@@ -730,19 +671,20 @@ export default function LevvoMainPage() {
                 </MagneticWrapper>
 
                 <MagneticWrapper strength={0.25}>
-                  <button
-                    type="button"
+                  <a
+                    href="https://photos.app.goo.gl/onQFqfNtP6roz25VA"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     onClick={() => {
                       sounds.playClick();
-                      showToast("🎬 Launching Levvo 1-min Video Tour!");
                     }}
-                    className="px-5 py-3.5 bg-black/40 hover:bg-black/60 border border-white/25 text-white font-sans text-xs sm:text-sm rounded-xl flex items-center gap-2.5 transition-colors backdrop-blur-sm"
+                    className="px-5 py-3.5 bg-black/40 hover:bg-black/60 border border-white/25 text-white font-sans text-xs sm:text-sm rounded-xl flex items-center gap-2.5 transition-colors backdrop-blur-sm group"
                   >
-                    <div className="w-6 h-6 rounded-full border border-white/60 flex items-center justify-center bg-white/10">
+                    <div className="w-6 h-6 rounded-full border border-white/60 flex items-center justify-center bg-white/10 group-hover:scale-105 transition-transform">
                       <Play className="w-3 h-3 fill-white translate-x-0.5" />
                     </div>
-                    <span>Watch 1-min Video</span>
-                  </button>
+                    <span>View Demo</span>
+                  </a>
                 </MagneticWrapper>
               </div>
 
@@ -879,17 +821,18 @@ export default function LevvoMainPage() {
                     <ArrowRight className="w-4 h-4" />
                   </button>
 
-                  <button
-                    type="button"
+                  <a
+                    href="https://photos.app.goo.gl/onQFqfNtP6roz25VA"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     onClick={() => {
                       sounds.playClick();
-                      showToast("🎬 Launching Levvo Arcade Demo Video!");
                     }}
                     className="px-4 py-2.5 bg-[#140E2A] hover:bg-[#201445] border border-cabinetBorder text-white font-arcade text-xs rounded-xl flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
                   >
                     <Play className="w-3.5 h-3.5 fill-white" />
-                    <span>WATCH DEMO</span>
-                  </button>
+                    <span>VIEW DEMO</span>
+                  </a>
                 </div>
               </div>
 
@@ -1074,15 +1017,19 @@ export default function LevvoMainPage() {
       )}
 
       {/* ========================================================================= */}
-      {/* 4. FOOTER (CLEAN WITH 1 TAGLINE)                                          */}
+      {/* 4. FOOTER (HOMEPAGE ONLY)                                                 */}
       {/* ========================================================================= */}
       {!currentUser && (
         <footer className="w-full bg-[#05030E] border-t border-[#1C1236] py-5 px-4 sm:px-8 mt-auto">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-            {/* Left Brand */}
-            <div className="flex items-center gap-2">
+            {/* Left Brand with Event Attribution */}
+            <div className="flex items-center justify-center sm:justify-start gap-2.5 flex-wrap">
               <Image src="/logo.png" alt="LEVVO" width={20} height={20} className="w-5 h-5 object-contain" />
               <span className="font-arcade text-xs text-synthMagenta tracking-widest font-bold">LEVVO</span>
+              <span className="text-gray-600 hidden sm:inline">•</span>
+              <span className="text-xs text-gray-400 font-sans">
+                A project of <strong className="text-gray-200 font-medium">TechZephyr 4.0</strong>
+              </span>
             </div>
 
             {/* Single Clean Tagline */}
