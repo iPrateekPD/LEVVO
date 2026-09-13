@@ -40,6 +40,9 @@ import {
   Music,
   Send,
   Wand2,
+  Trophy,
+  Swords,
+  Package,
 } from "lucide-react";
 import { sounds } from "@/lib/sound";
 import { lofiMusic } from "@/lib/lofiSynthesizer";
@@ -52,7 +55,13 @@ import { QuickMilestone } from "./QuickMilestone";
 import { DailyBossCard } from "./DailyBossCard";
 import { WeeklyMomentumCard } from "./WeeklyMomentumCard";
 import { FloatingParticles, FloatingParticleItem } from "./FloatingParticles";
+import { CharacterBuffsBar } from "./CharacterBuffsBar";
+import { SocialLeaderboard } from "./SocialLeaderboard";
+import { PartyRaidSection } from "./PartyRaidSection";
 import { AiPlanMyDayModal } from "../modals/AiPlanMyDayModal";
+import { QuestFocusModal } from "../modals/QuestFocusModal";
+import { RoutinePacksModal, RoutineQuest } from "../modals/RoutinePacksModal";
+import { ShareVictoryCardModal } from "../modals/ShareVictoryCardModal";
 
 interface ModernAppDashboardProps {
   currentUser: { id: string; email: string; username: string };
@@ -94,7 +103,9 @@ export function ModernAppDashboard({
   onRefresh,
 }: ModernAppDashboardProps) {
   // Active Sidebar Nav Tab
-  const [activeTab, setActiveTab] = useState<"HOME" | "TODAY" | "GOALS" | "FOCUS" | "PROGRESS" | "ARCADE" | "PROFILE">("HOME");
+  const [activeTab, setActiveTab] = useState<
+    "HOME" | "TODAY" | "GOALS" | "FOCUS" | "PROGRESS" | "ARCADE" | "LEADERBOARD" | "GUILD" | "PROFILE"
+  >("HOME");
   const [searchQuery, setSearchQuery] = useState("");
   const [taskFilter, setTaskFilter] = useState<"ALL" | "ACTIVE" | "COMPLETED">("ALL");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -104,8 +115,11 @@ export function ModernAppDashboard({
   // Floating Particles State
   const [particles, setParticles] = useState<FloatingParticleItem[]>([]);
 
-  // AI Plan My Day Modal State
+  // Modals State
   const [isAiPlanOpen, setIsAiPlanOpen] = useState(false);
+  const [isRoutinePacksOpen, setIsRoutinePacksOpen] = useState(false);
+  const [isShareVictoryOpen, setIsShareVictoryOpen] = useState(false);
+  const [focusModalTask, setFocusModalTask] = useState<TaskItem | null>(null);
 
   // Instant Quick-Capture Task Bar State
   const [quickTitle, setQuickTitle] = useState("");
@@ -248,6 +262,8 @@ export function ModernAppDashboard({
     { id: "FOCUS", label: "Focus", icon: Clock },
     { id: "PROGRESS", label: "Progress", icon: BarChart3 },
     { id: "ARCADE", label: "Arcade", icon: Gamepad2 },
+    { id: "LEADERBOARD", label: "Legends", icon: Trophy },
+    { id: "GUILD", label: "Co-Op Raid", icon: Swords },
     { id: "PROFILE", label: "Profile", icon: User },
   ] as const;
 
@@ -285,6 +301,39 @@ export function ModernAppDashboard({
             await onBatchCreateTasks(quests);
           }
         }}
+      />
+
+      {/* Curated Routine Packs Modal */}
+      <RoutinePacksModal
+        isOpen={isRoutinePacksOpen}
+        onClose={() => setIsRoutinePacksOpen(false)}
+        onEnrollPack={async (quests) => {
+          if (onBatchCreateTasks) {
+            await onBatchCreateTasks(quests);
+          }
+        }}
+      />
+
+      {/* Dedicated Quest Focus Sprint Chamber */}
+      <QuestFocusModal
+        isOpen={!!focusModalTask}
+        task={focusModalTask}
+        onClose={() => setFocusModalTask(null)}
+        onCompleteQuest={async (taskId) => {
+          await onCompleteTask(taskId);
+          setFocusModalTask(null);
+        }}
+      />
+
+      {/* Shareable Daily Victory Card */}
+      <ShareVictoryCardModal
+        isOpen={isShareVictoryOpen}
+        onClose={() => setIsShareVictoryOpen(false)}
+        characterName={firstName}
+        level={character?.currentLevel || 1}
+        xpEarnedToday={completedTasks.length * 50}
+        questsCompletedToday={completedTasks.length}
+        currentStreak={character?.streakCurrent || 1}
       />
 
       {/* Subtle Atmospheric Ambient Lighting */}
@@ -515,6 +564,20 @@ export function ModernAppDashboard({
                 <span className="w-2 h-2 rounded-full bg-cyan-400 absolute top-2 right-2 ring-2 ring-[#080B17] shadow-[0_0_6px_#22d3ee]" />
               </button>
 
+              {/* Share Victory Card Trigger */}
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playClick();
+                  setIsShareVictoryOpen(true);
+                }}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold shadow-sm transition-all hover:scale-105 active:scale-95"
+                title="Share your daily hero achievements"
+              >
+                <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                <span>Share Card</span>
+              </button>
+
               {notificationsOpen && (
                 <div className="absolute right-0 mt-2 w-72 bg-[#0E1326] border border-white/[0.1] rounded-2xl shadow-2xl p-4 z-50 text-xs animate-in fade-in zoom-in-95 backdrop-blur-xl">
                   <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
@@ -637,6 +700,11 @@ export function ModernAppDashboard({
                       <span>Progress Lives Here</span>
                     </div>
                   </div>
+
+                  {/* Character Buffs Bar */}
+                  <div className="relative z-10 pt-2 border-t border-white/[0.06] mt-2">
+                    <CharacterBuffsBar currentStreak={character?.streakCurrent || 1} />
+                  </div>
                 </div>
 
                 {/* FEATURE 3: DAILY DUNGEON BOSS CARD (PROCRASTINATION DEMON) */}
@@ -714,6 +782,20 @@ export function ModernAppDashboard({
                       >
                         <Wand2 className="w-3.5 h-3.5 text-amber-300" />
                         <span className="hidden sm:inline">Plan Day</span>
+                      </button>
+
+                      {/* FEATURE: Curated Routine Packs Trigger */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sounds.playClick();
+                          setIsRoutinePacksOpen(true);
+                        }}
+                        className="px-2.5 py-1.5 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all"
+                        title="Curated Routine Packs: 1-click install SWE, Exam, Morning, or Fitness routines"
+                      >
+                        <Package className="w-3.5 h-3.5 text-cyan-300" />
+                        <span className="hidden sm:inline">Routine Packs</span>
                       </button>
 
                       <button
@@ -870,17 +952,17 @@ export function ModernAppDashboard({
                                 </span>
                               ) : (
                                 <div className="flex items-center gap-1">
-                                  {/* Quick Sprint Button */}
+                                  {/* Quick Sprint Focus Chamber Button */}
                                   <button
                                     type="button"
                                     onClick={() => {
                                       sounds.playClick();
-                                      setActiveTab("FOCUS");
+                                      setFocusModalTask(t);
                                     }}
-                                    className="p-1 text-slate-400 hover:text-cyan-300 rounded hover:bg-white/[0.06] transition-colors"
-                                    title="Focus sprint on this quest"
+                                    className="p-1.5 text-cyan-400 hover:text-cyan-200 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 rounded-lg transition-all"
+                                    title="Enter 25m Focus Sprint Chamber (+25% XP Bonus)"
                                   >
-                                    <Play className="w-3.5 h-3.5" />
+                                    <Play className="w-3.5 h-3.5 fill-current" />
                                   </button>
 
                                   {/* Quick Edit */}
@@ -1198,6 +1280,36 @@ export function ModernAppDashboard({
                       </div>
                       <span className="text-[11px] font-semibold text-slate-200">Progress</span>
                     </button>
+
+                    {/* Action 5: Legends */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sounds.playClick();
+                        setActiveTab("LEADERBOARD");
+                      }}
+                      className="p-3 rounded-xl bg-[#101427]/80 hover:bg-[#151B33] border border-white/[0.06] hover:border-amber-500/40 flex flex-col items-center justify-center gap-1.5 transition-all text-center group shadow-sm hover:scale-[1.02]"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                        <Trophy className="w-4 h-4" />
+                      </div>
+                      <span className="text-[11px] font-semibold text-slate-200">Legends</span>
+                    </button>
+
+                    {/* Action 6: Co-Op Raid */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sounds.playClick();
+                        setActiveTab("GUILD");
+                      }}
+                      className="p-3 rounded-xl bg-[#101427]/80 hover:bg-[#151B33] border border-white/[0.06] hover:border-rose-500/40 flex flex-col items-center justify-center gap-1.5 transition-all text-center group shadow-sm hover:scale-[1.02]"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400 group-hover:scale-110 transition-transform">
+                        <Swords className="w-4 h-4" />
+                      </div>
+                      <span className="text-[11px] font-semibold text-slate-200">Co-Op Raid</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1391,6 +1503,20 @@ export function ModernAppDashboard({
                   onRefresh();
                 }}
               />
+            </div>
+          )}
+
+          {/* TAB: LEADERBOARD (ARCADE HIGH-SCORE HALL OF LEGENDS) */}
+          {activeTab === "LEADERBOARD" && (
+            <div className="flex flex-col gap-6">
+              <SocialLeaderboard />
+            </div>
+          )}
+
+          {/* TAB: GUILD (CO-OP GUILD RAID BOSS BATTLE) */}
+          {activeTab === "GUILD" && (
+            <div className="flex flex-col gap-6">
+              <PartyRaidSection onDealBossDamage={() => onRefresh()} />
             </div>
           )}
 
