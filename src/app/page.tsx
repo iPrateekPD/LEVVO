@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Sparkles,
   Sword,
@@ -375,9 +376,14 @@ export default function LevvoMainPage() {
           }}
           className="flex items-center gap-2.5 sm:gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-lg p-1"
         >
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-synthMagenta to-[#8A2BE2] flex items-center justify-center border border-synthMagenta/60 shadow-[0_0_12px_rgba(255,42,133,0.5)] group-hover:scale-105 transition-transform">
-            <Gamepad2 className="w-5 h-5 text-arcadeGold animate-pulse" />
-          </div>
+          <Image
+            src="/logo.png"
+            alt="LEVVO Logo"
+            width={32}
+            height={32}
+            className="w-8 h-8 object-contain drop-shadow-[0_0_12px_rgba(251,191,36,0.5)] group-hover:scale-105 transition-transform shrink-0"
+            priority
+          />
           <div className="flex flex-col">
             <span className="font-arcade text-base sm:text-xl text-[#FFE600] neon-glow-gold tracking-widest font-black leading-none group-hover:scale-105 transition-transform">
               LEVVO
@@ -516,8 +522,8 @@ export default function LevvoMainPage() {
           />
         ) : (
           <div className="w-full flex-1 flex flex-col items-center justify-center p-8 text-center min-h-[60vh]">
-            <div className="w-16 h-16 rounded-2xl bg-synthMagenta/20 border-2 border-synthMagenta flex items-center justify-center mb-4 shadow-[0_0_25px_rgba(255,42,133,0.5)] animate-pulse">
-              <Gamepad2 className="w-8 h-8 text-arcadeGold" />
+            <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.1] flex items-center justify-center mb-4 shadow-[0_0_25px_rgba(251,191,36,0.3)] animate-pulse">
+              <Image src="/logo.png" alt="LEVVO Logo" width={48} height={48} className="w-12 h-12 object-contain" priority />
             </div>
             <h2 className="font-arcade text-lg sm:text-xl text-arcadeGold neon-glow-gold tracking-widest">
               INSERT COIN // LOADING HERO HUD...
@@ -956,7 +962,7 @@ export default function LevvoMainPage() {
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 font-arcade text-xs">
             {/* Left Brand */}
             <div className="flex items-center gap-2">
-              <span className="text-synthMagenta">✦</span>
+              <Image src="/logo.png" alt="LEVVO" width={20} height={20} className="w-5 h-5 object-contain" />
               <span className="text-synthMagenta tracking-widest font-bold">LEVVO</span>
             </div>
 

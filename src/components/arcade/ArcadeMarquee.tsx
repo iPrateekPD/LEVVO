@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Volume2, VolumeX, Tv, LogIn, LogOut, User } from "lucide-react";
 import { sounds } from "@/lib/sound";
 
@@ -53,9 +54,19 @@ export function ArcadeMarquee({
             CREDITS: 02
           </span>
         </div>
-        <h1 className="font-arcade text-2xl sm:text-3xl md:text-4xl text-[#FFE600] tracking-wider neon-glow-gold mt-1">
-          LEVVO
-        </h1>
+        <div className="flex items-center justify-center gap-2 sm:gap-3 mt-1">
+          <Image
+            src="/logo.png"
+            alt="LEVVO"
+            width={36}
+            height={36}
+            className="w-7 h-7 sm:w-9 sm:h-9 object-contain drop-shadow-[0_0_15px_rgba(251,191,36,0.6)]"
+            priority
+          />
+          <h1 className="font-arcade text-2xl sm:text-3xl md:text-4xl text-[#FFE600] tracking-wider neon-glow-gold">
+            LEVVO
+          </h1>
+        </div>
         <p className="font-arcade text-[8px] sm:text-[10px] text-synthMagenta tracking-widest uppercase mt-0.5 neon-glow-magenta">
           レボ • LEVEL UP YOUR LIFE
         </p>

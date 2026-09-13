@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Home,
   CheckCircle2,
@@ -311,11 +312,14 @@ export function ModernAppDashboard({
             }}
             className="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-xl"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 via-indigo-600 to-cyan-400 p-0.5 shadow-[0_0_20px_rgba(139,92,246,0.4)] group-hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-[#080B17] rounded-[10px] flex items-center justify-center">
-                <Gamepad2 className="w-5 h-5 text-cyan-300" />
-              </div>
-            </div>
+            <Image
+              src="/logo.png"
+              alt="LEVVO Logo"
+              width={32}
+              height={32}
+              className="w-8 h-8 object-contain drop-shadow-[0_0_12px_rgba(251,191,36,0.4)] group-hover:scale-105 transition-transform shrink-0"
+              priority
+            />
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-base tracking-widest text-white leading-none group-hover:text-cyan-300 transition-colors">

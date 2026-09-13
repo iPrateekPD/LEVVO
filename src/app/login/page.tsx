@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Mail, Lock, Eye, EyeOff, User, Sparkles, LogIn, UserPlus } from "lucide-react";
 import gsap from "gsap";
@@ -206,9 +207,16 @@ export default function LoginPage() {
           <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
         </Link>
 
-        {/* Brand Header Matching Screenshot */}
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center">
+          <Image
+            src="/logo.png"
+            alt="LEVVO Logo"
+            width={40}
+            height={40}
+            className="w-10 h-10 object-contain drop-shadow-[0_0_15px_rgba(251,191,36,0.5)] mb-1.5 hover:scale-105 transition-transform"
+            priority
+          />
           <span className="font-arcade text-xl sm:text-3xl text-[#FFE600] neon-glow-gold tracking-widest font-black leading-none">
             LEVVO
           </span>

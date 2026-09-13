@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { UserPlus, LogIn, Sparkles, ShieldCheck, X } from "lucide-react";
 import { sounds } from "@/lib/sound";
 import { useEscapeKey } from "@/lib/useEscapeKey";
@@ -105,9 +106,14 @@ export function ArcadeAuthModal({ isOpen, onClose, onAuthenticated }: ArcadeAuth
 
         {/* Arcade Cabinet Header */}
         <div className="text-center mb-5">
-          <div className="inline-flex items-center justify-center p-2 rounded-xl bg-synthMagenta/20 border border-synthMagenta/40 text-synthMagenta mb-2 shadow-[0_0_15px_rgba(255,42,133,0.4)]">
-            <Sparkles className="w-6 h-6 text-arcadeGold animate-pulse" />
-          </div>
+          <Image
+            src="/logo.png"
+            alt="LEVVO"
+            width={48}
+            height={48}
+            className="w-12 h-12 object-contain drop-shadow-[0_0_20px_rgba(251,191,36,0.6)] mb-2 inline-block"
+            priority
+          />
           <h2 className="font-arcade text-lg text-arcadeGold neon-glow-gold tracking-wider">
             {mode === "LOGIN" ? "PLAYER ACCESS" : "ENROLL NEW HERO"}
           </h2>

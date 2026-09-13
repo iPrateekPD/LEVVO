@@ -16,6 +16,11 @@ const outfitFont = Outfit({
 export const metadata: Metadata = {
   title: "LEVVO | Retro Arcade 90s Life RPG",
   description: "Level up your real life with authentic 90s retro video game mechanics: Pac-Man focus chamber, Snakes & Ladders, Ludo tokens, and daily quests.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
