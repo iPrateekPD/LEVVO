@@ -738,9 +738,9 @@ export function ModernAppDashboard({
                 {/* 2. TODAY'S FOCUS (QUEST HUB CARD) */}
                 <div className="bg-[#0C1022]/85 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.35)] flex flex-col gap-4">
                   {/* Card Header & Filter Tabs */}
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-white/[0.07]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.07]">
                     {/* Left: Title & Filter Tabs */}
-                    <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex items-center justify-center sm:justify-start gap-3 flex-wrap">
                       <div className="flex items-center gap-2">
                         <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
                           <Sun className="w-4 h-4" />

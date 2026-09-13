@@ -665,41 +665,41 @@ export default function LevvoMainPage() {
                 </MagneticWrapper>
               </div>
 
-              {/* Trust Badges under CTA (Matching Screenshot: Free to join, No pressure, Any device, For all ages) */}
-              <div className="hero-anim-item flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-300 mt-6 font-sans select-none">
-                <div className="flex items-center gap-1.5">
-                  <Users className="w-4 h-4 text-neonCyan" />
+              {/* Trust Badges under CTA (Exactly 2 items per line on mobile, single line on desktop) */}
+              <div className="hero-anim-item grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-x-6 gap-y-2.5 text-xs sm:text-sm text-gray-300 mt-6 font-sans select-none max-w-xs sm:max-w-none mx-auto">
+                <div className="flex items-center justify-center sm:justify-start gap-1.5">
+                  <Users className="w-4 h-4 text-neonCyan shrink-0" />
                   <span>Free to join</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Shield className="w-4 h-4 text-phosphorGreen" />
+                <div className="flex items-center justify-center sm:justify-start gap-1.5">
+                  <Shield className="w-4 h-4 text-phosphorGreen shrink-0" />
                   <span>No pressure</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Monitor className="w-4 h-4 text-arcadeGold" />
+                <div className="flex items-center justify-center sm:justify-start gap-1.5">
+                  <Monitor className="w-4 h-4 text-arcadeGold shrink-0" />
                   <span>Any device</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Heart className="w-4 h-4 text-pink-400 fill-pink-400" />
+                <div className="flex items-center justify-center sm:justify-start gap-1.5">
+                  <Heart className="w-4 h-4 text-pink-400 fill-pink-400 shrink-0" />
                   <span>For all ages</span>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* 4-STEP PROCESS SECTION (MATCHING SCREENSHOT) */}
-          <section id="why-levvo" ref={featureCardsRef} className="w-full bg-[#080516] border-b border-[#241744] py-10 px-4 sm:px-8">
-            <div className="max-w-6xl mx-auto flex flex-col items-center gap-8">
-              <div className="w-full flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-3">
+          {/* 4-STEP PROCESS SECTION (COMPACT 2x2 GRID ON MOBILE, HORIZONTAL ON DESKTOP) */}
+          <section id="why-levvo" ref={featureCardsRef} className="w-full bg-[#080516] border-b border-[#241744] py-8 sm:py-10 px-4 sm:px-8">
+            <div className="max-w-6xl mx-auto flex flex-col items-center gap-6 sm:gap-8">
+              <div className="w-full grid grid-cols-2 lg:flex lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4 lg:gap-3">
                 {/* Step 1: SET GOALS */}
-                <div className="feature-card-anim flex flex-col items-center text-center gap-2 flex-1 max-w-xs">
-                  <div className="w-12 h-12 rounded-xl bg-pink-500/15 border border-pink-500/40 flex items-center justify-center text-pink-400 mb-1 shadow-[0_0_15px_rgba(244,63,94,0.2)]">
-                    <Flag className="w-6 h-6 fill-pink-500/30" />
+                <div className="feature-card-anim flex flex-col items-center text-center gap-1.5 sm:gap-2 flex-1 p-3 rounded-xl bg-[#0F0B20]/60 sm:bg-transparent border border-white/[0.04] sm:border-transparent">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-pink-500/15 border border-pink-500/40 flex items-center justify-center text-pink-400 mb-1 shadow-[0_0_15px_rgba(244,63,94,0.2)]">
+                    <Flag className="w-5 h-5 sm:w-6 sm:h-6 fill-pink-500/30" />
                   </div>
-                  <h3 className="font-arcade text-xs text-white tracking-widest uppercase font-bold">
+                  <h3 className="font-arcade text-[11px] sm:text-xs text-white tracking-widest uppercase font-bold">
                     SET GOALS
                   </h3>
-                  <p className="text-xs text-gray-400 leading-tight font-sans">
+                  <p className="text-[10px] sm:text-xs text-gray-400 leading-tight font-sans">
                     Choose what matters to you
                   </p>
                 </div>
@@ -707,14 +707,14 @@ export default function LevvoMainPage() {
                 <ChevronRight className="w-5 h-5 text-gray-600 hidden lg:block shrink-0" />
 
                 {/* Step 2: COMPLETE TASKS */}
-                <div className="feature-card-anim flex flex-col items-center text-center gap-2 flex-1 max-w-xs">
-                  <div className="w-12 h-12 rounded-xl bg-purple-500/15 border border-purple-500/40 flex items-center justify-center text-purple-300 mb-1 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
-                    <ScrollText className="w-6 h-6" />
+                <div className="feature-card-anim flex flex-col items-center text-center gap-1.5 sm:gap-2 flex-1 p-3 rounded-xl bg-[#0F0B20]/60 sm:bg-transparent border border-white/[0.04] sm:border-transparent">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-500/15 border border-purple-500/40 flex items-center justify-center text-purple-300 mb-1 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+                    <ScrollText className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
-                  <h3 className="font-arcade text-xs text-white tracking-widest uppercase font-bold">
+                  <h3 className="font-arcade text-[11px] sm:text-xs text-white tracking-widest uppercase font-bold">
                     COMPLETE TASKS
                   </h3>
-                  <p className="text-xs text-gray-400 leading-tight font-sans">
+                  <p className="text-[10px] sm:text-xs text-gray-400 leading-tight font-sans">
                     Do real work, in real life
                   </p>
                 </div>
@@ -722,14 +722,14 @@ export default function LevvoMainPage() {
                 <ChevronRight className="w-5 h-5 text-gray-600 hidden lg:block shrink-0" />
 
                 {/* Step 3: EARN REWARDS */}
-                <div className="feature-card-anim flex flex-col items-center text-center gap-2 flex-1 max-w-xs">
-                  <div className="w-12 h-12 rounded-xl bg-yellow-500/15 border border-yellow-500/40 flex items-center justify-center text-[#FFE600] mb-1 shadow-[0_0_15px_rgba(255,230,0,0.2)]">
-                    <Star className="w-6 h-6 fill-[#FFE600]/40" />
+                <div className="feature-card-anim flex flex-col items-center text-center gap-1.5 sm:gap-2 flex-1 p-3 rounded-xl bg-[#0F0B20]/60 sm:bg-transparent border border-white/[0.04] sm:border-transparent">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/15 border border-yellow-500/40 flex items-center justify-center text-[#FFE600] mb-1 shadow-[0_0_15px_rgba(255,230,0,0.2)]">
+                    <Star className="w-5 h-5 sm:w-6 sm:h-6 fill-[#FFE600]/40" />
                   </div>
-                  <h3 className="font-arcade text-xs text-white tracking-widest uppercase font-bold">
+                  <h3 className="font-arcade text-[11px] sm:text-xs text-white tracking-widest uppercase font-bold">
                     EARN REWARDS
                   </h3>
-                  <p className="text-xs text-gray-400 leading-tight font-sans">
+                  <p className="text-[10px] sm:text-xs text-gray-400 leading-tight font-sans">
                     Gain XP, unlock new possibilities
                   </p>
                 </div>
@@ -737,24 +737,24 @@ export default function LevvoMainPage() {
                 <ChevronRight className="w-5 h-5 text-gray-600 hidden lg:block shrink-0" />
 
                 {/* Step 4: BECOME A BETTER YOU */}
-                <div className="feature-card-anim flex flex-col items-center text-center gap-2 flex-1 max-w-xs">
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-1 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
-                    <BarChart3 className="w-6 h-6" />
+                <div className="feature-card-anim flex flex-col items-center text-center gap-1.5 sm:gap-2 flex-1 p-3 rounded-xl bg-[#0F0B20]/60 sm:bg-transparent border border-white/[0.04] sm:border-transparent">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-1 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+                    <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
-                  <h3 className="font-arcade text-xs text-white tracking-widest uppercase font-bold">
+                  <h3 className="font-arcade text-[11px] sm:text-xs text-white tracking-widest uppercase font-bold">
                     BECOME A BETTER YOU
                   </h3>
-                  <p className="text-xs text-gray-400 leading-tight font-sans">
+                  <p className="text-[10px] sm:text-xs text-gray-400 leading-tight font-sans">
                     Real progress. A brighter tomorrow.
                   </p>
                 </div>
               </div>
 
               {/* Bottom Divider Text: REAL LIFE // REAL PROGRESS // LEVVO */}
-              <div className="w-full flex items-center justify-center gap-3 sm:gap-6 text-gray-500 font-mono text-[10px] sm:text-xs tracking-[0.25em] uppercase pt-4 select-none">
-                <span className="w-10 sm:w-24 h-px bg-gray-800" />
+              <div className="w-full flex items-center justify-center gap-2 sm:gap-6 text-gray-500 font-mono text-[9px] sm:text-xs tracking-[0.15em] sm:tracking-[0.25em] uppercase pt-2 sm:pt-4 select-none">
+                <span className="w-6 sm:w-24 h-px bg-gray-800" />
                 <span>REAL LIFE &nbsp;//&nbsp; REAL PROGRESS &nbsp;//&nbsp; LEVVO</span>
-                <span className="w-10 sm:w-24 h-px bg-gray-800" />
+                <span className="w-6 sm:w-24 h-px bg-gray-800" />
               </div>
             </div>
           </section>
@@ -763,7 +763,7 @@ export default function LevvoMainPage() {
           <section id="how-it-works" ref={showcaseRef} className="w-full py-12 px-4 sm:px-8 max-w-7xl mx-auto flex flex-col gap-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               {/* Left Column: Value Proposition */}
-              <div className="lg:col-span-4 flex flex-col gap-4 text-left">
+              <div className="lg:col-span-4 flex flex-col gap-4 text-center lg:text-left items-center lg:items-start">
                 <span className="font-mono text-xs text-neonCyan tracking-widest uppercase">
                   {"// YOUR STORY AWAITS"}
                 </span>
@@ -781,7 +781,7 @@ export default function LevvoMainPage() {
                   Whether you want to learn a new skill, build better habits, stay healthy or complete a big project — Levvo turns it into a game.
                 </p>
 
-                <div className="flex items-center gap-3 pt-2">
+                <div className="flex items-center justify-center lg:justify-start gap-3 pt-2">
                   <button
                     type="button"
                     onClick={() => {
@@ -818,19 +818,22 @@ export default function LevvoMainPage() {
                   {/* Daily Quests Centerpiece Card */}
                   <TiltCard maxTilt={5}>
                     <div className="bg-[#120B24] border-2 border-synthMagenta rounded-2xl p-4 sm:p-5 shadow-[0_0_30px_rgba(255,42,133,0.3)] flex flex-col gap-3 relative z-20">
-                      <div className="flex items-center justify-between pb-2 border-b border-[#2C1948]">
+                      {/* Card Header */}
+                      <div className="flex items-center justify-between border-b border-[#2C1948] pb-2.5">
                         <div className="flex items-center gap-2">
-                          <span className="text-synthMagenta">✦</span>
-                          <span className="font-arcade text-xs text-neonCyan tracking-wider">
-                            DAILY QUESTS
+                          <Sword className="w-4 h-4 text-synthMagenta animate-pulse" />
+                          <span className="font-arcade text-xs text-synthMagenta neon-glow-magenta tracking-wider">
+                            TODAY&apos;S QUESTS
                           </span>
                         </div>
-                        <span className="text-[9px] font-mono text-gray-400">ACTIVE MISSIONS</span>
+                        <span className="text-[9px] font-mono text-neonCyan bg-neonCyan/10 border border-neonCyan/30 px-2 py-0.5 rounded-full">
+                          3 OF 3 ACTIVE
+                        </span>
                       </div>
 
                       {/* Checkbox Quest Items */}
                       <div className="flex flex-col gap-2">
-                        {showcaseQuests.map((q) => (
+                        {showcaseQuests.slice(0, 3).map((q) => (
                           <button
                             key={q.id}
                             type="button"
@@ -866,9 +869,9 @@ export default function LevvoMainPage() {
                       <button
                         type="button"
                         onClick={handleCompleteShowcase}
-                        className="arcade-btn w-full py-2.5 bg-gradient-to-r from-emerald-500 to-phosphorGreen hover:brightness-110 text-arcadeBlack font-arcade text-xs font-bold rounded-xl border border-emerald-300 shadow-[0_3px_0_#008A36] flex items-center justify-center gap-2 mt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                        className="arcade-btn w-full py-2 bg-gradient-to-r from-emerald-500 to-phosphorGreen hover:brightness-110 text-arcadeBlack font-arcade text-xs font-bold rounded-xl border border-emerald-300 shadow-[0_3px_0_#008A36] flex items-center justify-center gap-2 mt-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
                       >
-                        <Check className="w-4 h-4 stroke-[3]" />
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
                         <span>COMPLETE QUEST</span>
                       </button>
                     </div>
@@ -914,48 +917,48 @@ export default function LevvoMainPage() {
                 </div>
               </div>
 
-              {/* Right Column: Lifetime Stats Counters */}
-              <div className="lg:col-span-3 flex flex-col gap-3.5">
+              {/* Right Column: Lifetime Stats Counters (3-column on mobile, vertical stack on desktop) */}
+              <div className="lg:col-span-3 grid grid-cols-3 lg:grid-cols-1 gap-2 sm:gap-3.5">
                 {/* Counter 1: Active Explorers */}
-                <div className="bg-[#120D2A] border border-[#2B1D54] rounded-2xl p-4 flex items-center gap-4 shadow-lg hover:border-synthMagenta/50 transition-colors">
-                  <div className="w-12 h-12 rounded-xl bg-synthMagenta/15 border border-synthMagenta/40 flex items-center justify-center shrink-0">
-                    <Users className="w-6 h-6 text-synthMagenta" />
+                <div className="bg-[#120D2A] border border-[#2B1D54] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 flex flex-col sm:flex-row items-center justify-center sm:justify-start text-center sm:text-left gap-1.5 sm:gap-4 shadow-lg hover:border-synthMagenta/50 transition-colors">
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-synthMagenta/15 border border-synthMagenta/40 flex items-center justify-center shrink-0">
+                    <Users className="w-4 h-4 sm:w-6 sm:h-6 text-synthMagenta" />
                   </div>
-                  <div className="flex flex-col text-left">
-                    <span className="font-arcade text-xl sm:text-2xl text-white font-bold tracking-wider">
+                  <div className="flex flex-col items-center sm:items-start min-w-0">
+                    <span className="font-arcade text-xs sm:text-2xl text-white font-bold tracking-wider truncate">
                       12,428
                     </span>
-                    <span className="text-[10px] text-gray-400 font-mono tracking-wider">
+                    <span className="text-[7px] sm:text-[10px] text-gray-400 font-mono tracking-wider leading-tight">
                       ACTIVE EXPLORERS
                     </span>
                   </div>
                 </div>
 
                 {/* Counter 2: Quests Completed */}
-                <div className="bg-[#120D2A] border border-[#2B1D54] rounded-2xl p-4 flex items-center gap-4 shadow-lg hover:border-arcadeGold/50 transition-colors">
-                  <div className="w-12 h-12 rounded-xl bg-arcadeGold/15 border border-arcadeGold/40 flex items-center justify-center shrink-0">
-                    <Flag className="w-6 h-6 text-arcadeGold" />
+                <div className="bg-[#120D2A] border border-[#2B1D54] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 flex flex-col sm:flex-row items-center justify-center sm:justify-start text-center sm:text-left gap-1.5 sm:gap-4 shadow-lg hover:border-arcadeGold/50 transition-colors">
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-arcadeGold/15 border border-arcadeGold/40 flex items-center justify-center shrink-0">
+                    <Flag className="w-4 h-4 sm:w-6 sm:h-6 text-arcadeGold" />
                   </div>
-                  <div className="flex flex-col text-left">
-                    <span className="font-arcade text-xl sm:text-2xl text-[#FFE600] font-bold tracking-wider">
+                  <div className="flex flex-col items-center sm:items-start min-w-0">
+                    <span className="font-arcade text-xs sm:text-2xl text-[#FFE600] font-bold tracking-wider truncate">
                       1,16,320
                     </span>
-                    <span className="text-[10px] text-gray-400 font-mono tracking-wider">
+                    <span className="text-[7px] sm:text-[10px] text-gray-400 font-mono tracking-wider leading-tight">
                       QUESTS COMPLETED
                     </span>
                   </div>
                 </div>
 
                 {/* Counter 3: User Happiness */}
-                <div className="bg-[#120D2A] border border-[#2B1D54] rounded-2xl p-4 flex items-center gap-4 shadow-lg hover:border-yellow-400/50 transition-colors">
-                  <div className="w-12 h-12 rounded-xl bg-yellow-400/15 border border-yellow-400/40 flex items-center justify-center shrink-0">
-                    <Star className="w-6 h-6 text-yellow-400 fill-yellow-400" />
+                <div className="bg-[#120D2A] border border-[#2B1D54] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 flex flex-col sm:flex-row items-center justify-center sm:justify-start text-center sm:text-left gap-1.5 sm:gap-4 shadow-lg hover:border-yellow-400/50 transition-colors">
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-yellow-400/15 border border-yellow-400/40 flex items-center justify-center shrink-0">
+                    <Star className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-400 fill-yellow-400" />
                   </div>
-                  <div className="flex flex-col text-left">
-                    <span className="font-arcade text-xl sm:text-2xl text-yellow-300 font-bold tracking-wider">
+                  <div className="flex flex-col items-center sm:items-start min-w-0">
+                    <span className="font-arcade text-xs sm:text-2xl text-yellow-300 font-bold tracking-wider truncate">
                       4.8/5
                     </span>
-                    <span className="text-[10px] text-gray-400 font-mono tracking-wider">
+                    <span className="text-[7px] sm:text-[10px] text-gray-400 font-mono tracking-wider leading-tight">
                       USER HAPPINESS
                     </span>
                   </div>
@@ -967,8 +970,8 @@ export default function LevvoMainPage() {
           {/* Quick Win Dopamine Bar */}
           <section className="w-full bg-[#09071A] border-t border-b border-[#281A4C] py-8 px-4 sm:px-8">
             <div className="max-w-4xl mx-auto flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+                <div className="flex items-center justify-center gap-2">
                   <Sparkles className="w-4 h-4 text-synthMagenta animate-pulse" />
                   <span className="font-arcade text-xs text-synthMagenta neon-glow-magenta tracking-wider">
                     TRY A MICRO-WIN • LOG A QUICK WIN
