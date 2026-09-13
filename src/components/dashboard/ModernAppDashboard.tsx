@@ -549,6 +549,20 @@ export function ModernAppDashboard({
               <span>Ask AI</span>
             </button>
 
+            {/* Share Victory Card Trigger */}
+            <button
+              type="button"
+              onClick={() => {
+                sounds.playClick();
+                setIsShareVictoryOpen(true);
+              }}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold shadow-sm transition-all hover:scale-105 active:scale-95"
+              title="Share your daily hero achievements"
+            >
+              <Trophy className="w-3.5 h-3.5 text-amber-400" />
+              <span>Share Card</span>
+            </button>
+
             {/* Notification Bell */}
             <div className="relative">
               <button
@@ -562,20 +576,6 @@ export function ModernAppDashboard({
               >
                 <Bell className="w-4 h-4" />
                 <span className="w-2 h-2 rounded-full bg-cyan-400 absolute top-2 right-2 ring-2 ring-[#080B17] shadow-[0_0_6px_#22d3ee]" />
-              </button>
-
-              {/* Share Victory Card Trigger */}
-              <button
-                type="button"
-                onClick={() => {
-                  sounds.playClick();
-                  setIsShareVictoryOpen(true);
-                }}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold shadow-sm transition-all hover:scale-105 active:scale-95"
-                title="Share your daily hero achievements"
-              >
-                <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                <span>Share Card</span>
               </button>
 
               {notificationsOpen && (
@@ -719,21 +719,22 @@ export function ModernAppDashboard({
                 {/* 2. TODAY'S FOCUS (QUEST HUB CARD) */}
                 <div className="bg-[#0C1022]/85 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.35)] flex flex-col gap-4">
                   {/* Card Header & Filter Tabs */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.07]">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
-                        <Sun className="w-4 h-4" />
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-white/[0.07]">
+                    {/* Left: Title & Filter Tabs */}
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                          <Sun className="w-4 h-4" />
+                        </div>
+                        <h2 className="text-base font-bold text-white tracking-wide">
+                          Today&apos;s Focus
+                        </h2>
+                        <span className="px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/[0.08] text-slate-300 text-[11px] font-mono">
+                          {activeTasks.length} remaining
+                        </span>
                       </div>
-                      <h2 className="text-base font-bold text-white tracking-wide">
-                        Today&apos;s Focus
-                      </h2>
-                      <span className="px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/[0.08] text-slate-300 text-[11px] font-mono">
-                        {activeTasks.length} remaining
-                      </span>
-                    </div>
 
-                    {/* Filter Pills + AI Plan My Day + Add Task */}
-                    <div className="flex items-center gap-2 flex-wrap">
+                      {/* Filter Tabs */}
                       <div className="flex items-center bg-[#070915] p-1 rounded-xl border border-white/[0.08] text-[11px]">
                         <button
                           type="button"
@@ -769,7 +770,10 @@ export function ModernAppDashboard({
                           Done ({completedTasks.length})
                         </button>
                       </div>
+                    </div>
 
+                    {/* Right: Actions Group */}
+                    <div className="flex items-center gap-2 shrink-0">
                       {/* FEATURE 6: AI Plan My Day Trigger */}
                       <button
                         type="button"
@@ -777,7 +781,7 @@ export function ModernAppDashboard({
                           sounds.playClick();
                           setIsAiPlanOpen(true);
                         }}
-                        className="px-2.5 py-1.5 bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all"
+                        className="px-3 py-1.5 bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95"
                         title="AI Plan My Day: Auto-generate 3 balanced daily quests"
                       >
                         <Wand2 className="w-3.5 h-3.5 text-amber-300" />
@@ -791,7 +795,7 @@ export function ModernAppDashboard({
                           sounds.playClick();
                           setIsRoutinePacksOpen(true);
                         }}
-                        className="px-2.5 py-1.5 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all"
+                        className="px-3 py-1.5 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95"
                         title="Curated Routine Packs: 1-click install SWE, Exam, Morning, or Fitness routines"
                       >
                         <Package className="w-3.5 h-3.5 text-cyan-300" />
@@ -804,7 +808,7 @@ export function ModernAppDashboard({
                           sounds.playClick();
                           onOpenCreateQuest();
                         }}
-                        className="px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-[0_0_15px_rgba(99,102,241,0.3)] transition-all hover:scale-105 active:scale-95"
+                        className="px-3.5 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-[0_0_15px_rgba(99,102,241,0.3)] transition-all hover:scale-105 active:scale-95"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Add Task</span>

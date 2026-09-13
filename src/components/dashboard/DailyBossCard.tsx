@@ -8,16 +8,22 @@ interface DailyBossCardProps {
   completedTasksCount: number;
   totalXpToday: number;
   onClaimVictoryLoot?: () => void;
+  onBossStrike?: (damage: number) => void;
 }
 
 export function DailyBossCard({
   completedTasksCount,
   totalXpToday,
   onClaimVictoryLoot,
+  onBossStrike,
 }: DailyBossCardProps) {
   const MAX_HP = 400;
-  // Calculate boss damage from total XP earned today
-  const currentHp = Math.max(0, MAX_HP - (totalXpToday > 0 ? totalXpToday : completedTasksCount * 50));
+  const [bonusDamage, setBonusDamage] = useState(0);
+
+  // Calculate boss damage from total XP earned today + direct player strikes
+  const baseDamage = totalXpToday > 0 ? totalXpToday : completedTasksCount * 50;
+  const totalDamage = baseDamage + bonusDamage;
+  const currentHp = Math.max(0, MAX_HP - totalDamage);
   const isDefeated = currentHp === 0;
   const hpPercent = Math.round((currentHp / MAX_HP) * 100);
 
@@ -32,6 +38,20 @@ export function DailyBossCard({
       return () => clearTimeout(t);
     }
   }, [completedTasksCount, totalXpToday]);
+
+  const handleManualStrike = () => {
+    if (isDefeated) return;
+    sounds.playBossHit();
+    setIsHit(true);
+    const dmg = 35;
+    setBonusDamage((prev) => prev + dmg);
+    onBossStrike?.(dmg);
+    setTimeout(() => setIsHit(false), 400);
+
+    if (currentHp - dmg <= 0) {
+      sounds.playLevelUp();
+    }
+  };
 
   return (
     <div
@@ -81,9 +101,23 @@ export function DailyBossCard({
           </div>
         </div>
 
-        <span className="font-mono text-xs font-bold text-slate-300">
-          {isDefeated ? "0 HP" : `${currentHp} / ${MAX_HP} HP`}
-        </span>
+        <div className="flex items-center gap-3">
+          {!isDefeated && (
+            <button
+              type="button"
+              onClick={handleManualStrike}
+              className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 font-mono text-xs font-bold transition-all hover:scale-105 active:scale-95 shadow-sm"
+              title="Channel discipline into direct strike against Malakor"
+            >
+              <Sword className="w-3.5 h-3.5" />
+              <span>Strike (-35 HP)</span>
+            </button>
+          )}
+
+          <span className="font-mono text-xs font-bold text-slate-300">
+            {isDefeated ? "0 HP" : `${currentHp} / ${MAX_HP} HP`}
+          </span>
+        </div>
       </div>
 
       {/* Dynamic Boss HP Bar */}
@@ -101,7 +135,7 @@ export function DailyBossCard({
         <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
           <span className="flex items-center gap-1">
             <Sword className="w-3 h-3 text-rose-400" />
-            <span>Tasks deal direct HP damage</span>
+            <span>Tasks & strikes deal direct HP damage</span>
           </span>
           <span>{isDefeated ? "100% Cleared" : `${100 - hpPercent}% Damage Taken`}</span>
         </div>
@@ -131,9 +165,19 @@ export function DailyBossCard({
           )}
         </div>
       ) : (
-        <p className="text-[11px] text-slate-400 italic pt-1">
-          &ldquo;Every quest completed today strikes down Malakor&apos;s procrastination aura.&rdquo;
-        </p>
+        <div className="pt-1 flex items-center justify-between">
+          <p className="text-[11px] text-slate-400 italic">
+            &ldquo;Every quest completed today strikes down Malakor&apos;s procrastination aura.&rdquo;
+          </p>
+          <button
+            type="button"
+            onClick={handleManualStrike}
+            className="sm:hidden inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 font-mono text-[11px] font-bold"
+          >
+            <Sword className="w-3 h-3" />
+            <span>Strike</span>
+          </button>
+        </div>
       )}
     </div>
   );
