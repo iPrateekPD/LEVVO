@@ -165,8 +165,15 @@ export async function POST(req: Request) {
     });
 
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Signup error:", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
+    if (error && typeof error === "object" && "code" in error && error.code === "P2002") {
+      return NextResponse.json(
+        { success: false, error: "An account with this email or username already exists. Please log in or choose a different handle." },
+        { status: 409 }
+      );
+    }
+    const msg = error?.message || "Failed to complete adventurer registration. Try 1-Click Guest Login or check your details.";
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
