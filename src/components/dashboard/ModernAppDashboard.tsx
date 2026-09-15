@@ -910,11 +910,11 @@ export function ModernAppDashboard({
 
       <aside
         ref={sidebarRef}
-        className={`bg-[#0A0D1B]/95 backdrop-blur-xl flex flex-col shrink-0 z-50 transition-all duration-300 ease-in-out overflow-hidden ${
-          /* Mobile styles: fixed slide-over drawer */
+        className={`bg-[#0A0D1B]/95 backdrop-blur-xl flex flex-col shrink-0 z-50 transition-all duration-300 ease-in-out overflow-hidden min-h-0 ${
+          /* Mobile styles: fixed slide-over drawer constrained to dynamic viewport height */
           mobileMenuOpen
-            ? "fixed inset-y-0 left-0 w-64 h-screen max-h-screen shadow-2xl translate-x-0 border-r border-white/[0.07]"
-            : "fixed inset-y-0 left-0 w-64 h-screen max-h-screen -translate-x-full shadow-none border-r-0"
+            ? "fixed inset-y-0 left-0 w-64 h-[100dvh] max-h-[100dvh] h-screen shadow-2xl translate-x-0 border-r border-white/[0.07]"
+            : "fixed inset-y-0 left-0 w-64 h-[100dvh] max-h-[100dvh] h-screen -translate-x-full shadow-none border-r-0"
         } ${
           /* Desktop/Laptop styles: responsive collapsible sidebar */
           desktopSidebarOpen
@@ -922,9 +922,9 @@ export function ModernAppDashboard({
             : "md:relative md:inset-auto md:w-0 md:translate-x-0 md:h-full md:max-h-full md:opacity-0 md:pointer-events-none md:border-r-0"
         }`}
       >
-        <div className="w-60 lg:w-64 h-full flex flex-col shrink-0">
+        <div className="w-60 lg:w-64 h-full flex flex-col shrink-0 min-h-0">
           {/* Brand Header */}
-          <div className="h-16 px-4 flex items-center justify-between border-b border-white/[0.07] shrink-0">
+          <div className="h-14 sm:h-16 px-4 flex items-center border-b border-white/[0.07] shrink-0">
             <Link
               href="/"
               onClick={() => {
@@ -950,19 +950,6 @@ export function ModernAppDashboard({
                 </span>
               </div>
             </Link>
-
-            {/* Close button: only shown on mobile (<768px). Hidden on desktop so no cross icon appears in sidebar header */}
-            <button
-              type="button"
-              onClick={() => {
-                sounds.playClick();
-                setMobileMenuOpen(false);
-              }}
-              className="md:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/[0.06] transition-colors"
-              title="Close Navigation Drawer"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
 
         {/* Scrollable Navigation & Quick Actions Area */}
@@ -1125,8 +1112,8 @@ export function ModernAppDashboard({
         </div>
 
         {/* Pinned Bottom Sidebar Pixel Character & Quote Widget (Permanently visible in full) */}
-        <div className="p-3 m-3 mb-2 rounded-xl border border-white/[0.07] bg-gradient-to-br from-[#10152B] to-[#0A0D1A] flex items-center gap-3 shadow-inner shrink-0 mt-auto">
-          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0 text-base select-none shadow-[0_0_12px_rgba(6,182,212,0.15)]">
+        <div className="p-2.5 mx-3 mt-auto mb-2 rounded-xl border border-white/[0.07] bg-gradient-to-br from-[#10152B] to-[#0A0D1A] flex items-center gap-2.5 shadow-inner shrink-0">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0 text-sm sm:text-base select-none shadow-[0_0_12px_rgba(6,182,212,0.15)]">
             🧙‍♂️
           </div>
           <div className="flex flex-col min-w-0">
@@ -1143,7 +1130,7 @@ export function ModernAppDashboard({
         </div>
 
         {/* Profile Tab Button below Quotes */}
-        <div className="px-3 pb-3 shrink-0">
+        <div className="px-3 pb-[max(0.75rem,env(safe-area-inset-bottom,16px))] shrink-0">
           <button
             type="button"
             onClick={() => {
@@ -1151,7 +1138,7 @@ export function ModernAppDashboard({
               setActiveTab("PROFILE");
               setMobileMenuOpen(false);
             }}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl border transition-all group ${
+            className={`w-full flex items-center justify-between px-3 py-2 sm:py-2.5 rounded-xl border transition-all group ${
               activeTab === "PROFILE"
                 ? "bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.25)] font-semibold"
                 : "bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.12] text-slate-300 hover:text-white"
