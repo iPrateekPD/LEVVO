@@ -123,9 +123,48 @@ export function ModernAppDashboard({
   const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
   const sidebarRef = useRef<HTMLElement>(null);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const notificationRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const [searchFocused, setSearchFocused] = useState(false);
+
+  // Auto-focus search input when opened
+  useEffect(() => {
+    if (searchFocused) {
+      const timer = setTimeout(() => searchInputRef.current?.focus(), 50);
+      return () => clearTimeout(timer);
+    }
+  }, [searchFocused]);
+
+  // Handle outside clicks and ESC key to close notifications
+  useEffect(() => {
+    if (!notificationsOpen) return;
+
+    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
+      if (notificationRef.current && !notificationRef.current.contains(e.target as Node)) {
+        setNotificationsOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setNotificationsOpen(false);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      document.addEventListener("mousedown", handleOutsideClick);
+      document.addEventListener("touchstart", handleOutsideClick, { passive: true });
+      document.addEventListener("keydown", handleKeyDown);
+    }, 20);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [notificationsOpen]);
 
   // Auto-collapse mobile sidebar when touching anywhere outside or pressing Escape
   useEffect(() => {
@@ -603,6 +642,250 @@ export function ModernAppDashboard({
         </div>
       )}
 
+      {/* GLOBAL SEARCH & COMMAND PALETTE MODAL (TOP-LEVEL FULL SCREEN) */}
+      {searchFocused && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
+          <div
+            className="absolute inset-0"
+            onClick={() => setSearchFocused(false)}
+          />
+
+          <div
+            ref={searchContainerRef}
+            className="relative w-full max-w-lg bg-[#0A0E1F]/95 backdrop-blur-2xl border border-cyan-500/30 rounded-2xl shadow-[0_25px_70px_rgba(0,0,0,0.9)] p-4 z-10 flex flex-col gap-3 max-h-[80vh] overflow-y-auto animate-in zoom-in-95 duration-200"
+          >
+            {/* Search Input Bar inside Modal */}
+            <div className="relative flex items-center">
+              <Search className="w-4 h-4 text-cyan-400 absolute left-3 pointer-events-none" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && searchQuery.trim()) {
+                    if (filteredQuestsForSearch.length > 0) {
+                      setActiveTab("HOME");
+                      setSearchFocused(false);
+                    } else {
+                      handleQuickCreateFromSearch(searchQuery.trim());
+                    }
+                  }
+                }}
+                placeholder="Type a command or search quests..."
+                className="w-full h-11 bg-[#12162B] border border-white/[0.12] focus:border-cyan-400/60 rounded-xl pl-9 pr-8 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner"
+              />
+              {searchQuery ? (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 text-slate-400 hover:text-white p-1"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              ) : (
+                <span className="absolute right-3 font-mono text-[10px] text-slate-400 bg-[#161B33] px-1.5 py-0.5 rounded border border-white/[0.08] pointer-events-none">
+                  ESC
+                </span>
+              )}
+            </div>
+
+            {/* Secret Easter Egg Banner if query triggers it */}
+            {isEasterEggQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  triggerKonamiEasterEgg();
+                  setSearchFocused(false);
+                }}
+                className="p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/50 text-amber-300 flex items-center justify-between hover:scale-[1.01] transition-transform text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🕹️</span>
+                  <div>
+                    <div className="font-arcade text-[10px] text-[#FFE600] tracking-wider">
+                      90&apos;S CHEAT CODE DETECTED!
+                    </div>
+                    <div className="text-[10px] text-slate-300 font-mono">
+                      Click to unlock 30 Lives & +250 XP
+                    </div>
+                  </div>
+                </div>
+                <span className="font-arcade text-[9px] px-2 py-0.5 rounded bg-amber-500/30 text-amber-200">
+                  ACTIVATE
+                </span>
+              </button>
+            )}
+
+            {/* Quests Section */}
+            <div>
+              <div className="flex items-center justify-between px-1 pb-1 text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+                <span>Quests ({filteredQuestsForSearch.length})</span>
+                {searchQuery && (
+                  <span className="text-cyan-400">Matching &ldquo;{searchQuery}&rdquo;</span>
+                )}
+              </div>
+              {filteredQuestsForSearch.length > 0 ? (
+                <div className="flex flex-col gap-1">
+                  {filteredQuestsForSearch.map((task) => (
+                    <div
+                      key={task.id}
+                      onClick={() => {
+                        sounds.playClick();
+                        setActiveTab("HOME");
+                        setSearchFocused(false);
+                      }}
+                      className="p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] hover:border-cyan-500/30 flex items-center justify-between cursor-pointer transition-all group"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className={`w-2 h-2 rounded-full shrink-0 ${
+                            task.status === "COMPLETED" ? "bg-emerald-400" : "bg-cyan-400"
+                          }`}
+                        />
+                        <span className="text-xs text-white group-hover:text-cyan-300 truncate font-medium">
+                          {task.title}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-white/[0.06] text-slate-300">
+                          {task.attributeCode || "INT"}
+                        </span>
+                        <span className="text-[10px] font-mono text-amber-400">
+                          +{task.xpReward || 50} XP
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-3 text-center text-xs text-slate-400 bg-white/[0.02] rounded-xl border border-white/[0.04]">
+                  No quests match &ldquo;{searchQuery}&rdquo;
+                </div>
+              )}
+            </div>
+
+            {/* Goals Section */}
+            {filteredGoals.length > 0 && (
+              <div>
+                <div className="px-1 pb-1 text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+                  Goals ({filteredGoals.length})
+                </div>
+                <div className="flex flex-col gap-1">
+                  {filteredGoals.map((goal) => {
+                    const Icon = goal.icon;
+                    return (
+                      <div
+                        key={goal.id}
+                        onClick={() => {
+                          sounds.playClick();
+                          setActiveTab("GOALS");
+                          setSearchFocused(false);
+                        }}
+                        className="p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] flex items-center justify-between cursor-pointer transition-all group"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Icon className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                          <span className="text-xs text-white group-hover:text-cyan-300 font-medium">
+                            {goal.title}
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-mono text-cyan-400 font-bold">
+                          {goal.progress}%
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Quick Shortcuts & Navigation */}
+            <div>
+              <div className="px-1 pb-1 text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+                Quick Shortcuts
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sounds.playClick();
+                    onOpenCreateQuest();
+                    setSearchFocused(false);
+                  }}
+                  className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] text-left text-xs text-slate-300 hover:text-white flex items-center gap-2 transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Create Quest</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    sounds.playClick();
+                    setActiveTab("FOCUS");
+                    setSearchFocused(false);
+                  }}
+                  className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] text-left text-xs text-slate-300 hover:text-white flex items-center gap-2 transition-colors"
+                >
+                  <Clock className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Focus Chamber</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    sounds.playClick();
+                    setActiveTab("ARCADE");
+                    setSearchFocused(false);
+                  }}
+                  className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] text-left text-xs text-slate-300 hover:text-white flex items-center gap-2 transition-colors"
+                >
+                  <Gamepad2 className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Arcade Zone</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    sounds.playClick();
+                    onOpenAiOracle();
+                    setSearchFocused(false);
+                  }}
+                  className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] text-left text-xs text-slate-300 hover:text-white flex items-center gap-2 transition-colors"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Ask Oracle AI</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Add Quest Option if user is typing */}
+            {searchQuery.trim() && (
+              <button
+                type="button"
+                onClick={() => handleQuickCreateFromSearch(searchQuery.trim())}
+                className="p-2.5 rounded-xl bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 border border-cyan-500/30 hover:border-cyan-400 flex items-center justify-between text-xs text-cyan-300 font-semibold transition-all group"
+              >
+                <div className="flex items-center gap-2 truncate">
+                  <Plus className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                  <span className="truncate">Add quest &ldquo;{searchQuery}&rdquo;</span>
+                </div>
+                <span className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-500/40 shrink-0">
+                  Enter ↵
+                </span>
+              </button>
+            )}
+
+            <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-[10px] font-mono text-slate-500">
+              <span>Press ESC to close</span>
+              <span>⌘K to toggle</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Subtle Atmospheric Ambient Lighting */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[140px]" />
@@ -913,7 +1196,7 @@ export function ModernAppDashboard({
         className="flex-1 pt-16 md:pt-0 flex flex-col min-w-0 z-10 md:h-full md:overflow-y-auto overflow-x-hidden w-full max-w-full"
       >
         {/* Top App Bar (Search + Lo-Fi Music + Notifications + User Menu) - Fixed on mobile, sticky on desktop */}
-        <header className="fixed top-0 left-0 right-0 md:static md:sticky md:top-0 h-16 bg-[#080B17]/95 md:bg-[#080B17]/80 border-b border-white/[0.07] px-3 sm:px-4 lg:px-6 flex items-center justify-between z-30 backdrop-blur-xl shrink-0 w-full max-w-full overflow-hidden">
+        <header className="fixed top-0 left-0 right-0 md:static md:sticky md:top-0 h-16 bg-[#080B17]/95 md:bg-[#080B17]/80 border-b border-white/[0.07] px-3 sm:px-4 lg:px-6 flex items-center justify-between z-30 backdrop-blur-xl shrink-0 w-full max-w-full">
           {/* Mobile Menu Toggle + Compact Search Input + OG Gaming Life & Hi-Score Badges */}
           <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
             <button
@@ -945,250 +1228,6 @@ export function ModernAppDashboard({
               <Search className="w-4 h-4" />
             </button>
           </div>
-
-          {/* GLOBAL SEARCH & COMMAND PALETTE MODAL */}
-          {searchFocused && (
-            <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-              <div
-                className="absolute inset-0"
-                onClick={() => setSearchFocused(false)}
-              />
-
-              <div
-                ref={searchContainerRef}
-                className="relative w-full max-w-lg bg-[#0A0E1F]/95 backdrop-blur-2xl border border-cyan-500/30 rounded-2xl shadow-[0_25px_70px_rgba(0,0,0,0.9)] p-4 z-10 flex flex-col gap-3 max-h-[80vh] overflow-y-auto animate-in zoom-in-95 duration-200"
-              >
-                {/* Search Input Bar inside Modal */}
-                <div className="relative flex items-center">
-                  <Search className="w-4 h-4 text-cyan-400 absolute left-3 pointer-events-none" />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    autoFocus
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && searchQuery.trim()) {
-                        if (filteredQuestsForSearch.length > 0) {
-                          setActiveTab("HOME");
-                          setSearchFocused(false);
-                        } else {
-                          handleQuickCreateFromSearch(searchQuery.trim());
-                        }
-                      }
-                    }}
-                    placeholder="Type a command or search quests..."
-                    className="w-full h-11 bg-[#12162B] border border-white/[0.12] focus:border-cyan-400/60 rounded-xl pl-9 pr-8 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner"
-                  />
-                  {searchQuery ? (
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-3 text-slate-400 hover:text-white p-1"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  ) : (
-                    <span className="absolute right-3 font-mono text-[10px] text-slate-400 bg-[#161B33] px-1.5 py-0.5 rounded border border-white/[0.08] pointer-events-none">
-                      ESC
-                    </span>
-                  )}
-                </div>
-
-                {/* Secret Easter Egg Banner if query triggers it */}
-                {isEasterEggQuery && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerKonamiEasterEgg();
-                      setSearchFocused(false);
-                    }}
-                    className="p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/50 text-amber-300 flex items-center justify-between hover:scale-[1.01] transition-transform text-left"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">🕹️</span>
-                      <div>
-                        <div className="font-arcade text-[10px] text-[#FFE600] tracking-wider">
-                          90&apos;S CHEAT CODE DETECTED!
-                        </div>
-                        <div className="text-[10px] text-slate-300 font-mono">
-                          Click to unlock 30 Lives & +250 XP
-                        </div>
-                      </div>
-                    </div>
-                    <span className="font-arcade text-[9px] px-2 py-0.5 rounded bg-amber-500/30 text-amber-200">
-                      ACTIVATE
-                    </span>
-                  </button>
-                )}
-
-                {/* Quests Section */}
-                <div>
-                  <div className="flex items-center justify-between px-1 pb-1 text-[10px] font-mono text-slate-400 uppercase tracking-wider">
-                    <span>Quests ({filteredQuestsForSearch.length})</span>
-                    {searchQuery && (
-                      <span className="text-cyan-400">Matching &ldquo;{searchQuery}&rdquo;</span>
-                    )}
-                  </div>
-                  {filteredQuestsForSearch.length > 0 ? (
-                    <div className="flex flex-col gap-1">
-                      {filteredQuestsForSearch.slice(0, 5).map((task) => (
-                        <div
-                          key={task.id}
-                          onClick={() => {
-                            sounds.playClick();
-                            setActiveTab("HOME");
-                            setSearchFocused(false);
-                          }}
-                          className="p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] hover:border-cyan-500/30 flex items-center justify-between cursor-pointer transition-all group"
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span
-                              className={`w-2 h-2 rounded-full shrink-0 ${
-                                task.status === "COMPLETED" ? "bg-emerald-400" : "bg-cyan-400"
-                              }`}
-                            />
-                            <span className="text-xs text-white group-hover:text-cyan-300 truncate font-medium">
-                              {task.title}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-white/[0.06] text-slate-300">
-                              {task.attributeCode || "INT"}
-                            </span>
-                            <span className="text-[10px] font-mono text-amber-400">
-                              +{task.xpReward || 50} XP
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-3 text-center text-xs text-slate-400 bg-white/[0.02] rounded-xl border border-white/[0.04]">
-                      No quests match &ldquo;{searchQuery}&rdquo;
-                    </div>
-                  )}
-                </div>
-
-                {/* Goals Section */}
-                {filteredGoals.length > 0 && (
-                  <div>
-                    <div className="px-1 pb-1 text-[10px] font-mono text-slate-400 uppercase tracking-wider">
-                      Goals ({filteredGoals.length})
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      {filteredGoals.map((goal) => {
-                        const Icon = goal.icon;
-                        return (
-                          <div
-                            key={goal.id}
-                            onClick={() => {
-                              sounds.playClick();
-                              setActiveTab("GOALS");
-                              setSearchFocused(false);
-                            }}
-                            className="p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] flex items-center justify-between cursor-pointer transition-all group"
-                          >
-                            <div className="flex items-center gap-2">
-                              <Icon className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                              <span className="text-xs text-white group-hover:text-cyan-300 font-medium">
-                                {goal.title}
-                              </span>
-                            </div>
-                            <span className="text-[10px] font-mono text-cyan-400 font-bold">
-                              {goal.progress}%
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Quick Shortcuts & Navigation */}
-                <div>
-                  <div className="px-1 pb-1 text-[10px] font-mono text-slate-400 uppercase tracking-wider">
-                    Quick Shortcuts
-                  </div>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        sounds.playClick();
-                        onOpenCreateQuest();
-                        setSearchFocused(false);
-                      }}
-                      className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] text-left text-xs text-slate-300 hover:text-white flex items-center gap-2 transition-colors"
-                    >
-                      <Plus className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>Create Quest</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        sounds.playClick();
-                        setActiveTab("FOCUS");
-                        setSearchFocused(false);
-                      }}
-                      className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] text-left text-xs text-slate-300 hover:text-white flex items-center gap-2 transition-colors"
-                    >
-                      <Clock className="w-3.5 h-3.5 text-purple-400" />
-                      <span>Focus Chamber</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        sounds.playClick();
-                        setActiveTab("ARCADE");
-                        setSearchFocused(false);
-                      }}
-                      className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] text-left text-xs text-slate-300 hover:text-white flex items-center gap-2 transition-colors"
-                    >
-                      <Gamepad2 className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Arcade Zone</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        sounds.playClick();
-                        onOpenAiOracle();
-                        setSearchFocused(false);
-                      }}
-                      className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] text-left text-xs text-slate-300 hover:text-white flex items-center gap-2 transition-colors"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>Ask Oracle AI</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Quick Add Quest Option if user is typing */}
-                {searchQuery.trim() && (
-                  <button
-                    type="button"
-                    onClick={() => handleQuickCreateFromSearch(searchQuery.trim())}
-                    className="p-2.5 rounded-xl bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 border border-cyan-500/30 hover:border-cyan-400 flex items-center justify-between text-xs text-cyan-300 font-semibold transition-all group"
-                  >
-                    <div className="flex items-center gap-2 truncate">
-                      <Plus className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                      <span className="truncate">Add quest &ldquo;{searchQuery}&rdquo;</span>
-                    </div>
-                    <span className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-500/40 shrink-0">
-                      Enter ↵
-                    </span>
-                  </button>
-                )}
-
-                <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-[10px] font-mono text-slate-500">
-                  <span>Press ESC to close</span>
-                  <span>⌘K to toggle</span>
-                </div>
-              </div>
-            </div>
-          )}
 
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
 
@@ -1270,47 +1309,91 @@ export function ModernAppDashboard({
             </MagneticWrapper>
 
             {/* Notification Bell */}
-            <div className="relative shrink-0">
+            <div ref={notificationRef} className="relative shrink-0">
               <button
+                id="header-notification-bell"
                 type="button"
                 onClick={() => {
                   sounds.playClick();
-                  setNotificationsOpen(!notificationsOpen);
+                  setNotificationsOpen((prev) => !prev);
                 }}
                 className="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] text-slate-400 hover:text-white hover:bg-white/[0.08] transition-colors relative shrink-0"
                 title="Notifications"
               >
                 <Bell className="w-4 h-4" />
-                <span className="w-2 h-2 rounded-full bg-cyan-400 absolute top-2 right-2 ring-2 ring-[#080B17] shadow-[0_0_6px_#22d3ee]" />
+                {activeTasks.length > 0 && (
+                  <span className="w-2 h-2 rounded-full bg-cyan-400 absolute top-2 right-2 ring-2 ring-[#080B17] shadow-[0_0_6px_#22d3ee]" />
+                )}
               </button>
 
               {notificationsOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40 bg-black/40 sm:bg-transparent backdrop-blur-[2px] sm:backdrop-blur-none"
-                    onClick={() => setNotificationsOpen(false)}
-                  />
-                  <div className="fixed top-16 left-1/2 -translate-x-1/2 sm:absolute sm:top-full sm:left-auto sm:right-0 sm:translate-x-0 mt-2 w-[calc(100vw-2rem)] max-w-sm sm:w-72 bg-[#0E1326] border border-white/[0.1] rounded-2xl shadow-2xl p-4 z-50 text-xs animate-in fade-in zoom-in-95 backdrop-blur-xl">
-                    <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
+                <div
+                  id="notification-popover"
+                  className="absolute top-full right-0 mt-2 w-[calc(100vw-1.5rem)] max-w-xs sm:w-80 bg-[#0E1326] border border-cyan-500/30 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] p-4 z-50 text-xs animate-in fade-in zoom-in-95 backdrop-blur-2xl"
+                >
+                  <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
+                    <div className="flex items-center gap-2">
+                      <Bell className="w-3.5 h-3.5 text-cyan-400" />
                       <span className="font-semibold text-white">Daily Briefing</span>
-                      <span className="font-mono text-[10px] text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">ACTIVE</span>
                     </div>
-                    <div className="py-3 flex flex-col gap-2.5 text-slate-300">
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-base shrink-0">⚔️</span>
-                        <p>
-                          <strong className="text-white">{activeTasks.length} quests</strong> awaiting completion today.
+                    <span className="font-mono text-[10px] text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
+                      ACTIVE
+                    </span>
+                  </div>
+                  <div className="py-3 flex flex-col gap-2.5 text-slate-300">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sounds.playClick();
+                        setActiveTab("HOME");
+                        setNotificationsOpen(false);
+                      }}
+                      className="p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] hover:border-cyan-500/30 flex items-center gap-2.5 text-left transition-all group"
+                    >
+                      <span className="text-base shrink-0">⚔️</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white group-hover:text-cyan-300 font-medium">
+                          {activeTasks.length} Active Quests
+                        </p>
+                        <p className="text-[11px] text-slate-400">
+                          Awaiting completion today
                         </p>
                       </div>
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-base shrink-0">🔥</span>
-                        <p>
-                          Streak record: <strong className="text-amber-400">{character?.streakCurrent || 1} days strong</strong>. Keep the chain going!
+                    </button>
+                    <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.05] flex items-center gap-2.5">
+                      <span className="text-base shrink-0">🔥</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-medium">
+                          Streak: <strong className="text-amber-400">{character?.streakCurrent || 1} Days Strong</strong>
+                        </p>
+                        <p className="text-[11px] text-slate-400">
+                          Keep the flame alive today!
+                        </p>
+                      </div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.05] flex items-center gap-2.5">
+                      <span className="text-base shrink-0">👾</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-medium">
+                          Daily Boss Strike Ready
+                        </p>
+                        <p className="text-[11px] text-slate-400">
+                          Deal damage to Malakor!
                         </p>
                       </div>
                     </div>
                   </div>
-                </>
+                  <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-[10px] font-mono text-slate-500">
+                    <span>Press ESC to close</span>
+                    <button
+                      type="button"
+                      onClick={() => setNotificationsOpen(false)}
+                      className="text-cyan-400 hover:text-cyan-300 transition-colors"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
 
