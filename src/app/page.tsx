@@ -430,7 +430,7 @@ export default function LevvoMainPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#060414] text-white flex flex-col selection:bg-synthMagenta selection:text-white font-sans relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#060414] text-white flex flex-col selection:bg-synthMagenta selection:text-white font-sans relative overflow-x-hidden w-full max-w-full">
       {/* ========================================================================= */}
       {/* 1. TOP NAVBAR (SHOWN FOR GUESTS / LANDING)                                */}
       {/* ========================================================================= */}

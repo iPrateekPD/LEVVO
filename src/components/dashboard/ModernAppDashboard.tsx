@@ -46,6 +46,7 @@ import {
   Heart,
   Crown,
   Sword,
+  LogOut,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { sounds } from "@/lib/sound";
@@ -488,7 +489,7 @@ export function ModernAppDashboard({
   const TimeIcon = timeContext.icon;
 
   return (
-    <div className="min-h-screen md:h-screen md:overflow-hidden bg-[#070913] text-slate-100 flex flex-col md:flex-row relative selection:bg-cyan-500 selection:text-black font-sans">
+    <div className="min-h-screen md:h-screen md:overflow-hidden bg-[#070913] text-slate-100 flex flex-col md:flex-row relative selection:bg-cyan-500 selection:text-black font-sans w-full max-w-full overflow-x-hidden">
       {/* Ambient Mouse Cursor Follower Glow */}
       <AmbientCursorGlow />
 
@@ -634,11 +635,11 @@ export function ModernAppDashboard({
         } ${
           /* Desktop/Laptop styles: responsive collapsible sidebar */
           desktopSidebarOpen
-            ? "md:relative md:inset-auto md:w-64 md:translate-x-0 md:h-full md:max-h-full md:opacity-100 md:pointer-events-auto md:border-r md:border-white/[0.07]"
+            ? "md:relative md:inset-auto md:w-60 lg:w-64 md:translate-x-0 md:h-full md:max-h-full md:opacity-100 md:pointer-events-auto md:border-r md:border-white/[0.07]"
             : "md:relative md:inset-auto md:w-0 md:translate-x-0 md:h-full md:max-h-full md:opacity-0 md:pointer-events-none md:border-r-0"
         }`}
       >
-        <div className="w-64 h-full flex flex-col shrink-0">
+        <div className="w-60 lg:w-64 h-full flex flex-col shrink-0">
           {/* Brand Header */}
           <div className="h-16 px-4 flex items-center justify-between border-b border-white/[0.07] shrink-0">
             <Link
@@ -667,18 +668,15 @@ export function ModernAppDashboard({
               </div>
             </Link>
 
+            {/* Close button: only shown on mobile (<768px). Hidden on desktop so no cross icon appears in sidebar header */}
             <button
               type="button"
               onClick={() => {
                 sounds.playClick();
-                if (typeof window !== "undefined" && window.innerWidth < 768) {
-                  setMobileMenuOpen(false);
-                } else {
-                  setDesktopSidebarOpen(false);
-                }
+                setMobileMenuOpen(false);
               }}
-              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/[0.06] transition-colors"
-              title="Collapse Navigation"
+              className="md:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/[0.06] transition-colors"
+              title="Close Navigation Drawer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -912,12 +910,12 @@ export function ModernAppDashboard({
         onTouchStart={() => {
           if (mobileMenuOpen) setMobileMenuOpen(false);
         }}
-        className="flex-1 pt-16 md:pt-0 flex flex-col min-w-0 z-10 md:h-full md:overflow-y-auto"
+        className="flex-1 pt-16 md:pt-0 flex flex-col min-w-0 z-10 md:h-full md:overflow-y-auto overflow-x-hidden w-full max-w-full"
       >
         {/* Top App Bar (Search + Lo-Fi Music + Notifications + User Menu) - Fixed on mobile, sticky on desktop */}
-        <header className="fixed top-0 left-0 right-0 md:static md:sticky md:top-0 h-16 bg-[#080B17]/95 md:bg-[#080B17]/80 border-b border-white/[0.07] px-3 sm:px-6 md:px-8 flex items-center justify-between z-30 backdrop-blur-xl shrink-0">
+        <header className="fixed top-0 left-0 right-0 md:static md:sticky md:top-0 h-16 bg-[#080B17]/95 md:bg-[#080B17]/80 border-b border-white/[0.07] px-3 sm:px-4 lg:px-6 flex items-center justify-between z-30 backdrop-blur-xl shrink-0 w-full max-w-full overflow-hidden">
           {/* Mobile Menu Toggle + Compact Search Input + OG Gaming Life & Hi-Score Badges */}
-          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 sm:flex-none">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
             <button
               type="button"
               onClick={() => {
@@ -929,7 +927,7 @@ export function ModernAppDashboard({
                 }
               }}
               className="h-9 w-9 inline-flex items-center justify-center text-slate-400 hover:text-white rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-all hover:scale-105 active:scale-95 shrink-0"
-              title="Toggle Sidebar Navigation"
+              title={desktopSidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
             >
               <Menu className="w-4 h-4" />
             </button>
@@ -937,7 +935,7 @@ export function ModernAppDashboard({
             {/* Compact Global Search Bar with Live Command Dropdown */}
             <div
               ref={searchContainerRef}
-              className="relative flex-1 sm:w-44 md:w-56 sm:flex-none transition-all duration-200 focus-within:flex-1 sm:focus-within:w-60 min-w-[90px] max-w-[170px] sm:max-w-none shrink-0"
+              className="relative flex-1 max-w-[190px] sm:max-w-xs md:w-44 lg:w-56 min-w-[70px] shrink transition-all duration-200 focus-within:max-w-sm"
             >
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
@@ -1098,26 +1096,57 @@ export function ModernAppDashboard({
                       Quick Shortcuts
                     </div>
                     <div className="grid grid-cols-2 gap-1.5">
-                      {filteredQuickActions.slice(0, 4).map((act) => {
-                        const Icon = act.icon;
-                        return (
-                          <button
-                            key={act.id}
-                            type="button"
-                            onClick={() => {
-                              sounds.playClick();
-                              if (act.tab) setActiveTab(act.tab as any);
-                              if (act.modal === "AI") setIsAiPlanOpen(true);
-                              if (act.action === "BGM") lofiMusic?.toggle();
-                              setSearchFocused(false);
-                            }}
-                            className="p-1.5 rounded-lg bg-white/[0.03] hover:bg-cyan-500/15 hover:border-cyan-500/30 border border-white/[0.05] flex items-center gap-2 text-left transition-all text-slate-300 hover:text-white"
-                          >
-                            <Icon className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                            <span className="text-[11px] truncate font-medium">{act.title}</span>
-                          </button>
-                        );
-                      })}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sounds.playClick();
+                          onOpenCreateQuest();
+                          setSearchFocused(false);
+                        }}
+                        className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] text-left text-xs text-slate-300 hover:text-white flex items-center gap-2 transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Create Quest</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sounds.playClick();
+                          setActiveTab("FOCUS");
+                          setSearchFocused(false);
+                        }}
+                        className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] text-left text-xs text-slate-300 hover:text-white flex items-center gap-2 transition-colors"
+                      >
+                        <Clock className="w-3.5 h-3.5 text-purple-400" />
+                        <span>Focus Chamber</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sounds.playClick();
+                          setActiveTab("ARCADE");
+                          setSearchFocused(false);
+                        }}
+                        className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] text-left text-xs text-slate-300 hover:text-white flex items-center gap-2 transition-colors"
+                      >
+                        <Gamepad2 className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Arcade Zone</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sounds.playClick();
+                          onOpenAiOracle();
+                          setSearchFocused(false);
+                        }}
+                        className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] text-left text-xs text-slate-300 hover:text-white flex items-center gap-2 transition-colors"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Ask Oracle AI</span>
+                      </button>
                     </div>
                   </div>
 
@@ -1148,7 +1177,7 @@ export function ModernAppDashboard({
 
             {/* OG Zelda 3-Heart Health Containers */}
             <div
-              className="hidden lg:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[10px] font-mono cursor-default shadow-sm select-none shrink-0 whitespace-nowrap"
+              className="hidden xl:inline-flex items-center gap-1.5 h-9 px-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[10px] font-mono cursor-default shadow-sm select-none shrink-0 whitespace-nowrap"
               title="Zelda Life Containers: 3/3 Full Life"
             >
               <span className="text-[9px] font-arcade text-rose-300">LIFE</span>
@@ -1159,7 +1188,7 @@ export function ModernAppDashboard({
 
             {/* OG Arcade 1P Hi-Score Badge */}
             <div
-              className="hidden xl:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-amber-500/10 border border-amber-500/25 font-arcade text-[9px] text-[#FFE600] tracking-wider cursor-pointer hover:bg-amber-500/20 transition-colors shadow-sm select-none shrink-0 whitespace-nowrap"
+              className="hidden 2xl:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-amber-500/10 border border-amber-500/25 font-arcade text-[9px] text-[#FFE600] tracking-wider cursor-pointer hover:bg-amber-500/20 transition-colors shadow-sm select-none shrink-0 whitespace-nowrap"
               onClick={() => triggerKonamiEasterEgg()}
               title="Click to trigger Retro High-Score Easter Egg"
             >
@@ -1170,7 +1199,7 @@ export function ModernAppDashboard({
           </div>
 
           {/* Right Action Icons & User Badge */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 ml-1 sm:ml-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-2">
             {/* FEATURE 5: Lo-Fi Ambient Synthesizer Music Player */}
             <button
               type="button"
@@ -1180,7 +1209,7 @@ export function ModernAppDashboard({
                   lofiMusic.toggle();
                 }
               }}
-              className={`h-9 w-9 sm:w-[114px] inline-flex items-center justify-center gap-1.5 rounded-xl border text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
+              className={`h-9 px-2.5 sm:px-3 inline-flex items-center justify-center gap-1.5 rounded-xl border text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
                 isMusicPlaying
                   ? "bg-cyan-500/20 text-cyan-300 border-cyan-400/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
                   : "bg-white/[0.04] text-slate-400 border-white/[0.08] hover:text-slate-200 hover:bg-white/[0.08]"
@@ -1188,7 +1217,7 @@ export function ModernAppDashboard({
               title="Toggle Lo-Fi Study Synthwave Music"
             >
               <Music className={`w-3.5 h-3.5 shrink-0 ${isMusicPlaying ? "text-cyan-400 animate-bounce" : ""}`} />
-              <span className="hidden sm:inline truncate max-w-[65px]">
+              <span className="hidden xl:inline truncate max-w-[65px]">
                 {isMusicPlaying ? musicTrackName : "Lo-Fi BGM"}
               </span>
             </button>
@@ -1200,26 +1229,26 @@ export function ModernAppDashboard({
                 sounds.playClick();
                 onOpenAiOracle();
               }}
-              className="h-9 w-9 sm:w-[114px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-200 text-xs font-semibold whitespace-nowrap hover:bg-purple-500/30 hover:border-purple-400/50 transition-all hover:scale-[1.02] shadow-[0_0_15px_rgba(168,85,247,0.15)] shrink-0"
+              className="h-9 px-2.5 sm:px-3 inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-200 text-xs font-semibold whitespace-nowrap hover:bg-purple-500/30 hover:border-purple-400/50 transition-all hover:scale-[1.02] shadow-[0_0_15px_rgba(168,85,247,0.15)] shrink-0"
               title="Ask AI Companion Oracle"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin-slow shrink-0" />
-              <span className="hidden sm:inline">Ask AI</span>
+              <span className="hidden lg:inline">Ask AI</span>
             </button>
 
             {/* Share Victory Card Trigger with Magnetic Hover */}
-            <MagneticWrapper strength={0.25} className="hidden sm:inline-block shrink-0">
+            <MagneticWrapper strength={0.25} className="inline-block shrink-0">
               <button
                 type="button"
                 onClick={() => {
                   sounds.playClick();
                   setIsShareVictoryOpen(true);
                 }}
-                className="h-9 sm:w-[114px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold whitespace-nowrap shadow-sm transition-all hover:scale-105 active:scale-95 shrink-0"
+                className="h-9 px-2.5 sm:px-3 inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold whitespace-nowrap shadow-sm transition-all hover:scale-105 active:scale-95 shrink-0"
                 title="Share your daily hero achievements"
               >
                 <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <span>Share Card</span>
+                <span className="hidden xl:inline">Share Card</span>
               </button>
             </MagneticWrapper>
 
@@ -1273,7 +1302,7 @@ export function ModernAppDashboard({
               <Link
                 href="/profile"
                 onClick={() => sounds.playClick()}
-                className="h-9 flex items-center gap-2 p-1 pr-1 sm:pr-2.5 rounded-xl bg-white/[0.03] border border-white/[0.07] hover:bg-white/[0.07] hover:border-cyan-500/30 transition-all shrink-0"
+                className="h-9 flex items-center gap-2 p-1 pr-1.5 sm:pr-2.5 rounded-xl bg-white/[0.03] border border-white/[0.07] hover:bg-white/[0.07] hover:border-cyan-500/30 transition-all shrink-0"
               >
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-cyan-500 via-indigo-500 to-purple-500 p-0.5 shadow-[0_0_12px_rgba(6,182,212,0.3)] shrink-0">
                   <div className="w-full h-full rounded-[6px] bg-[#0B0F20] flex items-center justify-center font-bold text-[10px] text-white">
@@ -1290,14 +1319,14 @@ export function ModernAppDashboard({
                 </div>
               </Link>
 
-              {/* Logout button: hidden on small mobile, accessible in Profile tab & drawer */}
+              {/* Logout button: ALWAYS visible with clear LogOut icon */}
               <button
                 type="button"
                 onClick={onLogout}
-                className="hidden sm:inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.03] border border-white/[0.07] text-slate-400 hover:text-rose-300 hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors text-xs shrink-0"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.03] border border-white/[0.07] text-slate-400 hover:text-rose-300 hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors shrink-0"
                 title="Log out"
               >
-                ✕
+                <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -1306,14 +1335,14 @@ export function ModernAppDashboard({
         {/* ===================================================================== */}
         {/* 3. TAB CANVAS CONTENT                                                 */}
         {/* ===================================================================== */}
-        <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto flex flex-col gap-6">
+        <div className="flex-1 p-4 sm:p-5 lg:p-6 max-w-7xl w-full mx-auto flex flex-col gap-6 min-w-0">
           {/* TAB 1: HOME (REDESIGNED PREMIUM 2-COLUMN DASHBOARD) */}
           {activeTab === "HOME" && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start w-full min-w-0">
               {/* ------------------------------------------------------------- */}
-              {/* LEFT MAIN COLUMN (8 of 12 columns)                            */}
+              {/* LEFT MAIN COLUMN (7 cols on lg, 8 cols on xl+)               */}
               {/* ------------------------------------------------------------- */}
-              <div className="lg:col-span-8 flex flex-col gap-6">
+              <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-5 lg:gap-6 min-w-0">
                 {/* 1. CINEMATIC HERO GREETING BANNER */}
                 <div className="relative w-full rounded-2xl overflow-hidden border border-white/[0.09] shadow-[0_12px_40px_rgba(0,0,0,0.5)] min-h-[220px] sm:min-h-[250px] flex flex-col justify-between p-6 sm:p-8 bg-[#0B0F22] group">
                   {/* Background Artwork with Seamless Vignette Masks & Mouse Parallax */}
@@ -1740,39 +1769,39 @@ export function ModernAppDashboard({
               </div>
 
               {/* ------------------------------------------------------------- */}
-              {/* RIGHT SIDEBAR COLUMN (4 of 12 columns)                         */}
+              {/* RIGHT SIDEBAR COLUMN (5 cols on lg, 4 cols on xl+)            */}
               {/* ------------------------------------------------------------- */}
-              <div className="lg:col-span-4 flex flex-col gap-6">
+              <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-5 lg:gap-6 min-w-0">
                 {/* 1. PLAYER LEVEL & STATS CARD */}
-                <div className="bg-[#0C1022]/85 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-[0_8px_30px_rgba(0,0,0,0.35)] flex flex-col gap-4">
+                <div className="bg-[#0C1022]/85 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-[0_8px_30px_rgba(0,0,0,0.35)] flex flex-col gap-4 min-w-0">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 p-0.5 shadow-[0_0_15px_rgba(99,102,241,0.35)]">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 p-0.5 shadow-[0_0_15px_rgba(99,102,241,0.35)] shrink-0">
                         <div className="w-full h-full bg-[#0B0F20] rounded-[10px] flex items-center justify-center">
                           <Target className="w-5 h-5 text-indigo-400" />
                         </div>
                       </div>
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-extrabold text-sm text-white">
+                      <div className="flex flex-col min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-extrabold text-sm text-white truncate">
                             Level {character?.currentLevel || 1}
                           </span>
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shrink-0">
                             RANK 1
                           </span>
                         </div>
-                        <span className="text-[11px] text-slate-400">
+                        <span className="text-[11px] text-slate-400 truncate">
                           {character?.title || "Novice Explorer"}
                         </span>
                       </div>
                     </div>
-                    <span className="font-mono text-xs font-bold text-cyan-400">
+                    <span className="font-mono text-xs font-bold text-cyan-400 shrink-0">
                       {character?.progressPercent || 0}%
                     </span>
                   </div>
 
                   {/* Multi-gradient XP Progress Bar */}
-                  <div className="flex flex-col gap-1.5">
+                  <div className="flex flex-col gap-1.5 min-w-0">
                     <div className="w-full h-2 bg-[#060813] rounded-full overflow-hidden border border-white/[0.06] p-0.5">
                       <div
                         className="h-full bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(6,182,212,0.4)]"
@@ -1786,8 +1815,8 @@ export function ModernAppDashboard({
                   </div>
 
                   {/* Mini Stats Grid: Gold & Streak */}
-                  <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-white/[0.07]">
-                    <div className="bg-[#101427]/80 border border-white/[0.06] rounded-xl p-3 flex items-center gap-2.5 shadow-sm">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-2.5 pt-2 border-t border-white/[0.07] min-w-0">
+                    <div className="bg-[#101427]/80 border border-white/[0.06] rounded-xl p-2.5 sm:p-3 flex items-center gap-2 sm:gap-2.5 shadow-sm min-w-0">
                       <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0">
                         <Coins className="w-4 h-4 text-amber-400" />
                       </div>
@@ -1795,11 +1824,11 @@ export function ModernAppDashboard({
                         <span className="font-extrabold text-sm text-white truncate">
                           {character?.gold || 0}
                         </span>
-                        <span className="text-[10px] text-slate-400 leading-none mt-0.5">Gold Coins</span>
+                        <span className="text-[10px] text-slate-400 leading-none mt-0.5 truncate">Gold Coins</span>
                       </div>
                     </div>
 
-                    <div className="bg-[#101427]/80 border border-white/[0.06] rounded-xl p-3 flex items-center gap-2.5 shadow-sm">
+                    <div className="bg-[#101427]/80 border border-white/[0.06] rounded-xl p-2.5 sm:p-3 flex items-center gap-2 sm:gap-2.5 shadow-sm min-w-0">
                       <div className="w-8 h-8 rounded-lg bg-rose-500/15 border border-rose-500/30 flex items-center justify-center shrink-0">
                         <Flame className="w-4 h-4 text-rose-400 animate-pulse" />
                       </div>
@@ -1807,7 +1836,7 @@ export function ModernAppDashboard({
                         <span className="font-extrabold text-sm text-white truncate">
                           {character?.streakCurrent || 1}
                         </span>
-                        <span className="text-[10px] text-slate-400 leading-none mt-0.5">Day Streak</span>
+                        <span className="text-[10px] text-slate-400 leading-none mt-0.5 truncate">Day Streak</span>
                       </div>
                     </div>
                   </div>
@@ -1913,6 +1942,7 @@ export function ModernAppDashboard({
                           className="w-6 h-6 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] flex items-center justify-center text-slate-300 text-xs transition-colors"
                           aria-label="Increase water count"
                         >
+                          +
                         </button>
                         </div>
                       </div>

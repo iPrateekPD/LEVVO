@@ -70,10 +70,10 @@ export function DailyBossCard({
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
-        <div className="flex items-center gap-2.5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.08] min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
           <div
-            className={`w-8 h-8 rounded-xl flex items-center justify-center text-base select-none border transition-transform ${
+            className={`w-8 h-8 rounded-xl flex items-center justify-center text-base select-none border shrink-0 transition-transform ${
               isDefeated
                 ? "bg-emerald-500/20 border-emerald-400/40 text-emerald-300"
                 : isHit
@@ -83,7 +83,7 @@ export function DailyBossCard({
           >
             {isDefeated ? "🏆" : "👹"}
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="font-extrabold text-xs text-white uppercase tracking-wider">
                 {isDefeated ? "DUNGEON CLEARED" : "DAILY BOSS BATTLE"}
@@ -103,13 +103,13 @@ export function DailyBossCard({
                 </span>
               )}
             </div>
-            <span className="text-[11px] text-slate-400">
+            <span className="text-[11px] text-slate-400 truncate">
               {isDefeated ? "The Sloth Demon has fallen!" : "Malakor, The Procrastination Titan (OG Boss)"}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap shrink-0">
           {comboCount > 0 && !isDefeated && (
             <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 font-arcade text-[9px] animate-bounce">
               🔥 COMBO x{comboCount}
@@ -120,7 +120,7 @@ export function DailyBossCard({
             <button
               type="button"
               onClick={handleManualStrike}
-              className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 font-mono text-xs font-bold transition-all hover:scale-105 active:scale-95 shadow-sm"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 font-mono text-xs font-bold transition-all hover:scale-105 active:scale-95 shadow-sm"
               title="Channel discipline into direct strike against Malakor"
             >
               <Sword className="w-3.5 h-3.5" />

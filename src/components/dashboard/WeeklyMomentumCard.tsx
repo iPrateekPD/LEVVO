@@ -38,7 +38,7 @@ export function WeeklyMomentumCard({ currentStreak, completedTasksCount }: Weekl
       </div>
 
       {/* 7-Day Matrix */}
-      <div className="grid grid-cols-7 gap-1.5">
+      <div className="grid grid-cols-7 gap-1 sm:gap-1.5 min-w-0">
         {days.map((day, idx) => {
           const isToday = idx === todayIndex;
           const isActive = activeDayIndices.has(idx) || (isToday && completedTasksCount > 0);
@@ -47,7 +47,7 @@ export function WeeklyMomentumCard({ currentStreak, completedTasksCount }: Weekl
           return (
             <div
               key={day}
-              className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border transition-all ${
+              className={`flex flex-col items-center gap-1 sm:gap-1.5 p-1 sm:p-2 rounded-xl border transition-all min-w-0 ${
                 isToday
                   ? "bg-cyan-500/15 border-cyan-400/50 shadow-[0_0_12px_rgba(6,182,212,0.25)]"
                   : isActive
@@ -55,9 +55,9 @@ export function WeeklyMomentumCard({ currentStreak, completedTasksCount }: Weekl
                   : "bg-white/[0.03] border-white/[0.06] text-slate-500"
               }`}
             >
-              <span className="text-[10px] font-medium text-slate-400">{day}</span>
+              <span className="text-[9px] sm:text-[10px] font-medium text-slate-400 truncate">{day}</span>
               <div
-                className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold ${
+                className={`w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center text-[9px] sm:text-[10px] font-bold ${
                   isActive
                     ? "bg-emerald-500 text-black shadow-[0_0_8px_#10b981]"
                     : isToday
